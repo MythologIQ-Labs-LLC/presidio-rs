@@ -34,11 +34,13 @@ mod anonymizer;
 pub mod context;
 mod entity;
 mod recognizer;
+mod registry;
 mod result;
 pub mod validators;
 
 pub use analyzer::{AnalyzerEngine, DEFAULT_SCORE_THRESHOLD};
-pub use anonymizer::{anonymize, Operator};
+pub use anonymizer::{anonymize, AnonymizerEngine, Operator};
 pub use entity::EntityType;
 pub use recognizer::{Pattern, PatternRecognizer, Validator};
+pub use registry::RecognizerRegistry;
 pub use result::RecognizerResult;

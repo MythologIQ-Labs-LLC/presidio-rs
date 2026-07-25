@@ -1,4 +1,7 @@
-use presidio::{anonymize, AnalyzerEngine, EntityType, Operator};
+use presidio::{
+    anonymize, AnalyzerEngine, AnonymizerEngine, EntityType, Operator, Pattern, PatternRecognizer,
+    RecognizerRegistry,
+};
 
 #[test]
 fn detects_and_replaces_email_and_card() {
@@ -87,4 +90,51 @@ fn hash_operator_is_deterministic() {
     let b = anonymize(text, &results, &op);
     assert_eq!(a, b);
     assert!(!a.contains("jane@acme.com"));
+}
+
+#[test]
+fn custom_recognizer_via_registry() {
+    // An empty registry with a single custom recognizer detects only that entity.
+    let mut registry = RecognizerRegistry::empty();
+    registry.add(PatternRecognizer {
+        entity_type: EntityType::ApiKey,
+        patterns: vec![Pattern::new("acme-key", r"\bACME-[A-Z0-9]{8}\b", 0.9)],
+        context: &["key", "token"],
+        validator: None,
+    });
+    let analyzer = AnalyzerEngine::with_registry(registry);
+    let results = analyzer.analyze("token ACME-12ABCD34 here", None);
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].entity_type, EntityType::ApiKey);
+    assert!(results[0].score >= 0.9);
+}
+
+#[test]
+fn anonymizer_engine_applies_per_entity_operators() {
+    let analyzer = AnalyzerEngine::new();
+    let text = "jane@acme.com paid with card 4111 1111 1111 1111";
+    let results = analyzer.analyze(text, None);
+
+    let engine = AnonymizerEngine::new(Operator::Redact)
+        .with_operator(EntityType::Email, Operator::Replace(Some("[email]".into())))
+        .with_operator(
+            EntityType::CreditCard,
+            Operator::Mask {
+                mask_char: '#',
+                keep_last: 4,
+            },
+        );
+    let out = engine.anonymize(text, &results);
+
+    assert!(out.contains("[email]")); // email -> replace override
+    assert!(out.contains("1111")); // card -> mask keeps last 4
+    assert!(out.contains('#'));
+    assert!(!out.contains("jane@acme.com"));
+}
+
+#[test]
+fn predefined_registry_is_populated() {
+    let registry = RecognizerRegistry::with_predefined();
+    assert!(!registry.is_empty());
+    assert_eq!(registry.len(), registry.recognizers().len());
 }

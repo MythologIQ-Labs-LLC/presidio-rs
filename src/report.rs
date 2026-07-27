@@ -4,6 +4,7 @@ use core::fmt;
 
 use crate::document::{DocumentBinding, DocumentBindingError, FindingDocumentError, TextDocument};
 use crate::metadata::RecognizerMetadata;
+use crate::recognition::RecognitionError;
 use crate::types::{RecognizerId, Span, SpanError};
 use crate::{Finding, RecognizerResult};
 
@@ -52,7 +53,7 @@ impl AnalysisOptions {
     }
 }
 
-/// A typed, non-plaintext problem encountered while constructing validated findings.
+/// A typed, non-plaintext problem encountered during analysis.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[non_exhaustive]
@@ -75,21 +76,34 @@ pub enum AnalysisIssue {
         recognizer_index: usize,
         pattern_index: usize,
     },
+    /// A backend-neutral recognizer returned a typed execution failure.
+    RecognitionFailed {
+        recognizer: RecognizerId,
+        error: RecognitionError,
+    },
+    /// Legacy pattern registrations were skipped by the authoritative request path.
+    LegacyRecognizersSkipped { count: usize },
 }
 
-/// Whether report processing reached configured resource limits.
+/// Whether report processing reached configured limits or compatibility boundaries.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AnalysisStatus {
     candidate_limit_reached: bool,
     issue_limit_reached: bool,
+    legacy_projection_incomplete: bool,
 }
 
 impl AnalysisStatus {
-    pub(crate) const fn new(candidate_limit_reached: bool, issue_limit_reached: bool) -> Self {
+    pub(crate) const fn new(
+        candidate_limit_reached: bool,
+        issue_limit_reached: bool,
+        legacy_projection_incomplete: bool,
+    ) -> Self {
         Self {
             candidate_limit_reached,
             issue_limit_reached,
+            legacy_projection_incomplete,
         }
     }
 
@@ -103,7 +117,12 @@ impl AnalysisStatus {
         self.issue_limit_reached
     }
 
-    /// Whether either report collection reached a configured limit.
+    /// Whether open entity identifiers prevented a complete legacy projection.
+    pub const fn legacy_projection_incomplete(self) -> bool {
+        self.legacy_projection_incomplete
+    }
+
+    /// Whether either bounded report collection reached a configured limit.
     pub const fn was_truncated(self) -> bool {
         self.candidate_limit_reached || self.issue_limit_reached
     }
@@ -113,8 +132,8 @@ impl AnalysisStatus {
 ///
 /// `candidates` contains validated findings before thresholding or overlap
 /// resolution. `legacy_compatible_results` applies the existing analyzer policy
-/// to the same bounded raw candidate stream. `recognizers` contains authoritative
-/// metadata only for metadata-backed recognizers that emitted raw candidates.
+/// where open entity identifiers can be represented by the legacy taxonomy.
+/// `recognizers` contains authoritative metadata for represented recognizers.
 /// Document-aware analysis binds the report and each finding to exact source bytes.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
@@ -174,12 +193,12 @@ impl AnalysisReport {
         self.recognizers.iter().find(|metadata| metadata.id() == id)
     }
 
-    /// Existing analyzer semantics projected from the same bounded raw candidates.
+    /// Legacy-compatible projection from the same bounded candidate stream.
     pub fn legacy_compatible_results(&self) -> &[RecognizerResult] {
         &self.legacy_compatible_results
     }
 
-    /// Typed non-fatal report-construction issues.
+    /// Typed non-fatal analysis issues.
     pub fn issues(&self) -> &[AnalysisIssue] {
         &self.issues
     }
@@ -189,7 +208,7 @@ impl AnalysisReport {
         !self.issues.is_empty()
     }
 
-    /// Resource-limit status for this analysis.
+    /// Resource and compatibility status for this analysis.
     pub const fn status(&self) -> AnalysisStatus {
         self.status
     }

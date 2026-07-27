@@ -14,10 +14,11 @@
 //! - bounded candidate-preserving analysis reports
 //! - validated recognizer metadata and provenance
 //! - document identity and exact source-content binding
+//! - backend-neutral recognizer execution through validated analysis requests
 //!
 //! It performs no network or filesystem I/O and requires no Python runtime.
 //! Person names, prose locations, and other semantic entities are not detected
-//! by the current model-free implementation.
+//! by the current model-free implementation unless a consumer supplies a backend.
 //!
 //! ```
 //! use presidio::{anonymize, AnalyzerEngine, Operator};
@@ -30,16 +31,20 @@
 //! assert!(clean.contains("<EMAIL_ADDRESS>"));
 //! ```
 //!
-//! Document-aware analysis binds findings to exact source bytes:
+//! Request-oriented analysis binds findings to exact source bytes and applies
+//! deterministic selection and resource limits:
 //!
 //! ```
-//! use presidio::{AnalyzerEngine, DocumentId, TextDocument};
+//! use presidio::{AnalysisRequest, AnalyzerEngine, DocumentId, TextDocument};
 //!
 //! let document = TextDocument::new(
 //!     DocumentId::new("request-42").expect("valid document ID"),
 //!     "Email jane@acme.com",
 //! );
-//! let report = AnalyzerEngine::new().analyze_document(&document, None);
+//! let request = AnalysisRequest::new();
+//! let report = AnalyzerEngine::new()
+//!     .analyze_request(&document, &request)
+//!     .expect("bounded analysis");
 //! report.validate_for_document(&document).expect("matching source");
 //! ```
 //!
@@ -55,9 +60,11 @@ pub mod context;
 mod document;
 mod entity;
 mod metadata;
+mod recognition;
 mod recognizer;
 mod registry;
 mod report;
+mod request;
 mod result;
 mod types;
 pub mod validators;
@@ -69,6 +76,10 @@ pub use document::{
 };
 pub use entity::EntityType;
 pub use metadata::{RecognitionMechanism, RecognizerMetadata, RecognizerMetadataError};
+pub use recognition::{
+    CandidateEmissionError, CandidateEmitter, EmissionStatus, RecognitionError,
+    RecognitionErrorKind, Recognizer,
+};
 pub use recognizer::{
     ContextValidationError, Pattern, PatternRecognizer, PatternRecognizerRegistrationError,
     PatternValidationError, Validator,
@@ -77,6 +88,10 @@ pub use registry::{RecognizerRegistry, RecognizerRegistryError};
 pub use report::{
     AnalysisIssue, AnalysisOptions, AnalysisReport, AnalysisStatus, ReportDocumentError,
     DEFAULT_REPORT_CANDIDATE_LIMIT, DEFAULT_REPORT_ISSUE_LIMIT,
+};
+pub use request::{
+    AnalysisExecutionError, AnalysisRequest, AnalysisRequestError, LimitDimension,
+    DEFAULT_ANALYSIS_INPUT_LIMIT,
 };
 pub use result::RecognizerResult;
 pub use types::{

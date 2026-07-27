@@ -24,19 +24,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-      - name: Produce formatted source
-        run: cargo fmt --all
-      - name: Upload formatted source
-        uses: actions/upload-artifact@v4
-        with:
-          name: analysis-report-rustfmt-output
-          path: |
-            src
-            tests
-          if-no-files-found: error
-          retention-days: 1
       - name: Check formatting
-        run: git diff --exit-code
+        run: cargo fmt --all -- --check
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
       - name: Run tests

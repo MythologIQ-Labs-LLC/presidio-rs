@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Open-source-grade contribution, governance, conduct, security, and release-readiness policies.
+- A stealth open-source foundation track with contributor, consumer, security, evidence, package, governance, ecosystem, merge, and maturity gates.
 - CI gates for formatting, Clippy, tests, documentation, package verification, MSRV, dependency audit, and DCO sign-off.
 - Standalone public-facing project documentation and expected-use-case boundaries.
 - Validated structural spans, bounded open identifiers, constrained confidence values, evidence, and findings.
@@ -24,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Package metadata prepared for MIT-licensed distribution.
 - Documentation separates implemented, measured, and planned capabilities.
+- The governing private-development posture now states that the open-source foundation is the primary objective while publication timing remains separately controlled.
+- The release checklist now requires contributor, consumer, and public-release-candidate foundation maturity gates.
 - Built-in pattern recognizers now use validated metadata-backed registration.
 - New request-oriented integrations use exact document binding and authoritative recognizer provenance.
 - The existing analyzer, `RecognizerResult`, pattern registry, and anonymizer APIs remain available for compatibility.

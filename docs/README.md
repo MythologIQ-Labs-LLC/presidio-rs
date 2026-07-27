@@ -13,6 +13,7 @@
 
 ## Research and external landscape
 
+- [Active Rust privacy landscape watch](research/ACTIVE_LANDSCAPE_WATCH.md)
 - [Parallel efforts and architectural lessons](research/PARALLEL_EFFORTS_AND_LESSONS.md)
 
 ## Governance and release
@@ -29,3 +30,5 @@ The active planning baseline is a 30-week private development program from Augus
 The target outcome is a measured, multi-consumer private beta and an explicit release-strategy decision. Public release is not assumed.
 
 Architecture is reviewed continuously throughout the program. Each phase includes design review, risk review, evidence review, consumer impact assessment, and stop or redirect criteria.
+
+The build-versus-adopt-versus-collaborate question remains active throughout development. The external Rust privacy landscape is watched weekly, reviewed deeply each month, and escalated immediately when a material change could invalidate planned work or provide a better path for consumers.

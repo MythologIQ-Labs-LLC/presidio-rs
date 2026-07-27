@@ -1,0 +1,89 @@
+name: Bug report
+description: Report reproducible incorrect behavior or a regression
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not report security vulnerabilities here. Follow SECURITY.md for private disclosure.
+        Use synthetic data only. Never include real PII, credentials, or customer content.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What happened, and why is it incorrect?
+      placeholder: Describe the observed behavior.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Provide the smallest synthetic input and code needed to reproduce the issue.
+      render: rust
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What result should the library produce?
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: 0.1.0 or commit SHA
+    validations:
+      required: true
+
+  - type: input
+    id: rust
+    attributes:
+      label: Rust version
+      placeholder: rustc 1.xx.x
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Detection or recognizer
+        - Validator or scoring
+        - Unicode or offsets
+        - Overlap resolution
+        - Anonymization
+        - Serialization or public API
+        - Performance or resource use
+        - Documentation
+        - Build, CI, or packaging
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Additional evidence
+      description: Include test output, reduced fixtures, or relevant specifications. Remove sensitive information.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched existing issues for duplicates.
+          required: true
+        - label: This report contains only synthetic or public test data.
+          required: true
+        - label: This is not a privately reportable security vulnerability.
+          required: true

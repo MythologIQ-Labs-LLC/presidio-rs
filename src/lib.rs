@@ -13,6 +13,7 @@
 //! - additive validated value types for the next-generation finding contract
 //! - bounded candidate-preserving analysis reports
 //! - validated recognizer metadata and provenance
+//! - document identity and exact source-content binding
 //!
 //! It performs no network or filesystem I/O and requires no Python runtime.
 //! Person names, prose locations, and other semantic entities are not detected
@@ -29,6 +30,19 @@
 //! assert!(clean.contains("<EMAIL_ADDRESS>"));
 //! ```
 //!
+//! Document-aware analysis binds findings to exact source bytes:
+//!
+//! ```
+//! use presidio::{AnalyzerEngine, DocumentId, TextDocument};
+//!
+//! let document = TextDocument::new(
+//!     DocumentId::new("request-42").expect("valid document ID"),
+//!     "Email jane@acme.com",
+//! );
+//! let report = AnalyzerEngine::new().analyze_document(&document, None);
+//! report.validate_for_document(&document).expect("matching source");
+//! ```
+//!
 //! This is an independent open-source project. It is not affiliated with or
 //! endorsed by Microsoft. See the repository README for scope, limitations,
 //! security guidance, and acknowledgements.
@@ -38,6 +52,7 @@
 mod analyzer;
 mod anonymizer;
 pub mod context;
+mod document;
 mod entity;
 mod metadata;
 mod recognizer;
@@ -49,6 +64,9 @@ pub mod validators;
 
 pub use analyzer::{AnalyzerEngine, DEFAULT_SCORE_THRESHOLD};
 pub use anonymizer::{anonymize, AnonymizerEngine, Operator};
+pub use document::{
+    DocumentBinding, DocumentBindingError, DocumentFingerprint, FindingDocumentError, TextDocument,
+};
 pub use entity::EntityType;
 pub use metadata::{RecognitionMechanism, RecognizerMetadata, RecognizerMetadataError};
 pub use recognizer::{
@@ -57,11 +75,11 @@ pub use recognizer::{
 };
 pub use registry::{RecognizerRegistry, RecognizerRegistryError};
 pub use report::{
-    AnalysisIssue, AnalysisOptions, AnalysisReport, AnalysisStatus, DEFAULT_REPORT_CANDIDATE_LIMIT,
-    DEFAULT_REPORT_ISSUE_LIMIT,
+    AnalysisIssue, AnalysisOptions, AnalysisReport, AnalysisStatus, ReportDocumentError,
+    DEFAULT_REPORT_CANDIDATE_LIMIT, DEFAULT_REPORT_ISSUE_LIMIT,
 };
 pub use result::RecognizerResult;
 pub use types::{
-    Confidence, ConfidenceError, EntityId, Evidence, Finding, FindingConversionError,
+    Confidence, ConfidenceError, DocumentId, EntityId, Evidence, Finding, FindingConversionError,
     IdentifierError, MetadataId, RecognizerId, Span, SpanError,
 };

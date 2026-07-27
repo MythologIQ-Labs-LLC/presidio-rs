@@ -1,7 +1,10 @@
 //! Additive, bounded report contract for candidate-preserving analysis.
 
+use core::fmt;
+
+use crate::document::{DocumentBinding, DocumentBindingError, FindingDocumentError, TextDocument};
 use crate::metadata::RecognizerMetadata;
-use crate::types::RecognizerId;
+use crate::types::{RecognizerId, Span, SpanError};
 use crate::{Finding, RecognizerResult};
 
 /// Default maximum number of accepted raw candidates processed by a report.
@@ -112,10 +115,12 @@ impl AnalysisStatus {
 /// resolution. `legacy_compatible_results` applies the existing analyzer policy
 /// to the same bounded raw candidate stream. `recognizers` contains authoritative
 /// metadata only for metadata-backed recognizers that emitted raw candidates.
+/// Document-aware analysis binds the report and each finding to exact source bytes.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AnalysisReport {
     engine_version: &'static str,
+    document: Option<DocumentBinding>,
     candidates: Vec<Finding>,
     recognizers: Vec<RecognizerMetadata>,
     legacy_compatible_results: Vec<RecognizerResult>,
@@ -126,6 +131,7 @@ pub struct AnalysisReport {
 impl AnalysisReport {
     pub(crate) fn new(
         engine_version: &'static str,
+        document: Option<DocumentBinding>,
         candidates: Vec<Finding>,
         recognizers: Vec<RecognizerMetadata>,
         legacy_compatible_results: Vec<RecognizerResult>,
@@ -134,6 +140,7 @@ impl AnalysisReport {
     ) -> Self {
         Self {
             engine_version,
+            document,
             candidates,
             recognizers,
             legacy_compatible_results,
@@ -145,6 +152,11 @@ impl AnalysisReport {
     /// Version of the library engine that constructed this report.
     pub const fn engine_version(&self) -> &'static str {
         self.engine_version
+    }
+
+    /// Exact source binding, when produced through document-aware analysis.
+    pub fn document_binding(&self) -> Option<&DocumentBinding> {
+        self.document.as_ref()
     }
 
     /// Validated findings before thresholding or overlap resolution.
@@ -181,4 +193,72 @@ impl AnalysisReport {
     pub const fn status(&self) -> AnalysisStatus {
         self.status
     }
+
+    /// Validate report identity, candidate bindings, and legacy spans for a document.
+    pub fn validate_for_document(
+        &self,
+        document: &TextDocument<'_>,
+    ) -> Result<(), ReportDocumentError> {
+        let binding = self
+            .document
+            .as_ref()
+            .ok_or(ReportDocumentError::UnboundReport)?;
+        binding
+            .validate_document(document)
+            .map_err(ReportDocumentError::Document)?;
+
+        for (index, finding) in self.candidates.iter().enumerate() {
+            finding
+                .validate_for_document(document)
+                .map_err(|error| ReportDocumentError::Candidate { index, error })?;
+        }
+
+        for (index, result) in self.legacy_compatible_results.iter().enumerate() {
+            Span::new_for(document.original(), result.start, result.end)
+                .map_err(|error| ReportDocumentError::LegacySpan { index, error })?;
+        }
+
+        Ok(())
+    }
 }
+
+/// Failure to validate an analysis report against a document.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ReportDocumentError {
+    /// The report came from a legacy string-only analysis path.
+    UnboundReport,
+    /// The supplied document does not match the report's source binding.
+    Document(DocumentBindingError),
+    /// One candidate is missing or violates the report's source binding.
+    Candidate {
+        index: usize,
+        error: FindingDocumentError,
+    },
+    /// One legacy-compatible span cannot safely index the bound document.
+    LegacySpan { index: usize, error: SpanError },
+}
+
+impl fmt::Display for ReportDocumentError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::UnboundReport => {
+                formatter.write_str("analysis report is not bound to a document")
+            }
+            Self::Document(error) => write!(formatter, "report document mismatch: {error}"),
+            Self::Candidate { index, error } => {
+                write!(
+                    formatter,
+                    "candidate {index} does not match document: {error}"
+                )
+            }
+            Self::LegacySpan { index, error } => {
+                write!(
+                    formatter,
+                    "legacy result {index} has invalid document span: {error}"
+                )
+            }
+        }
+    }
+}
+
+impl std::error::Error for ReportDocumentError {}

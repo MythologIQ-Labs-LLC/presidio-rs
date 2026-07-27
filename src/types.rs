@@ -5,6 +5,7 @@
 
 use core::fmt;
 
+use crate::document::{DocumentBinding, FindingDocumentError, TextDocument};
 use crate::entity::EntityType;
 use crate::result::RecognizerResult;
 
@@ -203,6 +204,10 @@ identifier_type!(
 );
 identifier_type!(RecognizerId, "Stable identifier for a recognizer.");
 identifier_type!(
+    DocumentId,
+    "Caller-controlled stable identifier for a source document."
+);
+identifier_type!(
     MetadataId,
     "Bounded identifier for non-plaintext evidence metadata."
 );
@@ -313,17 +318,19 @@ pub struct Finding {
     span: Span,
     confidence: Confidence,
     recognizer: Option<RecognizerId>,
+    document: Option<DocumentBinding>,
     evidence: Vec<Evidence>,
 }
 
 impl Finding {
-    /// Construct a finding without inventing recognizer provenance.
+    /// Construct a finding without inventing recognizer or document provenance.
     pub fn new(entity: EntityId, span: Span, confidence: Confidence) -> Self {
         Self {
             entity,
             span,
             confidence,
             recognizer: None,
+            document: None,
             evidence: Vec::new(),
         }
     }
@@ -337,6 +344,11 @@ impl Finding {
     /// Attach non-plaintext evidence metadata.
     pub fn with_evidence(mut self, evidence: impl IntoIterator<Item = Evidence>) -> Self {
         self.evidence.extend(evidence);
+        self
+    }
+
+    pub(crate) fn with_document_binding(mut self, document: DocumentBinding) -> Self {
+        self.document = Some(document);
         self
     }
 
@@ -360,9 +372,37 @@ impl Finding {
         self.recognizer.as_ref()
     }
 
+    /// Exact source binding, when produced through document-aware analysis.
+    pub fn document_binding(&self) -> Option<&DocumentBinding> {
+        self.document.as_ref()
+    }
+
     /// Non-plaintext evidence metadata.
     pub fn evidence(&self) -> &[Evidence] {
         &self.evidence
+    }
+
+    /// Validate this finding's binding and span against a document.
+    pub fn validate_for_document(
+        &self,
+        document: &TextDocument<'_>,
+    ) -> Result<(), FindingDocumentError> {
+        let binding = self
+            .document
+            .as_ref()
+            .ok_or(FindingDocumentError::UnboundFinding)?;
+        binding.validate_document(document)?;
+        self.span.validate_for(document.original())?;
+        Ok(())
+    }
+
+    /// Return the matched substring only when the exact bound document is supplied.
+    pub fn slice_document<'a>(
+        &self,
+        document: &'a TextDocument<'_>,
+    ) -> Result<&'a str, FindingDocumentError> {
+        self.validate_for_document(document)?;
+        Ok(document.slice(self.span)?)
     }
 }
 
@@ -461,6 +501,7 @@ mod tests {
 
         assert_eq!(finding.entity().as_str(), "EMAIL_ADDRESS");
         assert_eq!(finding.recognizer(), None);
+        assert_eq!(finding.document_binding(), None);
         assert_eq!(finding.evidence(), &[Evidence::LegacyResult]);
     }
 

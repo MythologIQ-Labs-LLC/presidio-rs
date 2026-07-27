@@ -30,8 +30,11 @@ The next architectural slice is fallible anonymization over document-bound findi
 
 ## Development planning
 
+- [Stealth open-source foundation track](planning/OPEN_SOURCE_FOUNDATION_TRACK.md)
 - [Multi-phase development plan](planning/DEVELOPMENT_PLAN.md)
 - [Development risk and assumption register](planning/RISK_REGISTER.md)
+
+The open-source foundation is the primary development objective. Repository privacy controls timing and disclosure; it does not change the intended contributor, consumer, API, security, evidence, package, and maintainership standards.
 
 ## Research and external landscape
 
@@ -49,8 +52,8 @@ The next architectural slice is fallible anonymization over document-bound findi
 
 The active planning baseline is a 30-week private development program from August 3, 2026 through February 26, 2027.
 
-The target outcome is a measured, multi-consumer private beta and an explicit release-strategy decision. Public release is not assumed.
+The target outcome is a measured, multi-consumer open-source foundation developed in private, followed by an explicit publication, collaboration, continued-private-development, or redirection decision. Public release is not assumed or automatic.
 
-Architecture is reviewed continuously throughout the program. Each phase includes design review, risk review, evidence review, consumer impact assessment, and stop or redirect criteria.
+Architecture is reviewed continuously throughout the program. Each phase includes design review, risk review, evidence review, consumer impact assessment, foundation-readiness assessment, and stop or redirect criteria.
 
 The build-versus-adopt-versus-collaborate question remains active throughout development. The external Rust privacy landscape is watched weekly, reviewed deeply each month, and escalated immediately when a material change could invalidate planned work or provide a better path for consumers.

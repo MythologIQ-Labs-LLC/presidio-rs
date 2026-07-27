@@ -12,6 +12,20 @@ Making the repository public immediately would create irreversible licensing, hi
 
 Keeping the project conventionally proprietary during development would create a different risk: internal coupling, weak documentation, undocumented decisions, unreviewed dependencies, and a difficult public conversion later.
 
+## Strategic objective
+
+The primary development objective is to create a solid foundation for future open-source use.
+
+Repository privacy is a temporary operating condition that permits architecture, naming, provenance, security, maintenance, and release boundaries to mature before public expectations become irreversible. It is not a signal that the reusable core should be designed as a proprietary or internal-only library.
+
+Public release remains a separate controlled decision. The foundation should nevertheless be strong enough that publication, collaboration, or a clean public export can occur without first rebuilding the project around open-source expectations.
+
+The governing operating principle is:
+
+> Build privately, design publicly, disclose deliberately.
+
+The detailed cross-cutting requirements and maturity gates are maintained in the [Stealth Open-Source Foundation Track](../planning/OPEN_SOURCE_FOUNDATION_TRACK.md).
+
 ## Decision
 
 The project will remain private while being developed according to open-source-grade engineering and community standards.
@@ -25,10 +39,26 @@ The repository will use:
 - a Contributor License Agreement and DCO process;
 - attribution and provenance requirements;
 - security disclosure and conduct policies;
-- changelog, compatibility, governance, and architecture-decision discipline; and
+- changelog, compatibility, governance, and architecture-decision discipline;
+- continuous contributor, package, release, and clean-export readiness work; and
 - a separate public-release checklist and approval decision.
 
 Repository privacy does not permit confidential product assumptions to define the reusable library's public contract. Internal consumers may influence requirements only when those requirements are independently justified for the project.
+
+## Development and merge implications
+
+Material changes must improve or preserve the project's future open-source foundation.
+
+A change should identify:
+
+- the reusable consumer problem it solves;
+- why it belongs in the core, an adapter, an example, or an application;
+- public API and compatibility effects;
+- security, privacy, evidence, and maintenance consequences;
+- required README, guide, ADR, changelog, and migration updates; and
+- whether a better existing Rust project or component changes the decision to build independently.
+
+Feature breadth alone is not a sufficient reason to merge. Contributor usability, supportability, evidence, and release safety are first-class development outcomes.
 
 ## Public release boundary
 
@@ -56,6 +86,7 @@ The existing private repository should not automatically be made public. A clean
 - Internal coupling and undocumented assumptions are easier to detect.
 - Licensing, attribution, and contribution expectations are established early.
 - CI and release discipline improve private development immediately.
+- Contributor experience and clean-export readiness become continuous work.
 - Publication remains a reversible strategic decision until explicitly approved.
 
 ### Costs
@@ -64,12 +95,14 @@ The existing private repository should not automatically be made public. A clean
 - MIT licensing inside a private repository may require additional access and employment-policy clarity.
 - CLA and governance language require legal review before public third-party contributions are accepted.
 - Some public-facing references, URLs, and project naming may need revision before release.
+- Foundation work can slow visible feature accumulation, even when it reduces future release and maintenance risk.
 
 ### Risks
 
 - Developers may mistakenly interpret MIT files as authorization to redistribute the private repository. Repository access controls and organizational policy remain binding until approved public distribution.
 - Standards may become ceremonial unless CI, reviews, and release decisions enforce them.
 - The project may accumulate public promises faster than implementation evidence. Claims discipline remains mandatory.
+- Private consumer urgency may attempt to displace contributor, compatibility, security, or release-readiness work.
 
 ## Alternatives considered
 
@@ -80,6 +113,10 @@ Rejected because public licensing, history, name, and maintenance expectations w
 ### Keep the project proprietary until feature-complete
 
 Rejected because late conversion would preserve internal coupling and defer provenance, documentation, security, and contribution discipline until they are more expensive to repair.
+
+### Treat open-source readiness as launch-only work
+
+Rejected because API coherence, evidence, provenance, contributor experience, and maintainership cannot be repaired reliably in a final documentation sprint.
 
 ### Maintain separate private and public repositories immediately
 
@@ -92,7 +129,10 @@ This decision is considered effective when:
 - the private repository adopts the documented governance baseline;
 - CI gates pass;
 - subsequent changes follow DCO and review requirements;
-- architecture decisions are recorded for material changes; and
+- architecture decisions are recorded for material changes;
+- README, documentation, changelog, contributor, security, package, and release artifacts stay current;
+- private consumers do not silently define the reusable core;
+- the foundation maturity gates are reviewed during phase exits; and
 - no public release occurs without completing the explicit release checklist.
 
 ## Revisit conditions
@@ -102,5 +142,6 @@ Revisit this decision when:
 - the project reaches a credible public `0.1.0` boundary;
 - external collaboration is materially blocked by privacy;
 - commercial strategy requires a different license or contribution model;
-- project naming changes; or
-- maintenance capacity changes substantially.
+- project naming changes;
+- maintenance capacity changes substantially; or
+- an existing project becomes a demonstrably better foundation for the intended consumers.

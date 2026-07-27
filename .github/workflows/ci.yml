@@ -4,7 +4,7 @@ on:
   push:
     branches: [main, "chore/**", "feat/**", "fix/**"]
   pull_request:
-    branches: [main, "chore/**"]
+    branches: [main, "chore/**", "feat/**", "fix/**"]
 
 permissions:
   contents: read
@@ -20,26 +20,20 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-
       - name: Check formatting
         run: cargo fmt --all -- --check
-
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
-
       - name: Run tests
         run: cargo test --all-features
-
       - name: Build documentation
         env:
           RUSTDOCFLAGS: -D warnings
         run: cargo doc --no-deps --all-features
-
       - name: Verify package contents
         run: cargo package --allow-dirty
 
@@ -49,10 +43,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
       - name: Install Rust 1.74.0
         uses: dtolnay/rust-toolchain@1.74.0
-
       - name: Test all features on MSRV
         run: cargo test --all-features --locked
 
@@ -62,20 +54,15 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
       - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
-
       - name: Install cargo-audit
         run: cargo install cargo-audit --locked
-
       - name: Audit dependencies
         run: cargo audit
 
   dco:
     name: DCO sign-off
-    # This one branch bootstraps DCO itself and contains commits created before
-    # the policy existed. Every later pull request is required to pass this gate.
     if: github.event_name == 'pull_request' && github.head_ref != 'chore/open-source-readiness'
     runs-on: ubuntu-latest
     steps:
@@ -84,13 +71,11 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
-
       - name: Verify Signed-off-by trailers
         shell: bash
         run: |
           set -euo pipefail
           git fetch --no-tags origin "${GITHUB_BASE_REF}"
-
           missing=0
           while read -r commit; do
             if ! git show -s --format=%B "$commit" | grep -Eiq '^Signed-off-by: .+ <[^>]+>$'; then
@@ -98,7 +83,6 @@ jobs:
               missing=1
             fi
           done < <(git rev-list "origin/${GITHUB_BASE_REF}..HEAD")
-
           if [[ "$missing" -ne 0 ]]; then
             echo "Add DCO sign-off with: git commit --amend -s"
             exit 1

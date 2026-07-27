@@ -11,29 +11,47 @@ An embeddable library for identifying and transforming structured sensitive data
 [![CI](https://github.com/MythologIQ-Labs-LLC/presidio-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/MythologIQ-Labs-LLC/presidio-rs/actions/workflows/ci.yml)
 [![unsafe forbidden](https://img.shields.io/badge/crate--local%20unsafe-forbidden-success.svg)](src/lib.rs)
 
-**Early-stage, privately developed, and not production certified**
+**Early-stage open-source foundation, not production certified, and not yet published to crates.io**
 
 </div>
 
 > [!IMPORTANT]
-> `presidio-rs` is independently governed and developed privately with open-source-grade practices. It is not affiliated with, sponsored by, or endorsed by Microsoft. Microsoft Presidio is acknowledged as a design reference under its MIT license.
+> `presidio-rs` is independently governed and is not affiliated with, sponsored by, or endorsed by Microsoft. Microsoft Presidio is acknowledged as an architectural reference under its MIT license. This project is incomplete, may change before `1.0`, and does not guarantee detection of all sensitive information.
+
+## Release status
+
+The repository is targeted to become publicly readable on **Thursday, July 30, 2026**.
+
+Public repository visibility is separate from:
+
+- crates.io publication;
+- an advertised launch;
+- a public beta or stable release;
+- production certification; and
+- guaranteed maintainer response times.
+
+The project may remain quietly public while correctness, evaluation, fuzzing, compatibility, and consumer validation continue.
+
+- [Public repository release week](docs/planning/PUBLIC_RELEASE_WEEK.md)
+- [Rebaselined roadmap](docs/planning/DEVELOPMENT_PLAN.md)
+- [Release checklist](OPEN_SOURCE_RELEASE_CHECKLIST.md)
 
 ## What is implemented
 
 The current crate provides:
 
-- regex-based recognizers for structured PII and selected secrets
-- optional checksum validators and nearby context scoring
-- bounded open entity, recognizer, document, and metadata identifiers
-- UTF-8-safe spans and finite confidence values
-- evidence-bearing findings and candidate-preserving reports
-- authoritative recognizer IDs, versions, locales, capabilities, mechanisms, and attribution
-- exact source binding through document ID, byte length, and SHA-256 fingerprint
-- bounded request selection for entities, recognizers, locale, capabilities, confidence, input size, candidates, and issues
-- an object-safe backend-neutral `Recognizer` trait
-- validated candidate emission that enforces source, provenance, entity, confidence, and resource invariants
-- typed non-plaintext backend failures
-- legacy replacement, redaction, masking, and deterministic hashing
+- regex-based recognizers for structured PII and selected secrets;
+- optional checksum validators and nearby context scoring;
+- bounded open entity, recognizer, document, and metadata identifiers;
+- UTF-8-safe spans and finite confidence values;
+- evidence-bearing findings and candidate-preserving reports;
+- authoritative recognizer IDs, versions, locales, capabilities, mechanisms, and attribution;
+- exact source binding through document ID, byte length, and SHA-256 fingerprint;
+- bounded request selection for entities, recognizers, locale, capabilities, confidence, input size, candidates, and issues;
+- an object-safe backend-neutral `Recognizer` trait;
+- validated candidate emission that enforces source, provenance, entity, confidence, and resource invariants;
+- typed non-plaintext backend failures; and
+- legacy replacement, redaction, masking, and deterministic hashing.
 
 The crate itself performs no network or filesystem I/O. Its direct dependencies are `regex`, `sha2`, and optional `serde`.
 
@@ -92,67 +110,73 @@ assert_eq!(
 );
 ```
 
-`AnalysisReport::candidates()` is authoritative for this path. `legacy_compatible_results()` is only a compatibility projection. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.
+`AnalysisReport::candidates()` is authoritative for this path. `legacy_compatible_results()` is a compatibility projection. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.
 
 ## Expected use cases
 
 Good fits include:
 
-- sanitizing logs and telemetry before persistence
-- inspecting prompts, model responses, or tool output before release
-- redacting structured identifiers in local or offline pipelines
-- embedding PII controls in desktop, edge, sandboxed, or air-gapped software
-- protecting command-line output and diagnostic bundles
-- scanning text before it crosses a service or plugin boundary
-- adding organization-specific identifiers through strict pattern recognizers
-- integrating optional local semantic or dictionary backends
-- preserving recognizer provenance and backend failures for product policy decisions
+- sanitizing logs and telemetry before persistence;
+- inspecting prompts, model responses, or tool output before release;
+- redacting structured identifiers in local or offline pipelines;
+- embedding PII controls in desktop, edge, sandboxed, or air-gapped software;
+- protecting command-line output and diagnostic bundles;
+- scanning text before it crosses a service or plugin boundary;
+- adding organization-specific identifiers through strict pattern recognizers;
+- integrating optional local semantic or dictionary backends; and
+- preserving recognizer provenance and backend failures for product policy decisions.
 
 ## What it is not
 
 `presidio-rs` is not currently:
 
-- a complete reimplementation or drop-in replacement for Microsoft Presidio
-- a guarantee that all sensitive information will be detected
-- a built-in NLP or named-entity recognition system
-- able by default to reliably detect arbitrary names or prose locations
-- an OCR, image, DICOM, audio, or video redactor
-- a structured or tabular de-identification framework
-- a hosted service
-- a substitute for threat modeling, access control, review, or data governance
-- proof of compliance with any legal or regulatory obligation
-- a stable serialized request or report protocol
+- a complete reimplementation or drop-in replacement for Microsoft Presidio;
+- a guarantee that all sensitive information will be detected;
+- a built-in NLP or named-entity recognition system;
+- able by default to reliably detect arbitrary names or prose locations;
+- an OCR, image, DICOM, audio, or video redactor;
+- a structured or tabular de-identification framework;
+- a hosted service;
+- a substitute for threat modeling, access control, review, or data governance;
+- proof of compliance with any legal or regulatory obligation;
+- a stable serialized request or report protocol;
+- a production-certified security boundary; or
+- a published crates.io package.
 
 Detection systems produce false positives and false negatives. Consumers own coverage, thresholds, retention, failure behavior, and review policy.
 
 ## Installation
 
-While the repository remains private, authorized consumers should use a Git dependency or workspace path.
+The crate is not yet published to crates.io.
+
+Use a Git dependency when repository access is available:
 
 ```toml
 [dependencies]
 presidio-rs = { git = "https://github.com/MythologIQ-Labs-LLC/presidio-rs" }
 ```
 
+Or use a workspace path:
+
 ```toml
 [dependencies]
 presidio-rs = { path = "../presidio-rs" }
 ```
 
-The package is named `presidio-rs`; Rust code imports it as `presidio`. Public publication and final naming remain separate future decisions.
+The package is named `presidio-rs`; Rust code imports it as `presidio`. Package publication remains a separate decision targeted for review after the public alpha and beta gates.
 
 ## Request controls
 
 `AnalysisRequest` supports:
 
-- open entity allowlists
-- explicit recognizer allowlists
-- locale selection
-- available capability declarations
-- minimum confidence for the legacy-compatible projection
-- maximum UTF-8 input bytes
-- maximum candidates across selected recognizers
-- maximum retained issue details
+- open entity allowlists;
+- explicit recognizer allowlists;
+- locale selection;
+- available capability declarations;
+- minimum confidence for the legacy-compatible projection;
+- maximum UTF-8 input bytes;
+- maximum candidates across selected recognizers; and
+- maximum retained issue details.
 
 The default request selects metadata marked default-enabled, accepts at most 1 MiB of source text, retains at most 10,000 candidates, and retains at most 100 issue details.
 
@@ -183,8 +207,8 @@ impl Recognizer for LocalBackend {
         _request: &AnalysisRequest,
         emitter: &mut CandidateEmitter<'_, '_>,
     ) -> Result<(), RecognitionError> {
-        // Run the backend, preserve original UTF-8 byte coordinates,
-        // and submit each result through emitter.emit(...).
+        // Preserve original UTF-8 byte coordinates and submit results
+        // through emitter.emit(...).
         let _ = (document, emitter);
         Ok(())
     }
@@ -193,7 +217,7 @@ impl Recognizer for LocalBackend {
 
 The emitter rejects undeclared entities, invalid UTF-8 spans, invalid confidence values, and candidates beyond the remaining request limit. Accepted findings receive authoritative recognizer identity and exact document binding.
 
-Backend errors use stable categories, bounded codes, and retryability. Applications decide whether those issues should block, retry, fail open, fail closed, or require review.
+Backend errors use stable categories, bounded codes, and retryability. Applications decide whether those issues block, retry, fail open, fail closed, or require review.
 
 ## Built-in entity coverage
 
@@ -216,17 +240,17 @@ Backend errors use stable categories, bounded codes, and retryability. Applicati
 
 A listed entity does not imply complete country, vendor, formatting, or malformed-input coverage.
 
-## Anonymization
+## Anonymization status
 
 The current anonymizer consumes legacy `RecognizerResult` values and supports:
 
-- `Replace(None)` with an entity marker
-- `Replace(Some(value))`
-- `Redact`
-- `Mask`
-- deterministic salted SHA-256 `Hash`
+- `Replace(None)` with an entity marker;
+- `Replace(Some(value))`;
+- `Redact`;
+- `Mask`; and
+- deterministic salted SHA-256 `Hash`.
 
-Fallible anonymization over document-bound findings and an explicit permanent resolution policy are the next architectural slice.
+Fallible anonymization over document-bound findings and an explicit permanent resolution policy are immediate post-visibility roadmap work.
 
 Deterministic hashing enables correlation. It does not guarantee irreversible anonymity, especially for low-entropy values or disclosed salts.
 
@@ -250,7 +274,7 @@ TextDocument + AnalysisRequest
 Architecture documents:
 
 - [Target architecture](docs/architecture/ARCHITECTURE.md)
-- [ADR 0001: Private open-source posture](docs/adr/0001-private-open-source-posture.md)
+- [ADR 0001: Open-source-grade posture](docs/adr/0001-private-open-source-posture.md)
 - [ADR 0002: Backend-neutral core and optional adapters](docs/adr/0002-backend-neutral-core-and-optional-adapters.md)
 - [ADR 0003: Validated core types](docs/adr/0003-stage-core-types-before-engine-migration.md)
 - [ADR 0004: Candidate-preserving reports](docs/adr/0004-add-candidate-preserving-analysis-report.md)
@@ -263,13 +287,13 @@ Architecture documents:
 
 The crate:
 
-- performs no network or filesystem I/O
-- does not download patterns or models
-- forbids crate-local `unsafe` code
-- borrows raw source text rather than copying it into reports
-- omits plaintext from `TextDocument` debug output
-- uses bounded identifier-shaped evidence and failure codes
-- binds request-oriented findings to exact source identity and content
+- performs no network or filesystem I/O;
+- does not download patterns or models;
+- forbids crate-local `unsafe` code;
+- borrows raw source text rather than copying it into reports;
+- omits plaintext from `TextDocument` debug output;
+- uses bounded identifier-shaped evidence and failure codes; and
+- binds request-oriented findings to exact source identity and content.
 
 A document fingerprint is an integrity mechanism, not encryption or anonymization. Bindings may be sensitive metadata, particularly for low-entropy content. Use opaque document IDs and appropriate retention and access controls.
 
@@ -279,9 +303,11 @@ Report vulnerabilities through GitHub private vulnerability reporting. See [SECU
 
 ## Development program
 
-The active baseline is a 30-week private program from August 3, 2026 through February 26, 2027. Architecture review, consumer feedback, risk review, and ecosystem research continue throughout every phase.
+The accelerated roadmap targets public repository visibility on July 30, contributor-ready alpha by August 14, consumer-ready beta by September 25, and a separate package and advertised-launch decision by October 30.
 
-- [Development plan](docs/planning/DEVELOPMENT_PLAN.md)
+- [Public repository release week](docs/planning/PUBLIC_RELEASE_WEEK.md)
+- [Rebaselined development roadmap](docs/planning/DEVELOPMENT_PLAN.md)
+- [Open-source foundation track](docs/planning/OPEN_SOURCE_FOUNDATION_TRACK.md)
 - [Risk and assumption register](docs/planning/RISK_REGISTER.md)
 - [Active Rust privacy landscape watch](docs/research/ACTIVE_LANDSCAPE_WATCH.md)
 - [Parallel efforts and lessons](docs/research/PARALLEL_EFFORTS_AND_LESSONS.md)
@@ -307,7 +333,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md). Contributions require the [Contributor 
 
 ## Claims policy
 
-Documentation distinguishes among **implemented**, **measured**, and **planned** capabilities. Performance, accuracy, security, compliance, and cost claims require reproducible evidence.
+Documentation distinguishes among **implemented**, **measured**, and **planned** capabilities. Performance, accuracy, security, compliance, production-readiness, and cost claims require reproducible evidence.
 
 ## License and acknowledgements
 

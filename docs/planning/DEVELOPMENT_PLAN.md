@@ -1,780 +1,430 @@
-# Multi-Phase Development Plan
+# Rebaselined Development Roadmap
 
 ## Executive decision
 
-`presidio-rs` will be developed through a **30-week private program** beginning **August 3, 2026** and ending with a deliberate release-strategy decision on **February 26, 2027**.
+`presidio-rs` is targeted to become a **publicly readable GitHub repository on Thursday, July 30, 2026**.
 
-The plan prioritizes correctness, architectural durability, evaluation, and multi-consumer validation before feature breadth. Public release is not an automatic phase outcome.
+This supersedes the original 30-week private-development sequencing. The project will expose its source earlier while continuing foundation work in public.
 
-## Planning assumptions
+Public visibility is not equivalent to:
 
-The baseline timeline assumes:
+- crates.io publication;
+- an advertised launch;
+- production certification;
+- a stable `1.0` API;
+- complete evaluation evidence;
+- guaranteed maintainer response times; or
+- a promise that every planned capability is implemented.
 
-- one primary Rust engineer contributing approximately 70% to 90% of a full-time schedule;
-- one maintainer or senior reviewer contributing approximately 10% to 20%;
-- periodic privacy, security, legal, and product review;
-- access to at least two materially different Rust consumers for pilot integrations;
-- no requirement to ship a production semantic NER backend on the critical path; and
-- 20% capacity reserved across the program for discovery, redesign, defects, and unknown unknowns.
+Those remain separate maturity and strategy decisions.
 
-### Estimated effort
+## Rebaseline rationale
 
-| Work category | Estimated effort |
-|---|---:|
-| Core architecture and implementation | 14 to 17 engineer-weeks |
-| Evaluation, testing, and hardening | 7 to 9 engineer-weeks |
-| Consumer pilots and compatibility | 4 to 6 engineer-weeks |
-| Semantic-backend feasibility work | 2 to 4 engineer-weeks |
-| Documentation, governance, and release work | 3 to 4 engineer-weeks |
-| Review and specialist input | 5 to 7 reviewer-weeks, distributed |
-| **Total** | **35 to 47 person-weeks across 30 calendar weeks** |
+The original roadmap assumed that value types, source binding, candidate-preserving reports, recognizer metadata, request controls, backend-neutral execution, governance, CI, documentation, and release discipline would be built over several months.
 
-This is not a 47-week serial plan. Activities overlap, specialist effort is intermittent, and the primary engineer remains the pacing resource.
+Those foundations are already present on `main` substantially earlier than planned. The remaining work is no longer “prepare privately before anyone can see it.” It is now:
 
-### Capacity scenarios
+1. make the current repository safe and honest to expose;
+2. continue correctness and contributor-readiness work in public;
+3. gather evaluation and consumer evidence quickly;
+4. decide package publication and active promotion separately; and
+5. keep the build-versus-adopt-versus-collaborate decision active.
 
-| Staffing shape | Reasonable calendar expectation |
-|---|---|
-| One primary engineer plus part-time reviewer | 28 to 34 weeks |
-| Two experienced Rust engineers plus reviewer | 20 to 24 weeks |
-| One engineer with frequent competing priorities | 36 to 44 weeks |
+The accelerated schedule spends the recovered architecture time on visibility safety, correctness, evaluation, consumer validation, and maintainership rather than feature breadth.
 
-The 30-week baseline should be treated as a target range, not a contractual delivery date.
+## Operating principles
 
-## Program outcomes
+- **Public by default after July 30; promotion by explicit decision.**
+- **Foundation before breadth.** No recognizer accumulation merely to make a feature table longer.
+- **Honest maturity language.** Early-stage limitations remain prominent.
+- **One current `main`.** Completed slices merge promptly after review and green gates.
+- **Documentation ships with behavior.** README, guides, ADRs, changelog, and migration notes change in the same PR.
+- **Consumer evidence outranks internal preference.**
+- **A better existing Rust project remains a successful outcome.** Adoption, collaboration, reuse, or migration may replace independent implementation.
+- **Public access does not waive security, provenance, or licensing obligations.**
 
-By the end of the plan, the project should have:
+## Current foundation status
 
-1. a defensible standalone architecture;
-2. byte-accurate and fallible analysis and anonymization contracts;
-3. extensible recognizer and evidence models;
-4. a reproducible quality-evaluation harness;
-5. explicit dependency, compatibility, and security controls;
-6. at least two real Rust consumer pilots;
-7. measured performance and quality evidence for supported scope;
-8. a documented decision on semantic recognition;
-9. a stable private beta release boundary; and
-10. an explicit decision to publish, remain private, collaborate, rename, or redirect.
+Completed before the rebaseline:
 
-## Architecture work is continuous
+- open-source-grade governance, contribution, conduct, licensing, and security documents;
+- CI for formatting, Clippy, tests, documentation, packaging, MSRV, DCO, and dependency audit;
+- validated spans, confidence values, and open identifiers;
+- candidate-preserving reports with typed issues and resource limits;
+- authoritative recognizer metadata and strict registration;
+- exact `TextDocument` source binding;
+- bounded `AnalysisRequest` selection and resource controls;
+- object-safe backend-neutral recognizer execution;
+- validated candidate emission and typed backend failures;
+- current README, documentation index, ADR set, changelog, risk register, and active landscape watch;
+- a stealth open-source foundation track and explicit release checklist.
 
-Architecture is not confined to Phase 0.
+Partially complete:
 
-Every phase includes:
+- API compatibility policy;
+- contributor examples;
+- public release operations;
+- package metadata and package-content rehearsal;
+- provenance and history review;
+- source and documentation link verification;
+- maintainer ownership and branch-protection configuration.
 
-- a written assumption review;
-- at least one architecture checkpoint;
-- an ADR for material decisions;
-- a consumer-impact assessment;
-- a risk-register update;
-- a review of evidence gathered during the phase; and
-- explicit confirmation that the next phase remains the best use of effort.
+Not yet complete:
 
-### Standing architecture cadence
-
-| Cadence | Activity |
-|---|---|
-| Weekly | 45-minute architecture review during active implementation |
-| Every two weeks | Risk, assumption, and unknowns review |
-| Every four weeks | Downstream consumer and compatibility review |
-| Every eight weeks | External landscape and parallel-project review |
-| Phase exit | Architecture, evidence, and readiness gate |
-| Before new heavy dependency | Time-boxed spike and ADR |
-| Before public API break | Consumer compile test and migration analysis |
+- explicit permanent candidate-resolution policy;
+- fallible document-bound anonymization;
+- reproducible quality evaluation baseline;
+- sustained fuzzing and property testing;
+- two materially different consumer pilots;
+- downstream compile fixtures;
+- semver baseline and migration guide;
+- public package release;
+- advertised launch;
+- production-readiness evidence.
 
 ## Timeline summary
 
 | Phase | Dates | Primary outcome |
 |---|---|---|
-| 0. Discovery and strategic validation | Aug 3 to Aug 14, 2026 | Decide whether to build, adopt, collaborate, or narrow scope |
-| 1. Correctness and core architecture | Aug 17 to Sep 18, 2026 | Establish durable value, offset, error, and pipeline foundations |
-| 2. Evaluation and evidence foundation | Aug 31 to Oct 2, 2026 | Create reproducible quality baseline and regression harness |
-| 3. Extensibility and recognizer maturity | Sep 21 to Oct 30, 2026 | Introduce recognizer contract, metadata, locale, and evidence |
-| 4. Multi-consumer private alpha | Oct 19 to Dec 4, 2026 | Integrate with at least two different Rust consumers |
-| 5. Hardening and compatibility | Nov 16, 2026 to Jan 8, 2027 | Fuzz, benchmark, secure, and stabilize the supported core |
-| 6. Semantic recognition feasibility | Dec 7, 2026 to Jan 22, 2027 | Make an evidence-based adopt, defer, or reject decision |
-| 7. Private beta and release candidate | Jan 11 to Feb 12, 2027 | Produce a supportable private beta with measured claims |
-| 8. Strategy and publication decision | Feb 15 to Feb 26, 2027 | Decide public release, continued private development, or redirection |
+| R0. Public visibility release | Jul 27 to Jul 30, 2026 | Safely expose the repository without advertising or package publication |
+| R1. Contributor-ready public alpha | Jul 31 to Aug 14, 2026 | Complete release operations, examples, ownership, compatibility inventory, and first public contribution path |
+| R2. Correctness and evaluation sprint | Aug 3 to Sep 4, 2026 | Deliver explicit resolution, fallible anonymization, evaluation baseline, and critical fuzz targets |
+| R3. Consumer and compatibility sprint | Aug 17 to Sep 25, 2026 | Integrate two distinct consumers and establish downstream compatibility evidence |
+| R4. Public beta candidate | Sep 28 to Oct 16, 2026 | Harden supported scope, package contents, API migration, security, and measured claims |
+| R5. Package and launch decision | Oct 19 to Oct 30, 2026 | Decide crates.io publication and whether to actively announce the project |
+| R6. Post-public maturity program | Nov 2, 2026 to Feb 26, 2027 | Continue hardening, broader evaluation, governance maturity, and optional semantic feasibility |
 
-Phases overlap deliberately. Evaluation begins before the core redesign is complete, and consumer pilots begin before every feature is finished.
+The schedule is intentionally aggressive. Workstreams overlap, but public visibility is not allowed to erase the correctness and evidence work required for later maturity claims.
 
 ---
 
-## Phase 0: Discovery and strategic validation
+## R0: Public visibility release
 
-**Dates:** August 3 to August 14, 2026  
-**Estimated effort:** 1.5 to 2.5 engineer-weeks plus stakeholder interviews
+**Dates:** July 27 to July 30, 2026  
+**Target:** Public source access by Thursday, July 30
+
+### Objective
+
+Make the repository publicly readable, cloneable, buildable, and honestly documented without implying package release, production readiness, or an advertising commitment.
+
+### Required work
+
+1. Freeze non-release scope.
+2. Reconcile the roadmap and release checklist.
+3. Review the intended public tree and history for:
+   - secrets and credentials;
+   - confidential references;
+   - customer, employee, or private third-party data;
+   - problematic commit metadata;
+   - deleted proprietary material; and
+   - content that requires a clean export instead of a visibility change.
+4. Review source, fixture, regex, validator, algorithm, and documentation provenance.
+5. Confirm copyright ownership and MIT distribution intent.
+6. Review the name, package identity, Microsoft references, and non-affiliation language.
+7. Verify public-facing documentation and links.
+8. Verify issue templates, PR templates, private vulnerability reporting, Dependabot, DCO, and branch-protection expectations.
+9. Run a clean-clone build, test, documentation, and package rehearsal.
+10. Record the release commit, evidence, known limitations, operator, maintainers, and rollback procedure.
+11. Change visibility or publish an approved clean export.
+12. Verify anonymous access after the change.
+
+### Must-pass blockers
+
+Public visibility is blocked only by risks that make exposure unsafe or unauthorized, including:
+
+- secrets or confidential material;
+- unclear right to publish source or fixtures;
+- unacceptable license or provenance problems;
+- unresolved naming risk severe enough to require a rename before exposure;
+- materially false or misleading public documentation;
+- broken build or verification commands;
+- no usable security-reporting path; or
+- no accountable maintainer for the visibility operation.
+
+Incomplete metrics, fuzzing, pilots, semantic recognition, fallible anonymization, package publication, and advertising are not visibility blockers when documented as incomplete.
+
+### Exit criteria
+
+- the repository or clean export is public;
+- anonymous clone and documentation access work;
+- the declared early-stage status is prominent;
+- no package publication or announcement is implied;
+- public issue and security-reporting paths work; and
+- the release evidence record is committed.
+
+Detailed runbook: [Public Repository Release Week](PUBLIC_RELEASE_WEEK.md).
+
+---
+
+## R1: Contributor-ready public alpha
+
+**Dates:** July 31 to August 14, 2026
 
 ### Objectives
 
-- Validate that the project has a useful and differentiated scope.
-- Identify potential Rust consumers and their actual constraints.
-- Compare build, adopt, collaborate, fork, and narrow-scope options.
-- Establish the first architecture and risk baselines.
+- Make the newly public project understandable and contributable without private context.
+- Remove operational gaps exposed by public access.
+- Establish the first explicit compatibility baseline.
 
 ### Work
 
-1. Inventory likely Rust consumers without assuming any one product owns the design.
-2. Conduct short consumer interviews covering:
-   - input sizes and throughput;
-   - required entity types;
-   - locale and country needs;
-   - sync, async, batch, streaming, WASM, and FFI expectations;
-   - acceptable dependencies and MSRV;
-   - error and fail-open or fail-closed behavior;
-   - observability and privacy requirements;
-   - serialized output requirements; and
-   - upgrade and compatibility expectations.
-3. Evaluate parallel efforts including:
-   - Microsoft Presidio and Presidio Research;
-   - active Rust Presidio ports;
-   - `redact-core` and related NER crates;
-   - `cloakrs-core`;
-   - secret-scanning projects such as Gitleaks; and
-   - relevant Rust quality and supply-chain tools.
-4. Build a capability and differentiation matrix.
-5. Decide whether the best direction is:
-   - continue independently;
-   - collaborate with or contribute to an existing project;
-   - depend on an existing core and build a narrower adapter;
-   - focus on evaluation, governance, or constrained-runtime differentiation; or
-   - stop before sunk cost becomes a product strategy.
-6. Record the target architecture and first public API principles.
-7. Establish a maintained assumption ledger.
-
-### Required architecture decisions
-
-- Core scope and differentiator.
-- Build-versus-adopt-versus-collaborate decision.
-- Primary consumer surface.
-- Initial MSRV posture.
-- One-crate versus workspace starting shape.
-- Naming strategy for private development and future publication.
+- add a runnable strict pattern-recognizer example;
+- add a minimal custom backend reference implementation;
+- create a first-contribution guide with synthetic fixtures;
+- add CODEOWNERS or equivalent ownership documentation;
+- document public issue triage, review ownership, and security escalation;
+- document the legacy versus request-oriented API migration path;
+- inventory the public API and classify items as stable-for-alpha, transitional, legacy-compatible, experimental, or unsupported;
+- add documentation link checking;
+- add a clean package-content check and `cargo publish --dry-run` rehearsal without publishing;
+- enable and verify required branch protections and checks;
+- process public feedback without accepting internal-product coupling into the core.
 
 ### Exit criteria
 
-- At least two plausible consumers identified.
-- A written competitive and collaboration assessment completed.
-- A decision to continue has a clear reason beyond “Rust version of Presidio.”
-- Target architecture is accepted or revised.
-- Critical unknowns are scheduled as spikes rather than assumed away.
-
-### Stop or redirect triggers
-
-Pause or redirect if:
-
-- an existing project already satisfies the required constraints with acceptable quality and governance;
-- no distinct consumer need survives direct interviews;
-- differentiation depends entirely on unmeasured performance claims;
-- the project name or contribution model creates unacceptable legal or ecosystem risk; or
-- maintenance capacity is insufficient for security-sensitive library ownership.
+- a fresh external contributor can build, test, understand, and extend the project from repository documentation alone;
+- ownership and triage responsibilities are explicit;
+- the alpha compatibility policy and migration path are documented;
+- no release-week operational blocker remains open.
 
 ---
 
-## Phase 1: Correctness and core architecture
+## R2: Correctness and evaluation sprint
 
-**Dates:** August 17 to September 18, 2026  
-**Estimated effort:** 4 to 5 engineer-weeks
+**Dates:** August 3 to September 4, 2026
 
-### Objectives
+### Workstream A: explicit candidate resolution
 
-- Repair correctness risks before expanding recognizer breadth.
-- Establish stable internal concepts that can support multiple consumers.
-- Preserve compatibility where reasonable through transition adapters.
+- define supported overlap, nesting, adjacency, and equal-confidence behavior;
+- preserve unresolved candidates separately from selected findings;
+- make resolution policy explicit and versionable;
+- add conservative redaction-union behavior where policy requires it;
+- add differential tests against the legacy projection.
 
-### Workstreams
+### Workstream B: fallible document-bound anonymization
 
-#### 1. Value and error types
+- introduce an anonymization plan over validated document-bound findings;
+- validate the entire plan before transforming text;
+- reject source mismatch, invalid spans, unsupported operations, and policy conflicts explicitly;
+- produce source-to-output operation records;
+- avoid silent skips and partial transformation without an explicit report.
 
-Implement validated types for:
+### Workstream C: evaluation baseline
 
-- `Span`;
-- `Confidence`;
-- `EntityId`;
-- `RecognizerId`;
-- `DocumentId`;
-- `Finding`;
-- `AnalysisReport`;
-- `AnonymizationPlan`;
-- `AnonymizationReport`; and
-- typed error classifications.
+- define a versioned synthetic and redistributable corpus schema;
+- measure exact-span and overlap-tolerant precision, recall, and F1;
+- report results by entity, recognizer, locale, and corpus family;
+- add false-positive and false-negative regression fixtures;
+- record corpus provenance and licensing;
+- produce machine-readable evaluation receipts.
 
-#### 2. Original-text coordinate model
+### Workstream D: fuzzing and property tests
 
-- Introduce `TextDocument`.
-- Define original UTF-8 byte-offset semantics.
-- Add normalization-to-source mapping tests.
-- Prevent findings from being applied to the wrong text.
-- Add configurable input and finding limits.
+Add initial targets for:
 
-#### 3. Candidate preservation and resolution
-
-- Preserve all qualifying candidates before resolution.
-- Add explicit resolution policies.
-- Define nested, adjacent, and equal-score behavior.
-- Add conservative redaction span union.
-
-#### 4. Fallible anonymization
-
-- Replace silent skips with typed errors or explicit warnings.
-- Separate planning from transformation.
-- Validate all transformations before mutation.
-- Add source-to-output operation records.
-
-#### 5. Context correctness
-
-- Replace substring matching with boundary-aware handling.
-- Add negative context design or explicitly defer it.
-- Record context evidence.
-
-### Architecture checkpoints
-
-- Week 1: value-type and compatibility strategy.
-- Week 3: text and offset mapping review.
-- Week 5: anonymization and resolution review.
+- span validation;
+- request construction;
+- candidate emission;
+- resolution;
+- anonymization planning and application; and
+- report serialization.
 
 ### Exit criteria
 
-- Invalid spans cannot silently pass through anonymization.
-- Findings refer to original input coordinates.
-- Candidate evidence survives until explicit resolution.
-- Existing simple use cases remain available through migration shims or documented changes.
-- New core invariants have unit, property, and integration tests.
-
-### Key risks
-
-- API churn can consume the entire phase.
-- Unicode offset mapping may expose deeper design problems.
-- Compatibility shims may obscure the cleaner target API.
-- Over-generalized types may create needless complexity.
-
-### Mitigation
-
-Time-box abstractions, maintain concrete consumer fixtures, and prefer a small complete contract over speculative flexibility.
+- resolution behavior is explicit and tested;
+- document-bound anonymization is fallible and auditable;
+- a clean checkout reproduces an evaluation baseline;
+- critical-path fuzz and property targets run in CI or a documented scheduled workflow;
+- unsupported behavior remains documented rather than implied.
 
 ---
 
-## Phase 2: Evaluation and evidence foundation
+## R3: Consumer and compatibility sprint
 
-**Dates:** August 31 to October 2, 2026  
-**Estimated effort:** 3 to 4 engineer-weeks, overlapping Phase 1
+**Dates:** August 17 to September 25, 2026
 
-### Objectives
+### Consumer pilots
 
-- Measure the current implementation before replacing it.
-- Establish repeatable quality and error-analysis infrastructure.
-- Prevent recognizer changes from being approved solely by anecdote.
+Integrate at least two materially different Rust consumers, such as:
+
+- an in-process log or generated-text sanitizer;
+- a batch or CLI workflow;
+- a service with custom entity definitions;
+- a constrained or offline application; or
+- a WASM feasibility consumer.
+
+Two wrappers around the same application do not count.
 
 ### Work
 
-1. Define a versioned corpus schema containing:
-   - source text;
-   - expected entity ID;
-   - expected original-text spans;
-   - locale and country;
-   - source and license metadata;
-   - synthetic-template family where applicable; and
-   - allowed ambiguity.
-2. Build exact-span and relaxed-overlap metrics:
-   - precision;
-   - recall;
-   - F1;
-   - false positives;
-   - false negatives;
-   - confusion by entity;
-   - result by recognizer; and
-   - result by locale or corpus slice.
-3. Create regression fixtures for known failures.
-4. Separate synthetic templates across train, tuning, and evaluation partitions to avoid template leakage.
-5. Establish corpus provenance and privacy review.
-6. Record baseline results for the current engine.
-7. Add machine-readable evaluation receipts suitable for release evidence.
-
-### Architecture decisions
-
-- Whether evaluation tooling lives in the main crate, a sibling crate, or external tooling.
-- Stable corpus and report schemas.
-- Required evidence for default recognizer changes.
-- How ambiguous or overlapping ground truth is represented.
+- add downstream compile fixtures;
+- run realistic workloads through the request-oriented API;
+- compare integration complexity, failure handling, resource behavior, and upgrade friction;
+- classify requested changes as core, adapter, consumer policy, or rejected coupling;
+- add migration fixtures and examples;
+- introduce `cargo-semver-checks` or equivalent public API drift detection after the alpha baseline is recorded;
+- update the ecosystem comparison with any newly viable Rust alternatives.
 
 ### Exit criteria
 
-- A clean checkout can reproduce the baseline.
-- Results are available by entity and recognizer.
-- New recognizer PRs have a defined evidence requirement.
-- Corpus licensing and provenance are documented.
-- Test and evaluation data do not contain accidental real secrets or sensitive personal data.
-
-### Risk
-
-Synthetic data can create impressive metrics that fail on real-world text. The plan therefore requires multiple corpus families and explicit reporting by slice rather than one blended score.
+- two distinct consumers compile and integrate without private forks;
+- compatibility fixtures pass in CI;
+- reusable versus consumer-owned boundaries have survived real use;
+- adoption cost and missing capabilities are documented honestly;
+- no better existing Rust project has invalidated the independent path.
 
 ---
 
-## Phase 3: Extensibility and recognizer maturity
+## R4: Public beta candidate
 
-**Dates:** September 21 to October 30, 2026  
-**Estimated effort:** 4 to 5 engineer-weeks
+**Dates:** September 28 to October 16, 2026
 
 ### Objectives
 
-- Make the analyzer backend-neutral.
-- Support external Rust consumers without forcing them to fork the registry.
-- Add recognizer maturity only where evaluation justifies it.
+- Stabilize a supportable public beta boundary.
+- Convert implementation claims into measured evidence.
+- Rehearse package and release operations without assuming publication.
 
 ### Work
 
-1. Introduce a `Recognizer: Send + Sync` contract.
-2. Convert `PatternRecognizer` into one implementation.
-3. Add recognizer metadata:
-   - stable ID;
-   - version;
-   - supported entities;
-   - locale and country;
-   - mechanism;
-   - capability requirements;
-   - attribution; and
-   - evaluation receipt.
-4. Make analyzer construction immutable through a builder.
-5. Add registry filtering by entity, recognizer, locale, and capability.
-6. Add positive and negative context support if evaluation supports it.
-7. Add rule prefilters to avoid running irrelevant patterns unnecessarily.
-8. Add explicit allowlist and deny-list concepts without hiding detections in diagnostic mode.
-9. Evaluate mature parsing dependencies for high-complexity entities such as international phone numbers.
-10. Add a limited set of new recognizers chosen from consumer demand and evaluation value, not checklist accumulation.
-
-### Architecture checkpoints
-
-- Recognizer object safety, ownership, and concurrency.
-- Open entity identifiers versus enum compatibility.
-- Configuration timing and schema-version strategy.
-- Dependency acceptance for parser-backed recognizers.
+- freeze the beta API surface long enough for consumer verification;
+- complete sustained fuzzing and retained regression corpora;
+- add reproducible latency, throughput, allocation, memory, and package-size benchmarks;
+- enforce license, source, ban, and advisory policy with `cargo-deny` or equivalent;
+- verify feature combinations and MSRV;
+- complete package metadata and docs.rs configuration;
+- perform a clean-history or clean-export rehearsal;
+- run an independent security and architecture review where practical;
+- define realistic public issue and vulnerability response expectations;
+- prepare beta release notes, migration notes, supported matrix, and known limitations.
 
 ### Exit criteria
 
-- A consumer can implement and register a recognizer without modifying the crate.
-- Recognizers are explainable and versioned.
-- The analyzer is safely shareable for concurrent callers.
-- Default recognizer changes are evidence-backed.
-- Country and locale filtering semantics are defined.
-
-### Risk
-
-A plugin interface can become an unstable dumping ground. Keep the contract narrow, pass values rather than internal engine state, and avoid exposing implementation details merely to support one experimental recognizer.
+- the supported beta scope is explicit and measured;
+- no critical correctness or security issue remains open;
+- package and documentation rehearsals pass;
+- two consumers accept the pinned beta candidate;
+- maintainer capacity matches the public support posture.
 
 ---
 
-## Phase 4: Multi-consumer private alpha
+## R5: Package and advertised-launch decision
 
-**Dates:** October 19 to December 4, 2026  
-**Estimated effort:** 4 to 6 engineer-weeks across the library and consumer teams
+**Dates:** October 19 to October 30, 2026
 
-### Objectives
+### Separate decisions
 
-- Prove that the library is genuinely reusable.
-- Discover API requirements that internal unit tests cannot reveal.
-- Validate migration and compatibility behavior.
+Maintainers decide independently whether to:
 
-### Consumer selection
+1. publish a `0.1.0` crate;
+2. tag a GitHub-only beta without package publication;
+3. actively announce and promote the project;
+4. remain quietly public while continuing evidence work;
+5. publish a narrower component;
+6. collaborate with or migrate to another project; or
+7. rename or redirect before package publication.
 
-Pilot at least two consumers with materially different needs, for example:
+### Decision evidence
 
-- a synchronous in-process sanitizer for logs or generated text;
-- a batch-processing or command-line workflow;
-- a WASM feasibility consumer;
-- a high-throughput service; or
-- a consumer requiring custom entity definitions.
-
-Two wrappers around the same application do not count as two pilots. Humans are remarkably creative when satisfying metrics, so the distinction is explicit.
-
-### Work
-
-1. Create downstream compile and integration fixtures.
-2. Define consumer-specific policy outside the core crate.
-3. Run the existing and new detectors in parallel where possible.
-4. Compare:
-   - detection differences;
-   - latency and memory;
-   - failure behavior;
-   - integration complexity;
-   - logging and observability needs; and
-   - upgrade friction.
-5. Record consumer-requested changes and classify them as:
-   - broadly reusable core requirement;
-   - optional adapter;
-   - consumer-owned policy; or
-   - rejected coupling.
-6. Produce migration notes and sample integrations.
-7. Establish a downstream compatibility test mechanism.
-
-### Architecture checkpoints
-
-- Consumer API review after the first pilot.
-- Generalization review before accepting product-specific features.
-- Compatibility and serialization review after the second pilot.
-
-### Exit criteria
-
-- At least two distinct consumers run realistic workloads.
-- No consumer requires a private fork of the core.
-- Failure and error semantics work at actual boundaries.
-- Consumer-specific policy remains outside the reusable core.
-- Adoption costs and missing capabilities are documented honestly.
-
-### Stop or redesign triggers
-
-- Consumers require mutually incompatible public contracts.
-- The trait model causes unacceptable performance or ergonomics.
-- The source-offset model fails under real normalization or tokenization needs.
-- Most value comes from a consumer-specific adapter rather than the core.
-
----
-
-## Phase 5: Hardening and compatibility
-
-**Dates:** November 16, 2026 to January 8, 2027  
-**Estimated effort:** 5 to 6 engineer-weeks
-
-### Objectives
-
-- Make supported behavior resilient under malformed, large, adversarial, and evolving inputs.
-- Establish release-quality compatibility and dependency controls.
-
-### Workstreams
-
-#### Fuzzing and property testing
-
-Add targets for:
-
-- analyzer input;
-- custom pattern construction;
-- Unicode and normalization mapping;
-- overlap resolution;
-- anonymization planning;
-- masking and replacement;
-- report serialization; and
-- streaming experiments if present.
-
-#### Adversarial testing
-
-Test:
-
-- large inputs;
-- maximum finding counts;
-- dense overlapping matches;
-- malformed or unusual Unicode;
-- boundary-crossing identifiers;
-- low-entropy pseudonymization inputs;
-- invalid consumer-provided patterns;
-- pathological configuration; and
-- panic and resource-exhaustion behavior.
-
-#### Performance
-
-Measure with reproducible inputs:
-
-- cold analyzer construction;
-- warm p50, p95, and p99 latency;
-- throughput;
-- allocations and peak memory;
-- effect of recognizer count;
-- effect of input size;
-- batch behavior;
-- artifact size; and
-- optional feature cost.
-
-#### Supply chain
-
-Add and enforce:
-
-- `cargo-deny` for licenses, advisories, bans, and sources;
-- `cargo-audit` or equivalent advisory review;
-- dependency rationale and ownership;
-- feature-matrix CI;
-- MSRV CI; and
-- dependency-update review.
-
-#### Compatibility
-
-- Add consumer compile fixtures.
-- Introduce `cargo-semver-checks` after a versioned baseline exists.
-- Define serialized schema-version policy.
-- Add migration guidance for breaking changes.
-
-### Architecture decisions
-
-- Input and resource limit defaults.
-- Dependency acceptance policy.
-- Feature-flag structure.
-- Pseudonymization replacement for salted hashing.
-- Whether tracing integration belongs in core or an adapter.
-
-### Exit criteria
-
-- No known panics on untrusted text within supported limits.
-- Fuzzing has sustained runs with retained regression corpus.
-- Performance measurements are reproducible and published internally.
-- Dependency and license policies pass.
-- Downstream compile fixtures pass.
-- Claims documentation distinguishes measured results from expectations.
-
-### Risk
-
-Hardening often reveals architecture defects late. The timeline includes overlap with consumer pilots and preserves contingency rather than pretending this is merely a test-writing phase.
-
----
-
-## Phase 6: Semantic recognition feasibility
-
-**Dates:** December 7, 2026 to January 22, 2027  
-**Estimated effort:** 2 to 4 engineer-weeks
-
-### Critical-path status
-
-This phase is **not required** for a useful pattern-based private beta. It is a controlled feasibility program.
-
-### Objectives
-
-- Determine whether semantic recognition belongs in the project.
-- Avoid committing to a runtime, model, or artifact strategy based on familiarity alone.
-
-### Candidate work
-
-1. Define the semantic recognizer adapter contract.
-2. Evaluate at least two viable implementation paths when available:
-   - native Candle model implementation;
-   - ONNX-based runtime such as Candle ONNX, Tract, or ONNX Runtime; or
-   - collaboration with an existing Rust NER project.
-3. Evaluate:
-   - model and dataset license;
-   - source-offset alignment;
-   - supported labels and languages;
-   - artifact size;
-   - initialization and inference latency;
-   - memory;
-   - platform support;
-   - MSRV impact;
-   - transitive native dependencies;
-   - maintenance burden; and
-   - measurable quality gain over the model-free core.
-4. Produce one thin adapter spike rather than a complete product integration.
-5. Compare build versus reuse of existing Rust semantic implementations.
-
-### Required decision
-
-Choose one:
-
-- adopt a semantic backend;
-- collaborate with or depend on an existing implementation;
-- retain only the adapter seam and defer implementation;
-- reject semantic recognition from this project; or
-- move semantic recognition to a separately governed project.
-
-### Exit criteria
-
-- Decision is supported by evaluation and resource evidence.
-- No model or runtime enters the default dependency graph accidentally.
-- Model provenance and update policy are documented if adopted.
-- Public claims remain scoped to actual evaluated labels and languages.
-
-### Stop triggers
-
-- License or provenance is unsuitable.
-- Source-offset mapping cannot be made reliable.
-- Quality gain does not justify operational cost.
-- A maintained existing implementation is clearly superior to building another.
-
----
-
-## Phase 7: Private beta and release candidate
-
-**Dates:** January 11 to February 12, 2027  
-**Estimated effort:** 3 to 4 engineer-weeks
-
-### Objectives
-
-- Produce a supportable private beta release.
-- Freeze a coherent compatibility boundary long enough to gather real usage evidence.
-- Prepare, but do not presume, public release.
-
-### Work
-
-1. Select the supported entity, locale, platform, and feature matrix.
-2. Remove or clearly mark experimental APIs.
-3. Complete API documentation and examples.
-4. Add release notes and migration notes.
-5. Run full evaluation, benchmarks, fuzzing, and supply-chain checks.
-6. Run consumer acceptance against pinned release candidates.
-7. Review naming, licensing, CLA, provenance, and public history strategy.
-8. Obtain independent architecture and security review where practical.
-9. Define maintenance ownership and response expectations.
-10. Produce a release evidence bundle containing:
-    - source commit;
-    - dependency lock and audit result;
-    - evaluation receipt;
-    - benchmark receipt;
-    - supported matrix;
-    - known limitations;
-    - consumer acceptance; and
-    - unresolved risks.
-
-### Exit criteria
-
-- Private consumers can pin and upgrade the release candidate.
-- Supported behavior is documented and measured.
-- Known limitations are explicit.
-- No critical security or correctness issue remains open.
-- Maintenance capacity is named.
-- Public-release checklist has evidence for every completed item.
-
----
-
-## Phase 8: Strategy and publication decision
-
-**Dates:** February 15 to February 26, 2027  
-**Estimated effort:** 1 to 2 engineer-weeks plus leadership, legal, and maintainer review
-
-### Possible outcomes
-
-1. Publish a clean, renamed open-source repository.
-2. Continue private development with public-grade practices.
-3. Publish only a smaller core or evaluation toolkit.
-4. Collaborate with or contribute to another project.
-5. Maintain a private fork while standardizing compatibility with another ecosystem.
-6. Stop or archive the effort if differentiation and maintenance do not justify continuation.
-
-### Decision inputs
-
-- consumer adoption and satisfaction;
-- measured quality;
-- operational cost;
+- consumer adoption and feedback;
+- evaluation results;
+- fuzzing and security evidence;
+- API stability and migration cost;
+- package and docs rehearsal;
 - ecosystem differentiation;
-- collaboration opportunities;
-- maintenance burden;
-- naming and trademark posture;
-- legal review;
+- naming and legal review;
 - provenance review;
-- public versus commercial boundary; and
-- unresolved security risks.
+- maintainer and security-response capacity; and
+- unresolved risks.
 
-### Public release is approved only when
-
-- the project name is independently defensible;
-- source and history export are audited;
-- licensing and contribution terms are reviewed;
-- quality and performance claims are reproducible;
-- a maintainer can support public issues and security reports;
-- the supported scope is clear; and
-- publication creates more strategic value than ongoing private development.
+A public repository does not create an obligation to publish a crate or organize a launch campaign.
 
 ---
 
-## Cross-phase workstreams
+## R6: Post-public maturity program
 
-### 1. Consumer advisory loop
+**Dates:** November 2, 2026 to February 26, 2027
 
-Maintain a lightweight consumer group representing distinct integration shapes. Every four weeks, review:
+This period remains available for:
 
-- API ergonomics;
-- feature requests;
-- compatibility risk;
-- unsupported use cases;
-- performance needs; and
-- policy leakage into the core.
+- broader locale and entity evaluation;
+- additional consumer integrations;
+- performance and resource optimization;
+- governance and maintainer succession maturity;
+- serialized schema decisions;
+- pseudonymization improvements;
+- no-std, WASM, FFI, streaming, or async feasibility driven by consumers;
+- semantic recognition feasibility outside the default dependency graph;
+- collaboration with related Rust projects; and
+- a later `1.0` stability program when evidence supports it.
 
-### 2. Assumption ledger
+The February 26 date becomes a maturity review rather than the first possible publication decision.
 
-Track assumptions with:
+## Cross-cutting controls
 
-- statement;
-- owner;
-- confidence;
-- evidence;
-- validation date;
-- consequence if false; and
-- scheduled revisit.
+### Active ecosystem watch
 
-Examples:
+Continue weekly monitoring and immediate escalation when another Rust project:
 
-- consumers need Rust 1.74 support;
-- sync APIs are sufficient;
-- original byte offsets meet consumer needs;
-- model-free detection provides useful value independently;
-- no consumer requires `no_std`;
-- configuration can wait until the programmatic API stabilizes.
+- satisfies the consumer requirements more completely;
+- provides a reusable component that should replace planned work;
+- becomes the likely ecosystem standard;
+- develops stronger maintenance or evaluation capacity; or
+- creates a credible collaboration path.
 
-### 3. Architecture runway
+### Claims discipline
 
-Reserve approximately 15% of implementation capacity for design spikes, migration, and structural cleanup. This prevents feature delivery from consuming all capacity until architecture changes become impossible.
+Every quality, performance, security, compatibility, or production-readiness claim must identify:
 
-### 4. Landscape monitoring
-
-Every eight weeks, update the parallel-efforts review. Record whether another project has:
-
-- closed a capability gap;
-- adopted a better architecture;
-- changed license or maintenance status;
-- established the likely ecosystem standard; or
-- created a collaboration opportunity.
-
-### 5. Claims governance
-
-Every benchmark, quality, security, or compatibility claim must include:
-
-- exact version or commit;
-- input corpus or workload;
+- commit or version;
+- corpus or workload;
 - configuration;
 - environment;
 - metric definition;
 - reproduction command; and
-- known limitations.
+- limitations.
 
-## Unknown-unknown strategy
+### Documentation gate
 
-The plan assumes that important requirements and defects remain undiscovered.
+Every material PR must update the relevant combination of:
 
-Controls include:
+- README;
+- API documentation;
+- ADR;
+- guide or example;
+- changelog;
+- migration notes;
+- evaluation receipts; and
+- risk register.
 
-1. **20% schedule contingency** rather than a zero-slack critical path.
-2. **Early real-consumer pilots** before API stabilization.
-3. **Build-versus-adopt checkpoint** before major investment.
-4. **Architecture spikes** for model runtime, Unicode mapping, cryptography, and streaming.
-5. **Independent review** before security-sensitive releases.
-6. **Dual-run comparison** against existing consumer detectors where possible.
-7. **Adversarial testing** designed to invalidate assumptions, not merely confirm examples.
-8. **Phase stop criteria** so sunk cost does not force continuation.
-9. **Monthly assumption review** with explicit confidence changes.
-10. **No semantic backend on the core critical path.**
+### Main-branch discipline
 
-## Highest risks to the timeline
+- Keep `main` current through small reviewed merges.
+- Do not preserve long-lived feature stacks without a specific reason.
+- Merge only after required gates pass or an explicit documented exception is approved.
+- Do not weaken checks to satisfy the accelerated schedule.
 
-| Risk | Likelihood | Impact | Timeline treatment |
+## Highest schedule risks
+
+| Risk | Likelihood | Impact | Treatment |
 |---|---|---|---|
-| Existing Rust project proves better fit | Medium | High | Phase 0 build/adopt checkpoint |
-| Unicode and source-offset correctness requires redesign | Medium | High | Address in Phase 1 before breadth |
-| Consumer requirements conflict | Medium | High | Two distinct pilots and policy-boundary review |
-| Evaluation corpus is misleading or legally unusable | Medium | High | Provenance review and multiple corpus slices |
-| API redesign creates migration burden | High | Medium | Compatibility facade and consumer fixtures |
-| NER runtime or model is unsuitable | High | Medium | Optional Phase 6 with stop criteria |
-| Maintainer capacity is lower than assumed | Medium | High | Reforecast at every phase exit |
-| Dependency or MSRV conflict | Medium | Medium | Dependency spikes and feature isolation |
-| False negatives undermine trust | High | High | Evidence-first scope and explicit limitations |
-| Public naming or trademark problem | Medium | High | Keep private name provisional; resolve before publication |
-| Security issue in anonymization or pseudonymization | Medium | High | Fallible API, crypto ADR, independent review |
-| Overengineering delays usable value | Medium | Medium | Concrete consumer fixtures and phase exit gates |
+| History contains confidential or unpublishable material | Medium | Critical | Complete history scan; use clean export if necessary |
+| Name or Microsoft association creates material confusion | Medium | High | Review before visibility; rename or add stronger distancing language |
+| Provenance of patterns or fixtures is incomplete | Medium | Critical | Audit and remove, replace, or attribute affected material |
+| Public access creates unsupported maturity assumptions | High | High | Prominent early-stage status and explicit non-goals |
+| Maintainer capacity is overwhelmed by attention | Medium | High | Quiet release, no advertising, triage policy, realistic response language |
+| Resolution or anonymization defects undermine trust | Medium | High | Make them immediate post-public critical path |
+| Evaluation evidence remains weak | High | High | Complete baseline by September 4 before broader claims |
+| A better Rust project emerges | Medium | High | Weekly landscape watch and five-day architecture response |
+| Aggressive schedule causes checks to be bypassed | Medium | Critical | Hard visibility blockers and no check weakening |
 
-## Delivery confidence
+## Definition of success
 
-- **High confidence:** 30 weeks is sufficient to create a materially stronger pattern-based private beta if staffing assumptions hold.
-- **Medium confidence:** two consumer pilots can complete in the proposed window because consumer availability is outside the repository's control.
-- **Low-to-medium confidence:** a production-worthy semantic backend belongs inside the same 30-week program. It is deliberately optional.
-- **Medium confidence:** the project should ultimately be published. The plan preserves publication as an evidence-based decision rather than an emotional reward for finishing the roadmap.
+The aggressive rebaseline succeeds when:
 
-## Immediate next actions
-
-1. Complete Phase 0 consumer and parallel-project assessment.
-2. Record ADR 0002 for the backend-neutral core and optional-adapter direction.
-3. Create the assumption ledger and risk register.
-4. Define the evaluation corpus schema before adding recognizer breadth.
-5. Identify two pilot consumers and secure participation windows.
-6. Convert the phases into issues only after Phase 0 confirms the direction, avoiding a backlog composed mostly of assumptions.
+- the repository is public by July 30 without exposing unauthorized or confidential material;
+- documentation accurately states what is and is not ready;
+- contributors can understand the project without private context;
+- correctness and evaluation work continues on a compressed public roadmap;
+- package publication and advertising remain deliberate choices; and
+- speed improves learning without purchasing it through hidden security, provenance, or maintenance debt.

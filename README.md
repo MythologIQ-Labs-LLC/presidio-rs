@@ -11,12 +11,12 @@ A small, embeddable library for identifying and transforming structured sensitiv
 [![CI](https://github.com/MythologIQ-Labs-LLC/presidio-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/MythologIQ-Labs-LLC/presidio-rs/actions/workflows/ci.yml)
 [![unsafe forbidden](https://img.shields.io/badge/crate--local%20unsafe-forbidden-success.svg)](src/lib.rs)
 
-**Project status: early-stage and not yet production certified**
+**Project status: early-stage, privately developed, and not yet production certified**
 
 </div>
 
 > [!IMPORTANT]
-> `presidio-rs` is an independent open-source project. It is not affiliated with, sponsored by, or endorsed by Microsoft. Microsoft Presidio is acknowledged as a design reference under its MIT license.
+> `presidio-rs` is an independently governed Rust project being developed privately with open-source-grade practices. It is not affiliated with, sponsored by, or endorsed by Microsoft. Microsoft Presidio is acknowledged as a design reference under its MIT license.
 
 ## What it does
 
@@ -101,7 +101,7 @@ These are architectural properties, not benchmark results. The project does not 
 
 ## Installation
 
-The crate metadata is ready for publication, but until the first crates.io release, use the Git repository:
+While the repository remains private, authorized consumers should use a Git dependency or workspace path:
 
 ```toml
 [dependencies]
@@ -115,7 +115,7 @@ In a workspace:
 presidio-rs = { path = "../presidio-rs" }
 ```
 
-The package name is `presidio-rs`; the Rust library is imported as `presidio`.
+The package name is `presidio-rs`; the Rust library is imported as `presidio`. Public publication and final naming remain separate future decisions.
 
 ## Quick start
 
@@ -226,7 +226,7 @@ The current `Hash` operator enables deterministic correlation. It does not guara
 
 ## Architecture
 
-The project follows a two-stage model:
+The current implementation follows a two-stage model:
 
 ```text
 text
@@ -243,6 +243,12 @@ text
        -> right-to-left span transformation
   -> transformed text
 ```
+
+The planned architecture evolves this into a backend-neutral privacy core with validated source spans, recognizer provenance, explicit resolution policies, fallible anonymization, multi-consumer compatibility, and optional capability adapters.
+
+- [Target architecture](docs/architecture/ARCHITECTURE.md)
+- [ADR 0002: Backend-neutral core with optional adapters](docs/adr/0002-backend-neutral-core-and-optional-adapters.md)
+- [Project documentation index](docs/README.md)
 
 The public concepts are informed by Microsoft Presidio's analyzer and anonymizer architecture, but this implementation is independent and does not claim complete behavioral compatibility.
 
@@ -270,18 +276,26 @@ Before using the crate at a security boundary:
 
 Please report suspected vulnerabilities through GitHub private vulnerability reporting. Do not disclose security-sensitive findings in a public issue. See [SECURITY.md](SECURITY.md).
 
-## Current limitations and roadmap
+## Development plan
 
-The project has not yet published comparative performance or quality evidence. Planned work includes:
+The active planning baseline is a 30-week private program from August 3, 2026 through February 26, 2027.
 
-1. an offline span-level precision, recall, and F1 evaluation harness
-2. false-positive and false-negative regression corpora
-3. additional international and checksum-backed recognizers
-4. fuzzing, malformed Unicode tests, and adversarial long-input tests
-5. latency, throughput, memory, and artifact-size benchmarks
-6. stronger fallible anonymization and span validation APIs
-7. explicit finding provenance and conflict-resolution policy
-8. evaluation of an optional offline semantic recognizer backend
+The program includes:
+
+1. discovery and build-versus-adopt validation;
+2. source-offset, error, overlap, and anonymization correctness;
+3. reproducible evaluation and error analysis;
+4. recognizer extensibility and evidence metadata;
+5. at least two distinct Rust consumer pilots;
+6. fuzzing, performance, dependency, and compatibility hardening;
+7. an optional semantic-recognition feasibility phase; and
+8. a deliberate private, public, collaboration, or redirection decision.
+
+Architecture review, consumer feedback, risk review, and parallel-project research continue throughout all phases.
+
+- [Multi-phase development plan](docs/planning/DEVELOPMENT_PLAN.md)
+- [Development risk and assumption register](docs/planning/RISK_REGISTER.md)
+- [Parallel efforts and architectural lessons](docs/research/PARALLEL_EFFORTS_AND_LESSONS.md)
 
 A semantic backend is roadmap work, not a current capability or committed model choice.
 

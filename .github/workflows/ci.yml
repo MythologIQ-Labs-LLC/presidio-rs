@@ -26,8 +26,23 @@ jobs:
           components: rustfmt, clippy
       - name: Check formatting
         run: cargo fmt --all -- --check
-      - name: Run Clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Capture Clippy diagnostics
+        shell: bash
+        run: |
+          set +e
+          cargo clippy --all-targets --all-features -- -D warnings 2>&1 | tee clippy.log
+          echo "${PIPESTATUS[0]}" > clippy.status
+          exit 0
+      - name: Upload Clippy diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-report-clippy-output
+          path: |
+            clippy.log
+            clippy.status
+          retention-days: 1
+      - name: Enforce Clippy result
+        run: test "$(cat clippy.status)" -eq 0
       - name: Run tests
         run: cargo test --all-features
       - name: Build documentation
@@ -45,8 +60,23 @@ jobs:
         uses: actions/checkout@v4
       - name: Install Rust 1.74.0
         uses: dtolnay/rust-toolchain@1.74.0
-      - name: Test all features on MSRV
-        run: cargo test --all-features --locked
+      - name: Capture MSRV diagnostics
+        shell: bash
+        run: |
+          set +e
+          cargo test --all-features --locked 2>&1 | tee msrv.log
+          echo "${PIPESTATUS[0]}" > msrv.status
+          exit 0
+      - name: Upload MSRV diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-report-msrv-output
+          path: |
+            msrv.log
+            msrv.status
+          retention-days: 1
+      - name: Enforce MSRV result
+        run: test "$(cat msrv.status)" -eq 0
 
   dependency-audit:
     name: Dependency audit

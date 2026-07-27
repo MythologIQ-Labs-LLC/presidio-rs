@@ -41,6 +41,8 @@ Recognition and resolution become separate concepts, provenance survives analysi
 - duplicate explicit IDs are rejected; and
 - all existing and new quality gates pass.
 
+Consumer migration remains blocked until both the legacy and report-oriented paths are exercised against shared evaluation and downstream compatibility fixtures.
+
 ## Follow-up
 
 The next review should choose among `TextDocument` identity, structured context evidence, and a conservative overlap policy backed by adversarial fixtures. The legacy analyzer must not be routed through the report path until behavioral equivalence is measured.

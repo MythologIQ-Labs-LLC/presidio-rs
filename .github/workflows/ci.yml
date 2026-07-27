@@ -2,15 +2,14 @@ name: CI
 
 on:
   push:
-    branches: [main, "chore/**", "feat/**", "fix/**"]
+    branches: [main]
   pull_request:
-    branches: [main, "chore/**", "feat/**", "fix/**"]
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:

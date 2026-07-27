@@ -89,7 +89,10 @@ fn render(entity: EntityType, original: &str, op: &Operator) -> String {
             .clone()
             .unwrap_or_else(|| format!("<{}>", entity.as_tag())),
         Operator::Redact => String::new(),
-        Operator::Mask { mask_char, keep_last } => mask(original, *mask_char, *keep_last),
+        Operator::Mask {
+            mask_char,
+            keep_last,
+        } => mask(original, *mask_char, *keep_last),
         Operator::Hash { salt } => {
             let mut hasher = Sha256::new();
             hasher.update(salt.as_bytes());

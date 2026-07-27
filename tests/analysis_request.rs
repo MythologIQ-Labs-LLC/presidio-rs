@@ -252,9 +252,7 @@ fn locale_and_capability_requirements_control_selection() {
     let backend_metadata = metadata("custom.capability", "EMAIL_ADDRESS", true)
         .with_supported_locales([MetadataId::new("en-US").expect("valid locale")])
         .expect("unique locale")
-        .with_required_capabilities([
-            MetadataId::new("model.local").expect("valid capability")
-        ])
+        .with_required_capabilities([MetadataId::new("model.local").expect("valid capability")])
         .expect("unique capability");
     let backend = TestBackend {
         metadata: backend_metadata,
@@ -271,9 +269,7 @@ fn locale_and_capability_requirements_control_selection() {
 
     let selected = AnalysisRequest::new()
         .with_locale(MetadataId::new("en-US").expect("valid locale"))
-        .with_available_capabilities([
-            MetadataId::new("model.local").expect("valid capability")
-        ])
+        .with_available_capabilities([MetadataId::new("model.local").expect("valid capability")])
         .expect("unique capability");
     assert_eq!(
         analyzer
@@ -286,9 +282,7 @@ fn locale_and_capability_requirements_control_selection() {
 
     let wrong_locale = AnalysisRequest::new()
         .with_locale(MetadataId::new("fr-FR").expect("valid locale"))
-        .with_available_capabilities([
-            MetadataId::new("model.local").expect("valid capability")
-        ])
+        .with_available_capabilities([MetadataId::new("model.local").expect("valid capability")])
         .expect("unique capability");
     assert!(analyzer
         .analyze_request(&source, &wrong_locale)

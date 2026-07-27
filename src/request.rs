@@ -210,7 +210,10 @@ impl fmt::Display for AnalysisRequestError {
                 write!(formatter, "duplicate capability {capability}")
             }
             Self::ZeroLimit { dimension } => {
-                write!(formatter, "analysis limit {dimension} must be greater than zero")
+                write!(
+                    formatter,
+                    "analysis limit {dimension} must be greater than zero"
+                )
             }
         }
     }

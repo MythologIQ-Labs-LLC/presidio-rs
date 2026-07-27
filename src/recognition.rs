@@ -79,8 +79,7 @@ impl<'metadata, 'text> CandidateEmitter<'metadata, 'text> {
         }
 
         let span = Span::new_for(self.text, start, end).map_err(CandidateEmissionError::Span)?;
-        let confidence =
-            Confidence::new(score).map_err(CandidateEmissionError::Confidence)?;
+        let confidence = Confidence::new(score).map_err(CandidateEmissionError::Confidence)?;
         let finding = Finding::new(entity, span, confidence)
             .with_recognizer(self.metadata.id().clone())
             .with_document_binding(self.binding.clone())

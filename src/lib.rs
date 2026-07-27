@@ -11,6 +11,7 @@
 //! - replace, redact, mask, and deterministic hash operators
 //! - custom recognizer and validator registration
 //! - additive validated value types for the next-generation finding contract
+//! - bounded candidate-preserving analysis reports
 //!
 //! It performs no network or filesystem I/O and requires no Python runtime.
 //! Person names, prose locations, and other semantic entities are not detected
@@ -39,6 +40,7 @@ pub mod context;
 mod entity;
 mod recognizer;
 mod registry;
+mod report;
 mod result;
 mod types;
 pub mod validators;
@@ -48,6 +50,10 @@ pub use anonymizer::{anonymize, AnonymizerEngine, Operator};
 pub use entity::EntityType;
 pub use recognizer::{Pattern, PatternRecognizer, Validator};
 pub use registry::RecognizerRegistry;
+pub use report::{
+    AnalysisIssue, AnalysisOptions, AnalysisReport, AnalysisStatus, DEFAULT_REPORT_CANDIDATE_LIMIT,
+    DEFAULT_REPORT_ISSUE_LIMIT,
+};
 pub use result::RecognizerResult;
 pub use types::{
     Confidence, ConfidenceError, EntityId, Evidence, Finding, FindingConversionError,

@@ -7,6 +7,7 @@ use std::cmp::Ordering;
 use std::collections::HashSet;
 
 use crate::context;
+use crate::document::{DocumentBinding, TextDocument};
 use crate::entity::EntityType;
 use crate::metadata::RecognizerMetadata;
 use crate::recognizer::PatternRecognizer;
@@ -85,15 +86,49 @@ impl AnalyzerEngine {
         self.project_legacy_results(&collection.candidates)
     }
 
-    /// Analyze text while preserving validated candidates before legacy policy.
+    /// Analyze text while preserving validated, but source-unbound, candidates.
     pub fn analyze_report(&self, text: &str, entities: Option<&[EntityType]>) -> AnalysisReport {
         self.analyze_report_with_options(text, entities, AnalysisOptions::default())
     }
 
-    /// Analyze text with explicit report resource limits.
+    /// Analyze text with explicit report resource limits without document identity.
     pub fn analyze_report_with_options(
         &self,
         text: &str,
+        entities: Option<&[EntityType]>,
+        options: AnalysisOptions,
+    ) -> AnalysisReport {
+        self.build_report(text, None, entities, options)
+    }
+
+    /// Analyze an identity- and content-bound source document.
+    pub fn analyze_document(
+        &self,
+        document: &TextDocument<'_>,
+        entities: Option<&[EntityType]>,
+    ) -> AnalysisReport {
+        self.analyze_document_with_options(document, entities, AnalysisOptions::default())
+    }
+
+    /// Analyze a source document with explicit report resource limits.
+    pub fn analyze_document_with_options(
+        &self,
+        document: &TextDocument<'_>,
+        entities: Option<&[EntityType]>,
+        options: AnalysisOptions,
+    ) -> AnalysisReport {
+        self.build_report(
+            document.original(),
+            Some(document.binding()),
+            entities,
+            options,
+        )
+    }
+
+    fn build_report(
+        &self,
+        text: &str,
+        document: Option<&DocumentBinding>,
         entities: Option<&[EntityType]>,
         options: AnalysisOptions,
     ) -> AnalysisReport {
@@ -163,6 +198,9 @@ impl AnalyzerEngine {
             if let Some(metadata) = self.registry.metadata_at(candidate.recognizer_index) {
                 finding = finding.with_recognizer(metadata.id().clone());
             }
+            if let Some(binding) = document {
+                finding = finding.with_document_binding(binding.clone());
+            }
             findings.push(finding);
         }
 
@@ -175,6 +213,7 @@ impl AnalyzerEngine {
 
         AnalysisReport::new(
             env!("CARGO_PKG_VERSION"),
+            document.cloned(),
             findings,
             recognizers,
             legacy_compatible_results,

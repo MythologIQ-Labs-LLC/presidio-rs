@@ -1,17 +1,19 @@
-//! # presidio-rs (internal)
+//! # presidio-rs
 //!
-//! Offline, pure-Rust PII detection and anonymization — a Rust-native
-//! reimagining of Microsoft Presidio's analyzer/anonymizer design.
+//! Offline, Rust-native PII detection and anonymization inspired by the
+//! model-free architecture of Microsoft Presidio.
 //!
-//! - **Zero network access.** No downloads, no runtime calls; the entire engine
-//!   is regex + arithmetic + hashing.
-//! - **Detection** = regex recognizers, checksum validators (Luhn, IBAN mod-97),
-//!   and context-word scoring (a nearby keyword boosts a match's confidence).
-//! - **Anonymization** = replace / redact / mask / hash operators.
-//! - **NER gap** is explicit: [`EntityType::Person`], [`EntityType::Location`],
-//!   and [`EntityType::Nrp`] have no regex form and are reserved for a future
-//!   offline model backend (ONNX token-classifier). The current engine never
-//!   emits them.
+//! The crate currently provides:
+//!
+//! - pattern-based detection for structured identifiers and secrets
+//! - checksum validation for supported entity types
+//! - nearby context-word scoring
+//! - replace, redact, mask, and deterministic hash operators
+//! - custom recognizer and validator registration
+//!
+//! It performs no network or filesystem I/O and requires no Python runtime.
+//! Person names, prose locations, and other semantic entities are not detected
+//! by the current model-free implementation.
 //!
 //! ```
 //! use presidio::{anonymize, AnalyzerEngine, Operator};
@@ -24,8 +26,9 @@
 //! assert!(clean.contains("<EMAIL_ADDRESS>"));
 //! ```
 //!
-//! Internal — MythologIQ-Labs-LLC. Consumed by GG-CORE / COREFORGE; not for
-//! public distribution.
+//! This is an independent open-source project. It is not affiliated with or
+//! endorsed by Microsoft. See the repository README for scope, limitations,
+//! security guidance, and acknowledgements.
 
 #![forbid(unsafe_code)]
 

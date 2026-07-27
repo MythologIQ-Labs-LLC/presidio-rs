@@ -39,7 +39,11 @@ fn context_word_boosts_ssn_score() {
         .iter()
         .find(|r| r.entity_type == EntityType::Ssn)
         .expect("ssn detected");
-    assert!(ssn.score >= 0.4, "context should lift score, got {}", ssn.score);
+    assert!(
+        ssn.score >= 0.4,
+        "context should lift score, got {}",
+        ssn.score
+    );
 }
 
 #[test]
@@ -74,7 +78,9 @@ fn entity_filter_scopes_detection() {
     let analyzer = AnalyzerEngine::new();
     let text = "jane@acme.com and 4111 1111 1111 1111";
     let only_email = analyzer.analyze(text, Some(&[EntityType::Email]));
-    assert!(only_email.iter().all(|r| r.entity_type == EntityType::Email));
+    assert!(only_email
+        .iter()
+        .all(|r| r.entity_type == EntityType::Email));
     assert!(!only_email.is_empty());
 }
 
@@ -83,9 +89,7 @@ fn hash_operator_is_deterministic() {
     let analyzer = AnalyzerEngine::new();
     let text = "contact jane@acme.com";
     let results = analyzer.analyze(text, None);
-    let op = Operator::Hash {
-        salt: "s".into(),
-    };
+    let op = Operator::Hash { salt: "s".into() };
     let a = anonymize(text, &results, &op);
     let b = anonymize(text, &results, &op);
     assert_eq!(a, b);

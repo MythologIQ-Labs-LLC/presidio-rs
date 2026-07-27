@@ -45,7 +45,10 @@ pub fn enhance(text: &str, start: usize, end: usize, score: f32, context: &[&str
     let prefix = &text[pre..start];
     let suffix = &text[end..post];
     let hay = format!("{prefix} {suffix}").to_lowercase();
-    if context.iter().any(|w| hay.contains(w.to_lowercase().as_str())) {
+    if context
+        .iter()
+        .any(|w| hay.contains(w.to_lowercase().as_str()))
+    {
         (score + CONTEXT_SIMILARITY_FACTOR).clamp(MIN_SCORE_WITH_CONTEXT, 1.0)
     } else {
         score

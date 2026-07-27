@@ -113,7 +113,11 @@ fn predefined() -> Vec<PatternRecognizer> {
         },
         PatternRecognizer {
             entity_type: EntityType::IbanCode,
-            patterns: vec![Pattern::new("iban", r"\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b", 0.3)],
+            patterns: vec![Pattern::new(
+                "iban",
+                r"\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b",
+                0.3,
+            )],
             context: &["iban", "bank", "account"],
             validator: Some(validators::iban_mod97),
         },
@@ -138,7 +142,11 @@ fn predefined() -> Vec<PatternRecognizer> {
         },
         PatternRecognizer {
             entity_type: EntityType::UsItin,
-            patterns: vec![Pattern::new("itin", r"\b9\d{2}[-\s]?[7-9]\d[-\s]?\d{4}\b", 0.3)],
+            patterns: vec![Pattern::new(
+                "itin",
+                r"\b9\d{2}[-\s]?[7-9]\d[-\s]?\d{4}\b",
+                0.3,
+            )],
             context: &["itin", "taxpayer"],
             validator: None,
         },

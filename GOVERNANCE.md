@@ -71,6 +71,15 @@ Material architectural decisions should be recorded under `docs/adr/` using a sh
 
 An accepted decision may be revisited when evidence or requirements change. Architecture is a maintained decision system, not sacred sediment.
 
+The active target architecture and development program are maintained in:
+
+- [Target architecture](docs/architecture/ARCHITECTURE.md);
+- [Multi-phase development plan](docs/planning/DEVELOPMENT_PLAN.md);
+- [Development risk and assumption register](docs/planning/RISK_REGISTER.md); and
+- [Parallel efforts and architectural lessons](docs/research/PARALLEL_EFFORTS_AND_LESSONS.md).
+
+During active development, architecture is reviewed weekly, risks and assumptions every two weeks, consumer compatibility every four weeks, and the parallel-project landscape every eight weeks.
+
 ## Releases
 
 Until `1.0.0`, the project follows Rust and Cargo semantic-versioning expectations while reserving normal `0.x` flexibility. Maintainers should still avoid unnecessary breaking changes.

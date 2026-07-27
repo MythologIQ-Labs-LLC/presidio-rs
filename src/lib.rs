@@ -50,9 +50,7 @@ pub use anonymizer::{anonymize, AnonymizerEngine, Operator};
 pub use entity::EntityType;
 pub use recognizer::{Pattern, PatternRecognizer, RecognizerMetadata, Validator};
 pub use registry::{RecognizerRegistry, RegistryError};
-pub use report::{
-    AnalysisError, AnalysisIssue, AnalysisReport, CandidateIssue, ResolutionPolicy,
-};
+pub use report::{AnalysisError, AnalysisIssue, AnalysisReport, CandidateIssue, ResolutionPolicy};
 pub use result::RecognizerResult;
 pub use types::{
     Confidence, ConfidenceError, EntityId, Evidence, Finding, FindingConversionError,

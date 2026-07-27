@@ -35,6 +35,12 @@ The immediate post-visibility architecture work is explicit candidate resolution
 - [Open-source foundation track](planning/OPEN_SOURCE_FOUNDATION_TRACK.md)
 - [Development risk and assumption register](planning/RISK_REGISTER.md)
 
+## Release evidence
+
+- [July 30 public visibility evidence](release/2026-07-30-PUBLIC-VISIBILITY-EVIDENCE.md)
+
+The evidence record is updated throughout release week. A planning target, checklist, or green build does not itself authorize public visibility.
+
 ## Accelerated release baseline
 
 The repository is targeted to become publicly readable on **Thursday, July 30, 2026**.

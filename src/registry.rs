@@ -88,9 +88,7 @@ impl RecognizerRegistry {
     }
 
     /// Iterate registered recognizers together with provenance metadata.
-    pub fn entries(
-        &self,
-    ) -> impl Iterator<Item = (&PatternRecognizer, &RecognizerMetadata)> + '_ {
+    pub fn entries(&self) -> impl Iterator<Item = (&PatternRecognizer, &RecognizerMetadata)> + '_ {
         self.recognizers.iter().zip(self.metadata.iter())
     }
 
@@ -125,10 +123,8 @@ impl fmt::Display for RegistryError {
 impl std::error::Error for RegistryError {}
 
 fn metadata(id: &str) -> RecognizerMetadata {
-    RecognizerMetadata::new(
-        RecognizerId::new(id).expect("built-in recognizer identifier is valid"),
-    )
-    .with_version(env!("CARGO_PKG_VERSION"))
+    RecognizerMetadata::new(RecognizerId::new(id).expect("built-in recognizer identifier is valid"))
+        .with_version(env!("CARGO_PKG_VERSION"))
 }
 
 fn predefined_metadata() -> Vec<RecognizerMetadata> {

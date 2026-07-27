@@ -1,5 +1,7 @@
 //! Additive, bounded report contract for candidate-preserving analysis.
 
+use crate::metadata::RecognizerMetadata;
+use crate::types::RecognizerId;
 use crate::{Finding, RecognizerResult};
 
 /// Default maximum number of accepted raw candidates processed by a report.
@@ -108,13 +110,14 @@ impl AnalysisStatus {
 ///
 /// `candidates` contains validated findings before thresholding or overlap
 /// resolution. `legacy_compatible_results` applies the existing analyzer policy
-/// to the same bounded raw candidate stream. When candidate collection is
-/// truncated, that projection is intentionally partial and the status reports it.
+/// to the same bounded raw candidate stream. `recognizers` contains authoritative
+/// metadata only for metadata-backed recognizers that emitted raw candidates.
 #[derive(Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct AnalysisReport {
     engine_version: &'static str,
     candidates: Vec<Finding>,
+    recognizers: Vec<RecognizerMetadata>,
     legacy_compatible_results: Vec<RecognizerResult>,
     issues: Vec<AnalysisIssue>,
     status: AnalysisStatus,
@@ -124,6 +127,7 @@ impl AnalysisReport {
     pub(crate) fn new(
         engine_version: &'static str,
         candidates: Vec<Finding>,
+        recognizers: Vec<RecognizerMetadata>,
         legacy_compatible_results: Vec<RecognizerResult>,
         issues: Vec<AnalysisIssue>,
         status: AnalysisStatus,
@@ -131,6 +135,7 @@ impl AnalysisReport {
         Self {
             engine_version,
             candidates,
+            recognizers,
             legacy_compatible_results,
             issues,
             status,
@@ -145,6 +150,16 @@ impl AnalysisReport {
     /// Validated findings before thresholding or overlap resolution.
     pub fn candidates(&self) -> &[Finding] {
         &self.candidates
+    }
+
+    /// Metadata snapshots for authoritative recognizers represented in this report.
+    pub fn recognizers(&self) -> &[RecognizerMetadata] {
+        &self.recognizers
+    }
+
+    /// Find authoritative metadata by stable recognizer ID.
+    pub fn recognizer_metadata(&self, id: &RecognizerId) -> Option<&RecognizerMetadata> {
+        self.recognizers.iter().find(|metadata| metadata.id() == id)
     }
 
     /// Existing analyzer semantics projected from the same bounded raw candidates.

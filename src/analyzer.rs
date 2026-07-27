@@ -4,11 +4,13 @@
 //! Mirrors Presidio's `AnalyzerEngine`.
 
 use std::cmp::Ordering;
+use std::collections::HashSet;
 
 use crate::context;
 use crate::entity::EntityType;
+use crate::metadata::RecognizerMetadata;
 use crate::recognizer::PatternRecognizer;
-use crate::registry::RecognizerRegistry;
+use crate::registry::{RecognizerRegistry, RecognizerRegistryError};
 use crate::report::{AnalysisIssue, AnalysisOptions, AnalysisReport, AnalysisStatus};
 use crate::result::RecognizerResult;
 use crate::types::{Confidence, EntityId, Evidence, Finding, MetadataId, Span};
@@ -61,9 +63,19 @@ impl AnalyzerEngine {
         &mut self.registry
     }
 
-    /// Register an additional custom recognizer.
+    /// Register an additional custom recognizer through the legacy path.
     pub fn add_recognizer(&mut self, recognizer: PatternRecognizer) {
         self.registry.add(recognizer);
+    }
+
+    /// Validate and register a custom recognizer with authoritative metadata.
+    pub fn add_recognizer_with_metadata(
+        &mut self,
+        metadata: RecognizerMetadata,
+        recognizer: PatternRecognizer,
+    ) -> Result<(), RecognizerRegistryError> {
+        self.registry.add_with_metadata(metadata, recognizer)?;
+        Ok(())
     }
 
     /// Detect PII in `text`. When `entities` is `Some`, only those entity types
@@ -88,6 +100,7 @@ impl AnalyzerEngine {
         let collection =
             self.collect_raw_candidates(text, entities, Some(options.max_candidates()));
         let legacy_compatible_results = self.project_legacy_results(&collection.candidates);
+        let recognizers = self.collect_used_metadata(&collection.candidates);
         let mut findings = Vec::with_capacity(collection.candidates.len());
         let mut issues = Vec::new();
         let mut issue_limit_reached = false;
@@ -145,10 +158,12 @@ impl AnalyzerEngine {
                 evidence.push(Evidence::LegacyValidatorAccepted);
             }
 
-            findings.push(
-                Finding::new(EntityId::from(candidate.entity_type), span, confidence)
-                    .with_evidence(evidence),
-            );
+            let mut finding = Finding::new(EntityId::from(candidate.entity_type), span, confidence)
+                .with_evidence(evidence);
+            if let Some(metadata) = self.registry.metadata_at(candidate.recognizer_index) {
+                finding = finding.with_recognizer(metadata.id().clone());
+            }
+            findings.push(finding);
         }
 
         findings.sort_by(|left, right| {
@@ -161,6 +176,7 @@ impl AnalyzerEngine {
         AnalysisReport::new(
             env!("CARGO_PKG_VERSION"),
             findings,
+            recognizers,
             legacy_compatible_results,
             issues,
             AnalysisStatus::new(collection.limit_reached, issue_limit_reached),
@@ -227,6 +243,19 @@ impl AnalyzerEngine {
             candidates,
             limit_reached: false,
         }
+    }
+
+    fn collect_used_metadata(&self, candidates: &[RawCandidate]) -> Vec<RecognizerMetadata> {
+        let mut seen = HashSet::new();
+        let mut metadata = Vec::new();
+        for candidate in candidates {
+            if seen.insert(candidate.recognizer_index) {
+                if let Some(recognizer) = self.registry.metadata_at(candidate.recognizer_index) {
+                    metadata.push(recognizer.clone());
+                }
+            }
+        }
+        metadata
     }
 
     fn project_legacy_results(&self, candidates: &[RawCandidate]) -> Vec<RecognizerResult> {

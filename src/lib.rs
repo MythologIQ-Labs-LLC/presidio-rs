@@ -12,6 +12,7 @@
 //! - custom recognizer and validator registration
 //! - additive validated value types for the next-generation finding contract
 //! - bounded candidate-preserving analysis reports
+//! - validated recognizer metadata and provenance
 //!
 //! It performs no network or filesystem I/O and requires no Python runtime.
 //! Person names, prose locations, and other semantic entities are not detected
@@ -38,6 +39,7 @@ mod analyzer;
 mod anonymizer;
 pub mod context;
 mod entity;
+mod metadata;
 mod recognizer;
 mod registry;
 mod report;
@@ -48,8 +50,12 @@ pub mod validators;
 pub use analyzer::{AnalyzerEngine, DEFAULT_SCORE_THRESHOLD};
 pub use anonymizer::{anonymize, AnonymizerEngine, Operator};
 pub use entity::EntityType;
-pub use recognizer::{Pattern, PatternRecognizer, Validator};
-pub use registry::RecognizerRegistry;
+pub use metadata::{RecognitionMechanism, RecognizerMetadata, RecognizerMetadataError};
+pub use recognizer::{
+    ContextValidationError, Pattern, PatternRecognizer, PatternRecognizerRegistrationError,
+    PatternValidationError, Validator,
+};
+pub use registry::{RecognizerRegistry, RecognizerRegistryError};
 pub use report::{
     AnalysisIssue, AnalysisOptions, AnalysisReport, AnalysisStatus, DEFAULT_REPORT_CANDIDATE_LIMIT,
     DEFAULT_REPORT_ISSUE_LIMIT,

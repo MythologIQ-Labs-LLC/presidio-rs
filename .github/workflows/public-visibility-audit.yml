@@ -1,3 +1,4 @@
+# Release-safety audit. This workflow is intentionally read-only.
 name: Public visibility audit
 
 on:
@@ -19,7 +20,7 @@ jobs:
     name: History, provenance, and package audit
     runs-on: ubuntu-latest
     env:
-      AUDIT_DIR: ${{ runner.temp }}/public-visibility-audit
+      AUDIT_DIR: /tmp/public-visibility-audit
     steps:
       - name: Check out complete repository history
         uses: actions/checkout@v4
@@ -147,6 +148,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: public-visibility-audit
-          path: ${{ runner.temp }}/public-visibility-audit/
+          path: /tmp/public-visibility-audit/
           if-no-files-found: error
           retention-days: 14

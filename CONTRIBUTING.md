@@ -1,8 +1,21 @@
 # Contributing to presidio-rs
 
-Thank you for contributing to `presidio-rs`. The repository is currently developed privately, but its contribution standards are designed for eventual public collaboration.
+Thank you for contributing to `presidio-rs`. The project is preparing for public source visibility while its contributor-ready alpha process is still being completed.
 
 This project handles security-sensitive text processing. Changes should be small, explainable, tested, and honest about their limits.
+
+## Interim public contribution intake
+
+After the repository becomes public, anyone may open issues and pull requests for discussion and review.
+
+Until the Contributor License Agreement and its acceptance mechanism receive the required legal and maintainer approval:
+
+- outside contributions will not be merged;
+- maintainers may review, discuss, or request revisions without implying acceptance;
+- every commit must still pass DCO sign-off; and
+- contributors must not submit confidential, proprietary, customer, employee, or private third-party material.
+
+This restriction applies to contribution acceptance, not public participation. The repository will record when the restriction is lifted.
 
 ## Contribution terms
 
@@ -26,7 +39,7 @@ This appends:
 Signed-off-by: Your Name <you@example.com>
 ```
 
-Use an identity you are authorized to use. Do not add another person's sign-off.
+Use an identity you are authorized to use. Do not add another person's sign-off. Commit author and sign-off identities become public repository metadata when the repository is public.
 
 ## Development setup
 

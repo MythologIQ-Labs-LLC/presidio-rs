@@ -1,0 +1,148 @@
+name: Public visibility audit
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-visibility-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: History, provenance, and package audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out complete repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch branches, tags, and pull-request refs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --force --prune origin \
+            '+refs/heads/*:refs/remotes/origin/*' \
+            '+refs/tags/*:refs/tags/*'
+          git fetch --force origin \
+            '+refs/pull/*/head:refs/remotes/pull/*/head' \
+            '+refs/pull/*/merge:refs/remotes/pull/*/merge' || true
+
+      - name: Inventory refs, commits, objects, and metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit
+          git for-each-ref --format='%(refname)%09%(objectname)' | sort > audit/refs.tsv
+          git log --all --date=iso-strict --format='%H%x09%an%x09%ae%x09%ad%x09%s' > audit/commits.tsv
+          git rev-list --objects --all > audit/objects.tsv
+          git count-objects -vH > audit/object-count.txt
+          git fsck --full --no-reflogs --unreachable > audit/git-fsck.txt 2>&1 || true
+
+          patterns='Bicameral|Qortara|Accountable\.Live|empty-flagon|Celestara|mythologiq\.studio'
+          : > audit/internal-reference-paths.txt
+          while read -r commit; do
+            git grep -IlE "$patterns" "$commit" -- . 2>/dev/null || true
+          done < <(git rev-list --all) | sort -u > audit/internal-reference-paths.txt
+
+          cut -f3 audit/commits.tsv | sort -u > audit/author-emails.txt
+
+      - name: Install verified Gitleaks release
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_json=$(curl -fsSL https://api.github.com/repos/gitleaks/gitleaks/releases/latest)
+          tag=$(jq -r '.tag_name' <<<"$release_json")
+          asset=$(jq -r '.assets[].name | select(test("linux_x64\\.tar\\.gz$"))' <<<"$release_json" | head -n1)
+          checksum_asset=$(jq -r '.assets[].name | select(test("checksums\\.txt$"))' <<<"$release_json" | head -n1)
+          test -n "$tag" && test -n "$asset" && test -n "$checksum_asset"
+          asset_url=$(jq -r --arg name "$asset" '.assets[] | select(.name == $name) | .browser_download_url' <<<"$release_json")
+          checksum_url=$(jq -r --arg name "$checksum_asset" '.assets[] | select(.name == $name) | .browser_download_url' <<<"$release_json")
+          curl -fsSL "$asset_url" -o /tmp/gitleaks.tar.gz
+          curl -fsSL "$checksum_url" -o /tmp/gitleaks-checksums.txt
+          expected=$(awk -v asset="$asset" '$2 == asset {print $1}' /tmp/gitleaks-checksums.txt)
+          test -n "$expected"
+          echo "$expected  /tmp/gitleaks.tar.gz" | sha256sum --check
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          /tmp/gitleaks version | tee audit/gitleaks-version.txt
+
+      - name: Scan current tree and all fetched history for secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/gitleaks git . \
+            --log-opts='--all --full-history' \
+            --redact \
+            --report-format=json \
+            --report-path=audit/gitleaks-history.json \
+            --exit-code=0
+          /tmp/gitleaks dir . \
+            --redact \
+            --report-format=json \
+            --report-path=audit/gitleaks-tree.json \
+            --exit-code=0
+          test -f audit/gitleaks-history.json || echo '[]' > audit/gitleaks-history.json
+          test -f audit/gitleaks-tree.json || echo '[]' > audit/gitleaks-tree.json
+
+      - name: Inspect package contents and dependency license metadata
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Produce package and license evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo package --list --allow-dirty > audit/cargo-package-list.txt
+          cargo package --allow-dirty
+          cargo metadata --locked --all-features --format-version 1 > audit/cargo-metadata.json
+          jq -r '.packages[] | [.name, .version, (.license // "MISSING"), (.source // "workspace")] | @tsv' \
+            audit/cargo-metadata.json | sort -u > audit/dependency-licenses.tsv
+
+      - name: Summarize audit
+        id: summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          history_findings=$(jq 'length' audit/gitleaks-history.json)
+          tree_findings=$(jq 'length' audit/gitleaks-tree.json)
+          refs=$(wc -l < audit/refs.tsv)
+          commits=$(wc -l < audit/commits.tsv)
+          objects=$(wc -l < audit/objects.tsv)
+          package_files=$(wc -l < audit/cargo-package-list.txt)
+          internal_paths=$(wc -l < audit/internal-reference-paths.txt)
+          missing_licenses=$(awk -F '\t' '$3 == "MISSING" {count++} END {print count+0}' audit/dependency-licenses.tsv)
+
+          cat > audit/AUDIT-SUMMARY.md <<EOF
+          # Public visibility audit summary
+
+          - Commit: $GITHUB_SHA
+          - Refs fetched: $refs
+          - Commits scanned: $commits
+          - Objects inventoried: $objects
+          - Gitleaks history findings: $history_findings
+          - Gitleaks current-tree findings: $tree_findings
+          - Internal-reference paths requiring manual review: $internal_paths
+          - Cargo package files: $package_files
+          - Dependencies with missing license metadata: $missing_licenses
+
+          This automated result supplements, but does not replace, maintainer review of naming, copyright ownership, provenance, contribution terms, GitHub settings, and acceptable author metadata.
+          EOF
+          cat audit/AUDIT-SUMMARY.md >> "$GITHUB_STEP_SUMMARY"
+
+          if [[ "$history_findings" -ne 0 || "$tree_findings" -ne 0 || "$missing_licenses" -ne 0 ]]; then
+            echo '::error::Public visibility audit found secret or dependency-license findings requiring review.'
+            exit 1
+          fi
+
+      - name: Upload audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-visibility-audit
+          path: audit/
+          if-no-files-found: error
+          retention-days: 14

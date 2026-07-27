@@ -4,6 +4,8 @@
 
 Review this document every two weeks during active development and at every phase exit.
 
+Risks R-001 and R-029 are also governed by the [Active Rust Privacy Landscape Watch](../research/ACTIVE_LANDSCAPE_WATCH.md): weekly monitoring, monthly source-level review, and immediate escalation when a material ecosystem change is detected.
+
 Risk ratings are qualitative:
 
 - **Likelihood:** Low, Medium, High
@@ -14,7 +16,7 @@ Risk ratings are qualitative:
 
 | ID | Risk | Likelihood | Impact | Early warning | Mitigation and contingency | Decision point | State |
 |---|---|---|---|---|---|---|---|
-| R-001 | An existing Rust project is a better technical and ecosystem fit | Medium | High | Comparable API, active maintenance, stronger coverage or adoption | Complete source-level comparison; prefer adoption, collaboration, or a narrow adapter when justified | Aug 14, 2026 | Open |
+| R-001 | An existing Rust project is a better technical and ecosystem fit | Medium | High | Comparable API, active maintenance, stronger coverage, evidence, adoption, or collaboration potential | Maintain a weekly ecosystem watch and monthly source-level comparison; immediately evaluate adoption, collaboration, migration, or a narrow adapter when a material alternative emerges | Continuous; formal review at every phase exit | Mitigating |
 | R-002 | Project differentiation is too weak | Medium | High | Positioning reduces to “Presidio in Rust” or unmeasured speed claims | Validate constrained-runtime, evidence, provenance, and consumer needs; stop or narrow scope if absent | Aug 14, 2026 | Open |
 | R-003 | UTF-8 normalization and source-offset mapping require substantial redesign | Medium | Critical | Findings cannot reliably map to original text; consumer examples fail | Address before recognizer expansion; prototype mapping; reject approximate spans | Sep 4, 2026 | Open |
 | R-004 | Overlap resolution causes false-negative redaction | Medium | Critical | Nested or higher-scoring short match hides a larger sensitive span | Preserve candidates; add conservative union policy; adversarial fixtures | Sep 18, 2026 | Open |
@@ -42,7 +44,7 @@ Risk ratings are qualitative:
 | R-026 | CLA or contribution terms are legally insufficient | Medium | High | Outside contribution proposed before legal review | Do not accept public third-party contribution under draft CLA; obtain counsel review | Before public contribution | Mitigating |
 | R-027 | Internal consumer pressure reintroduces product coupling | High | Medium | Core gains orchestration, policy, or private identifiers used by one product | Require independent reusable justification and architecture review | Every consumer PR | Mitigating |
 | R-028 | Schedule optimism consumes contingency | High | High | Phase work carries over repeatedly; architecture review skipped | Reforecast at each phase; protect 20% reserve; cut scope before quality | Every phase exit | Open |
-| R-029 | Parallel projects change during development | High | Medium | Another crate adds required capability or gains ecosystem adoption | Eight-week landscape review; collaboration checkpoint | Scheduled reviews | Open |
+| R-029 | Parallel projects change during development | High | High | Another crate adds required capability, stronger evidence, maintenance capacity, adoption, or a reusable subsystem | Weekly conditional monitoring; monthly deep source review; maintain comparison matrix; trigger build-versus-adopt review within five working days of a material change | Continuous | Mitigating |
 | R-030 | Real PII or secrets enter test corpora or CI artifacts | Medium | Critical | Fixtures contain live credentials or personal data | Synthetic or approved data only; secret scanning; corpus review; artifact retention controls | Before corpus merge | Open |
 
 ## Assumption ledger
@@ -64,6 +66,7 @@ Risk ratings are qualitative:
 | A-013 | The current name is temporary for private development | High | Naming review | Rename earlier if integrations make the name sticky | Oct 30, 2026 |
 | A-014 | Semantic recognition can remain off the critical path | High | Consumer requirements | Reforecast program around model capability | Aug 14, 2026 |
 | A-015 | Maintainer and reviewer capacity remains available for 30 weeks | Medium | Confirmed ownership calendar | Reduce scope or extend schedule | Every phase exit |
+| A-016 | No existing or emerging Rust project makes independent development the inferior path | Low | Weekly watch, monthly deep comparison, consumer migration analysis | Adopt, collaborate, narrow, redirect, or stop | Weekly and every phase exit |
 
 ## Escalation rule
 
@@ -73,7 +76,8 @@ A risk requires immediate architecture review when any of the following occurs:
 - a phase exit depends on an unvalidated assumption with Low confidence;
 - a consumer needs a breaking contract change;
 - a new native, network, model, or cryptographic dependency is proposed;
-- a real data-leak or unsafe transformation is discovered; or
+- a real data-leak or unsafe transformation is discovered;
+- a material landscape-watch finding could invalidate planned work, reduce differentiation, or provide a better consumer path; or
 - the schedule consumes more than half of remaining contingency before Phase 5.
 
 ## Closure evidence

@@ -1,0 +1,69 @@
+name: Feature request
+description: Propose a capability that fits the reusable Rust library scope
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Describe the concrete problem, affected users, and why existing APIs are insufficient.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed capability
+      description: Describe the smallest useful solution. Avoid prescribing implementation details unless they are essential.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Why it belongs in the core crate
+      description: Explain why this should be reusable library behavior rather than application-specific policy, a hosted service, or an external adapter.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and examples
+      description: Include synthetic examples, specifications, format references, evaluation data, or user scenarios.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe workarounds, external crates, custom recognizers, or smaller changes considered.
+    validations:
+      required: true
+
+  - type: textarea
+    id: implications
+    attributes:
+      label: Security, privacy, compatibility, and maintenance implications
+      description: Discuss false positives, false negatives, offsets, normalization, dependencies, MSRV, API stability, and long-term ownership as relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: prior_art
+    attributes:
+      label: Prior art and related projects
+      description: Identify relevant implementations, standards, datasets, papers, or licenses.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched existing issues for related proposals.
+          required: true
+        - label: I have not presented planned behavior as an implemented or measured capability.
+          required: true

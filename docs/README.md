@@ -38,8 +38,10 @@ The immediate post-visibility architecture work is explicit candidate resolution
 ## Release evidence
 
 - [July 30 public visibility evidence](release/2026-07-30-PUBLIC-VISIBILITY-EVIDENCE.md)
+- [Tuesday automated audit evidence](release/2026-07-27-TUESDAY-AUDIT-EVIDENCE.md)
+- [Source and dependency provenance inventory](release/SOURCE_AND_DEPENDENCY_PROVENANCE.md)
 
-The evidence record is updated throughout release week. A planning target, checklist, or green build does not itself authorize public visibility.
+The evidence records are updated throughout release week. A planning target, checklist, or green build does not itself authorize public visibility.
 
 ## Accelerated release baseline
 

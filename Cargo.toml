@@ -3,12 +3,18 @@ name = "presidio-rs"
 version = "0.1.0"
 edition = "2021"
 rust-version = "1.74"
-description = "Offline, pure-Rust PII detection and anonymization — a Rust-native reimagining of Microsoft Presidio's analyzer/anonymizer design. Internal — MythologIQ-Labs-LLC."
-license-file = "LICENSE"
-repository = "https://github.com/mythologiq-labs-llc/presidio-rs"
-publish = false
-keywords = ["pii", "privacy", "redaction", "security"]
-categories = ["text-processing"]
+authors = ["MythologIQ Labs LLC"]
+description = "Offline, Rust-native PII detection and anonymization inspired by Microsoft Presidio's model-free architecture."
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/MythologIQ-Labs-LLC/presidio-rs"
+documentation = "https://docs.rs/presidio-rs"
+keywords = ["pii", "privacy", "redaction", "anonymization", "security"]
+categories = ["text-processing", "development-tools"]
+exclude = [
+    ".github/",
+    "OPEN_SOURCE_RELEASE_CHECKLIST.md",
+]
 
 [lib]
 name = "presidio"

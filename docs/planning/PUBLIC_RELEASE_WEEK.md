@@ -66,14 +66,28 @@ These items block later maturity gates, not public inspection of an explicitly e
 
 ### Monday, July 27
 
-- Rebaseline the roadmap around July 30 visibility.
-- Freeze non-release scope.
-- Create the release tracking issue and assign owners.
-- Inventory the current tree, history, dependencies, documentation, and GitHub settings.
-- Decide whether the current history can be exposed or a clean public export is required.
-- Begin name, provenance, license, and confidential-reference review.
+- [x] Rebaseline the roadmap around July 30 visibility.
+- [x] Freeze non-release scope.
+- [x] Create the release tracking issue and assign owners.
+- [x] Inventory visibility blockers and create focused owner-assigned issues.
+- [x] Record a preliminary current-history versus clean-export decision.
+- [x] Begin name, provenance, license, confidential-reference, and security review.
+- [x] Close superseded PR #3.
+- [x] Commit the preliminary release evidence record.
 
 **Exit:** every visibility blocker has an owner, evidence requirement, and deadline.
+
+Monday evidence: [July 30 Public Visibility Evidence](../release/2026-07-30-PUBLIC-VISIBILITY-EVIDENCE.md).
+
+Open Monday-derived trackers:
+
+- #18 public name and Presidio positioning;
+- #19 history, secret, confidentiality, and provenance scan;
+- #20 publication authority, license posture, and contribution intake;
+- #21 security reporting, branch protection, and stale refs;
+- #22 source and dependency provenance inventory;
+- #23 confidential-reference boundary; and
+- #24 current history versus clean export decision.
 
 ### Tuesday, July 28
 

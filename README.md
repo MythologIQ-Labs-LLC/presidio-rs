@@ -4,45 +4,44 @@
 
 **Offline, Rust-native PII detection and anonymization**
 
-A small, embeddable library for identifying and transforming structured sensitive data without requiring Python, a network service, or runtime model downloads.
+An embeddable library for identifying and transforming structured sensitive data without requiring Python, a network service, or runtime model downloads.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.74%2B-orange.svg)](Cargo.toml)
 [![CI](https://github.com/MythologIQ-Labs-LLC/presidio-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/MythologIQ-Labs-LLC/presidio-rs/actions/workflows/ci.yml)
 [![unsafe forbidden](https://img.shields.io/badge/crate--local%20unsafe-forbidden-success.svg)](src/lib.rs)
 
-**Project status: early-stage, privately developed, and not production certified**
+**Early-stage, privately developed, and not production certified**
 
 </div>
 
 > [!IMPORTANT]
-> `presidio-rs` is an independently governed Rust project being developed privately with open-source-grade practices. It is not affiliated with, sponsored by, or endorsed by Microsoft. Microsoft Presidio is acknowledged as a design reference under its MIT license.
+> `presidio-rs` is independently governed and developed privately with open-source-grade practices. It is not affiliated with, sponsored by, or endorsed by Microsoft. Microsoft Presidio is acknowledged as a design reference under its MIT license.
 
-## Current capabilities
+## What is implemented
 
-`presidio-rs` analyzes UTF-8 text for supported categories of personally identifiable information and secrets. The current implementation provides:
+The current crate provides:
 
-- compiled regular-expression recognizers
-- optional checksum validators
-- nearby context-word scoring
-- bounded, evidence-bearing findings
-- candidate-preserving analysis reports
-- authoritative recognizer IDs, versions, locales, mechanisms, capabilities, and attribution
-- exact source binding through document IDs, byte lengths, and SHA-256 fingerprints
-- request-time entity, recognizer, locale, capability, input, candidate, and issue controls
-- a backend-neutral `Recognizer` trait for consumer-supplied structural, dictionary, or semantic backends
-- validated candidate emission that enforces entity declarations, UTF-8 spans, confidence bounds, provenance, document binding, and resource limits
+- regex-based recognizers for structured PII and selected secrets
+- optional checksum validators and nearby context scoring
+- bounded open entity, recognizer, document, and metadata identifiers
+- UTF-8-safe spans and finite confidence values
+- evidence-bearing findings and candidate-preserving reports
+- authoritative recognizer IDs, versions, locales, capabilities, mechanisms, and attribution
+- exact source binding through document ID, byte length, and SHA-256 fingerprint
+- bounded request selection for entities, recognizers, locale, capabilities, confidence, input size, candidates, and issues
+- an object-safe backend-neutral `Recognizer` trait
+- validated candidate emission that enforces source, provenance, entity, confidence, and resource invariants
+- typed non-plaintext backend failures
 - legacy replacement, redaction, masking, and deterministic hashing
 
-The crate performs no network or filesystem I/O itself. Its current direct dependencies are `regex`, `sha2`, and optional `serde`.
+The crate itself performs no network or filesystem I/O. Its direct dependencies are `regex`, `sha2`, and optional `serde`.
 
-## Two API paths
+## API paths
 
-The library currently preserves two additive API paths while consumers migrate.
+The crate preserves a legacy-compatible path while introducing an authoritative request-oriented path for new Rust consumers.
 
-### Legacy-compatible path
-
-Use this path for existing `PatternRecognizer`, `RecognizerResult`, and `AnonymizerEngine` integrations.
+### Legacy-compatible analysis and anonymization
 
 ```rust
 use presidio::{AnalyzerEngine, AnonymizerEngine, Operator};
@@ -60,11 +59,9 @@ assert_eq!(
 );
 ```
 
-This path remains source compatible. It uses the closed `EntityType` taxonomy and current overlap and threshold behavior.
+This path retains `PatternRecognizer`, `RecognizerResult`, `EntityType`, the existing overlap policy, and the current anonymization API.
 
-### Authoritative request path
-
-Use this path for exact document binding, open entity identifiers, recognizer provenance, typed backend failures, deterministic request selection, and bounded reports.
+### Authoritative document-aware analysis
 
 ```rust
 use presidio::{AnalysisRequest, AnalyzerEngine, DocumentId, TextDocument};
@@ -95,23 +92,21 @@ assert_eq!(
 );
 ```
 
-`AnalysisReport::candidates()` is authoritative for the request path. `legacy_compatible_results()` is only a compatibility projection. When an open entity cannot be represented by `EntityType`, `report.status().legacy_projection_incomplete()` is true.
+`AnalysisReport::candidates()` is authoritative for this path. `legacy_compatible_results()` is only a compatibility projection. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.
 
 ## Expected use cases
 
 Good fits include:
 
-- sanitizing application logs and telemetry before persistence
+- sanitizing logs and telemetry before persistence
 - inspecting prompts, model responses, or tool output before release
-- redacting structured identifiers in local or offline processing pipelines
+- redacting structured identifiers in local or offline pipelines
 - embedding PII controls in desktop, edge, sandboxed, or air-gapped software
-- protecting command-line output and generated diagnostic bundles
-- scanning text fields before they cross a service or plugin boundary
+- protecting command-line output and diagnostic bundles
+- scanning text before it crosses a service or plugin boundary
 - adding organization-specific identifiers through strict pattern recognizers
-- integrating an optional local semantic backend without making it a default crate dependency
-- preserving recognizer provenance and backend failures for consumer policy decisions
-
-The library is especially useful when introducing a Python runtime, HTTP sidecar, or model-serving process would be disproportionate to the required deployment scope.
+- integrating optional local semantic or dictionary backends
+- preserving recognizer provenance and backend failures for product policy decisions
 
 ## What it is not
 
@@ -120,15 +115,15 @@ The library is especially useful when introducing a Python runtime, HTTP sidecar
 - a complete reimplementation or drop-in replacement for Microsoft Presidio
 - a guarantee that all sensitive information will be detected
 - a built-in NLP or named-entity recognition system
-- able by default to reliably detect arbitrary person names or prose locations
+- able by default to reliably detect arbitrary names or prose locations
 - an OCR, image, DICOM, audio, or video redactor
 - a structured or tabular de-identification framework
-- a hosted API or network service
-- a substitute for data classification, threat modeling, access control, or human review
-- evidence by itself that an application satisfies a legal or regulatory obligation
+- a hosted service
+- a substitute for threat modeling, access control, review, or data governance
+- proof of compliance with any legal or regulatory obligation
 - a stable serialized request or report protocol
 
-Detection systems produce false positives and false negatives. Applications must choose coverage, thresholds, failure behavior, retention, and review requirements appropriate to their risks.
+Detection systems produce false positives and false negatives. Consumers own coverage, thresholds, retention, failure behavior, and review policy.
 
 ## Installation
 
@@ -144,7 +139,7 @@ presidio-rs = { git = "https://github.com/MythologIQ-Labs-LLC/presidio-rs" }
 presidio-rs = { path = "../presidio-rs" }
 ```
 
-The package name is `presidio-rs`; the Rust library is imported as `presidio`. Public publication and final naming remain separate future decisions.
+The package is named `presidio-rs`; Rust code imports it as `presidio`. Public publication and final naming remain separate future decisions.
 
 ## Request controls
 
@@ -157,15 +152,15 @@ The package name is `presidio-rs`; the Rust library is imported as `presidio`. P
 - minimum confidence for the legacy-compatible projection
 - maximum UTF-8 input bytes
 - maximum candidates across selected recognizers
-- maximum retained analysis issues
+- maximum retained issue details
 
-The default request selects recognizers whose metadata is marked default-enabled, accepts at most 1 MiB of source text, retains at most 10,000 candidates, and retains at most 100 issue details.
+The default request selects metadata marked default-enabled, accepts at most 1 MiB of source text, retains at most 10,000 candidates, and retains at most 100 issue details.
 
-Legacy pattern registrations created through `RecognizerRegistry::add` have unknown provenance. They continue to run through legacy APIs but are deliberately skipped by `analyze_request`. The report records one typed `LegacyRecognizersSkipped` issue rather than fabricating identities or versions.
+Legacy pattern registrations made through `RecognizerRegistry::add` have unknown provenance. They continue to run through legacy APIs but are skipped by `analyze_request`, which records a typed `LegacyRecognizersSkipped` issue instead of inventing metadata.
 
-## Custom recognizer backends
+## Custom backends
 
-Consumer backends implement the object-safe `Recognizer` trait and emit findings through `CandidateEmitter`.
+Consumer backends implement `Recognizer` and emit candidates through `CandidateEmitter`.
 
 ```rust
 use presidio::{
@@ -188,21 +183,21 @@ impl Recognizer for LocalBackend {
         _request: &AnalysisRequest,
         emitter: &mut CandidateEmitter<'_, '_>,
     ) -> Result<(), RecognitionError> {
-        // Run the local backend, map every result to original UTF-8 byte
-        // coordinates, and call emitter.emit(...).
+        // Run the backend, preserve original UTF-8 byte coordinates,
+        // and submit each result through emitter.emit(...).
         let _ = (document, emitter);
         Ok(())
     }
 }
 ```
 
-The emitter rejects undeclared entities, invalid UTF-8 spans, non-finite or out-of-range confidence values, and emissions beyond the remaining global candidate capacity. It attaches authoritative recognizer identity and exact document binding to accepted findings.
+The emitter rejects undeclared entities, invalid UTF-8 spans, invalid confidence values, and candidates beyond the remaining request limit. Accepted findings receive authoritative recognizer identity and exact document binding.
 
-Backends return bounded, non-plaintext `RecognitionError` values with stable categories, stable codes, and retryability. Consumer applications decide whether those issues should fail open, fail closed, block, retry, or require human review.
+Backend errors use stable categories, bounded codes, and retryability. Applications decide whether those issues should block, retry, fail open, fail closed, or require review.
 
-## Supported built-in entities
+## Built-in entity coverage
 
-| Entity | Output tag | Detection method | Validator |
+| Entity | Tag | Method | Validator |
 |---|---|---|---|
 | Credit card | `CREDIT_CARD` | Pattern | Luhn |
 | US Social Security number | `US_SSN` | Pattern | None |
@@ -215,101 +210,85 @@ Backends return bounded, non-plaintext `RecognitionError` values with stable cat
 | URL | `URL` | Pattern | None |
 | US ITIN | `US_ITIN` | Pattern | None |
 | API key | `API_KEY` | Selected vendor formats | None |
-| Person | `PERSON` | Reserved for an optional semantic backend | Not emitted by built-ins |
-| Location | `LOCATION` | Reserved for an optional semantic backend | Not emitted by built-ins |
-| NRP | `NRP` | Reserved for an optional semantic backend | Not emitted by built-ins |
+| Person | `PERSON` | Optional backend only | Not emitted by built-ins |
+| Location | `LOCATION` | Optional backend only | Not emitted by built-ins |
+| NRP | `NRP` | Optional backend only | Not emitted by built-ins |
 
-A listed entity does not imply coverage of every country, vendor, formatting variation, or malformed representation.
+A listed entity does not imply complete country, vendor, formatting, or malformed-input coverage.
 
-## Anonymization operators
+## Anonymization
 
-| Operator | Behavior |
-|---|---|
-| `Replace(None)` | Replaces a span with its entity tag, such as `<EMAIL_ADDRESS>` |
-| `Replace(Some(value))` | Replaces a span with a caller-provided value |
-| `Redact` | Removes the span |
-| `Mask` | Masks characters while optionally preserving the final characters |
-| `Hash` | Produces a deterministic salted SHA-256 token |
+The current anonymizer consumes legacy `RecognizerResult` values and supports:
 
-The current anonymization API consumes legacy `RecognizerResult` values. Fallible anonymization over document-bound findings and an explicit permanent resolution policy are the next architectural slice.
+- `Replace(None)` with an entity marker
+- `Replace(Some(value))`
+- `Redact`
+- `Mask`
+- deterministic salted SHA-256 `Hash`
 
-The `Hash` operator enables deterministic correlation. It does not guarantee irreversible anonymity. Low-entropy values can remain guessable, particularly if a salt is disclosed or candidate values can be tested.
+Fallible anonymization over document-bound findings and an explicit permanent resolution policy are the next architectural slice.
+
+Deterministic hashing enables correlation. It does not guarantee irreversible anonymity, especially for low-entropy values or disclosed salts.
 
 ## Architecture
 
 ```text
 Legacy path
------------
-&str
-  -> RecognizerRegistry
-  -> pattern matching, validators, and context scoring
-  -> overlap and threshold policy
-  -> Vec<RecognizerResult>
-  -> AnonymizerEngine
+&str -> pattern registry -> legacy resolution -> Vec<RecognizerResult> -> anonymizer
 
-Authoritative request path
---------------------------
+Authoritative path
 TextDocument + AnalysisRequest
-  -> strict metadata-backed pattern adapters
-  -> optional Arc<dyn Recognizer> backends
+  -> strict pattern adapters and optional Arc<dyn Recognizer> backends
   -> CandidateEmitter invariant enforcement
   -> AnalysisReport
-       -> source-bound candidate findings
+       -> source-bound candidates
        -> recognizer metadata catalog
-       -> typed issues and truncation status
+       -> typed issues and limit status
        -> legacy-compatible projection
 ```
 
-Current architecture decisions:
+Architecture documents:
 
 - [Target architecture](docs/architecture/ARCHITECTURE.md)
+- [ADR 0001: Private open-source posture](docs/adr/0001-private-open-source-posture.md)
 - [ADR 0002: Backend-neutral core and optional adapters](docs/adr/0002-backend-neutral-core-and-optional-adapters.md)
 - [ADR 0003: Validated core types](docs/adr/0003-stage-core-types-before-engine-migration.md)
 - [ADR 0004: Candidate-preserving reports](docs/adr/0004-add-candidate-preserving-analysis-report.md)
-- [ADR 0005: Recognizer metadata](docs/adr/0005-add-backend-neutral-recognizer-metadata.md)
+- [ADR 0005: Recognizer metadata and validated registration](docs/adr/0005-add-recognizer-metadata-and-validated-registration.md)
 - [ADR 0006: Exact document binding](docs/adr/0006-bind-findings-to-text-documents.md)
 - [ADR 0007: Requests and recognizer execution](docs/adr/0007-add-analysis-request-and-recognizer-trait.md)
-- [Project documentation index](docs/README.md)
+- [Documentation index](docs/README.md)
 
 ## Security and privacy boundaries
 
-The crate itself:
+The crate:
 
 - performs no network or filesystem I/O
 - does not download patterns or models
-- forbids crate-local `unsafe` code with `#![forbid(unsafe_code)]`
+- forbids crate-local `unsafe` code
 - borrows raw source text rather than copying it into reports
-- omits source plaintext from `TextDocument` debug output
+- omits plaintext from `TextDocument` debug output
 - uses bounded identifier-shaped evidence and failure codes
 - binds request-oriented findings to exact source identity and content
 
-A document fingerprint is an integrity mechanism, not encryption or anonymization. Bindings may be sensitive metadata, especially for low-entropy or guessable content. Use opaque document IDs and appropriate retention and access controls.
+A document fingerprint is an integrity mechanism, not encryption or anonymization. Bindings may be sensitive metadata, particularly for low-entropy content. Use opaque document IDs and appropriate retention and access controls.
 
-Before using the crate at a security boundary:
+Before deployment at a security boundary, define required coverage, test adversarial inputs, choose fail-open or fail-closed behavior, validate Unicode handling, and establish review and regression-monitoring policy.
 
-- define required entity and locale coverage
-- test representative, malformed, and adversarial inputs
-- determine acceptable false-negative and false-positive rates
-- choose explicit confidence and failure policies
-- decide whether backend issues fail open or fail closed
-- validate Unicode and original-coordinate behavior
-- define handling for unsupported or unrecognized semantic PII
-- monitor regressions when recognizers or dependencies change
+Report vulnerabilities through GitHub private vulnerability reporting. See [SECURITY.md](SECURITY.md).
 
-Report suspected vulnerabilities through GitHub private vulnerability reporting. Do not disclose security-sensitive findings in a public issue. See [SECURITY.md](SECURITY.md).
+## Development program
 
-## Development plan
+The active baseline is a 30-week private program from August 3, 2026 through February 26, 2027. Architecture review, consumer feedback, risk review, and ecosystem research continue throughout every phase.
 
-The active planning baseline is a 30-week private program from August 3, 2026 through February 26, 2027. Architecture review, consumer feedback, risk review, and parallel-project research continue throughout every phase.
-
-- [Multi-phase development plan](docs/planning/DEVELOPMENT_PLAN.md)
-- [Development risk and assumption register](docs/planning/RISK_REGISTER.md)
+- [Development plan](docs/planning/DEVELOPMENT_PLAN.md)
+- [Risk and assumption register](docs/planning/RISK_REGISTER.md)
 - [Active Rust privacy landscape watch](docs/research/ACTIVE_LANDSCAPE_WATCH.md)
-- [Parallel efforts and architectural lessons](docs/research/PARALLEL_EFFORTS_AND_LESSONS.md)
+- [Parallel efforts and lessons](docs/research/PARALLEL_EFFORTS_AND_LESSONS.md)
 
-The build-versus-adopt-versus-collaborate decision remains active. Sunk cost is not a reason to duplicate a better maintained Rust implementation.
+The build-versus-adopt-versus-collaborate decision remains active. Sunk cost is not a reason to duplicate a better maintained project.
 
-## Development
+## Development commands
 
 ```bash
 cargo build --all-features
@@ -320,27 +299,15 @@ cargo doc --no-deps --all-features
 cargo audit
 ```
 
-The minimum supported Rust version is declared in `Cargo.toml` and verified in CI.
+Rust 1.74 is the declared minimum and is verified in CI.
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting changes. Contributions require:
-
-- acceptance of the [Contributor License Agreement](CONTRIBUTOR_LICENSE_AGREEMENT.md)
-- DCO sign-off on every commit
-- appropriate tests and documentation
-- attribution for adapted algorithms, datasets, APIs, or prior art
-- a responsible human contributor who can explain and defend the change
+Read [CONTRIBUTING.md](CONTRIBUTING.md). Contributions require the [Contributor License Agreement](CONTRIBUTOR_LICENSE_AGREEMENT.md), DCO sign-off, tests, documentation, attribution, and a responsible human contributor who can explain the change.
 
 ## Claims policy
 
-Project documentation distinguishes among:
-
-- **implemented:** visible in source and tests
-- **measured:** supported by a reproducible benchmark or evaluation artifact
-- **planned:** proposed but not implemented
-
-Performance, accuracy, security, compliance, and cost claims must not be presented as measured facts without reproducible evidence.
+Documentation distinguishes among **implemented**, **measured**, and **planned** capabilities. Performance, accuracy, security, compliance, and cost claims require reproducible evidence.
 
 ## License and acknowledgements
 
@@ -348,6 +315,4 @@ Copyright (c) 2026 MythologIQ Labs LLC and contributors.
 
 Licensed under the [MIT License](LICENSE).
 
-The analyzer and anonymizer concepts are informed by [Microsoft Presidio](https://github.com/microsoft/presidio), which is also distributed under the MIT License. No Microsoft Presidio source code is linked, vendored, or redistributed by this crate.
-
-Microsoft and Microsoft Presidio remain the property of their respective owners. Their names are used only to identify the referenced project.
+The analyzer and anonymizer concepts are informed by [Microsoft Presidio](https://github.com/microsoft/presidio), also distributed under MIT. No Microsoft Presidio source code is linked, vendored, or redistributed by this crate.

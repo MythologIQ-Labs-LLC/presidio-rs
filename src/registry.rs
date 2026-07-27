@@ -4,13 +4,17 @@
 //! [`crate::AnalyzerEngine`] iterates them on each `analyze` call. Swap or
 //! extend the registry to change what gets detected.
 
+use core::fmt;
+
 use crate::entity::EntityType;
-use crate::recognizer::{Pattern, PatternRecognizer};
+use crate::recognizer::{Pattern, PatternRecognizer, RecognizerMetadata};
+use crate::types::RecognizerId;
 use crate::validators;
 
 /// Holds the set of [`PatternRecognizer`]s an [`crate::AnalyzerEngine`] runs.
 pub struct RecognizerRegistry {
     recognizers: Vec<PatternRecognizer>,
+    metadata: Vec<RecognizerMetadata>,
 }
 
 impl Default for RecognizerRegistry {
@@ -24,25 +28,70 @@ impl RecognizerRegistry {
     pub fn empty() -> Self {
         Self {
             recognizers: Vec::new(),
+            metadata: Vec::new(),
         }
     }
 
     /// A registry preloaded with the built-in recognizers.
     pub fn with_predefined() -> Self {
+        let recognizers = predefined();
+        let metadata = predefined_metadata();
+        debug_assert_eq!(recognizers.len(), metadata.len());
         Self {
-            recognizers: predefined(),
+            recognizers,
+            metadata,
         }
     }
 
-    /// Register a recognizer (builder-friendly, returns `&mut Self`).
+    /// Register a recognizer using generated registry-local metadata.
     pub fn add(&mut self, recognizer: PatternRecognizer) -> &mut Self {
+        let id = RecognizerId::new(format!(
+            "custom.{}.{}",
+            recognizer.entity_type.as_tag(),
+            self.recognizers.len()
+        ))
+        .expect("generated recognizer identifier is valid");
+        let metadata = RecognizerMetadata::new(id).with_version(env!("CARGO_PKG_VERSION"));
         self.recognizers.push(recognizer);
+        self.metadata.push(metadata);
         self
+    }
+
+    /// Register a recognizer with explicit stable metadata.
+    pub fn add_with_metadata(
+        &mut self,
+        recognizer: PatternRecognizer,
+        metadata: RecognizerMetadata,
+    ) -> Result<&mut Self, RegistryError> {
+        if self
+            .metadata
+            .iter()
+            .any(|existing| existing.id() == metadata.id())
+        {
+            return Err(RegistryError::DuplicateRecognizerId {
+                id: metadata.id().clone(),
+            });
+        }
+        self.recognizers.push(recognizer);
+        self.metadata.push(metadata);
+        Ok(self)
     }
 
     /// The registered recognizers.
     pub fn recognizers(&self) -> &[PatternRecognizer] {
         &self.recognizers
+    }
+
+    /// Metadata aligned with [`Self::recognizers`].
+    pub fn metadata(&self) -> &[RecognizerMetadata] {
+        &self.metadata
+    }
+
+    /// Iterate registered recognizers together with provenance metadata.
+    pub fn entries(
+        &self,
+    ) -> impl Iterator<Item = (&PatternRecognizer, &RecognizerMetadata)> + '_ {
+        self.recognizers.iter().zip(self.metadata.iter())
     }
 
     /// Number of registered recognizers.
@@ -56,8 +105,48 @@ impl RecognizerRegistry {
     }
 }
 
-/// The built-in recognizers. Format-structured entities only — the NER-only
-/// trio (`Person`/`Location`/`Nrp`) is reserved for a future model backend.
+/// Failure to register recognizer metadata.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RegistryError {
+    /// A stable recognizer identifier is already registered.
+    DuplicateRecognizerId { id: RecognizerId },
+}
+
+impl fmt::Display for RegistryError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::DuplicateRecognizerId { id } => {
+                write!(f, "recognizer identifier {id} is already registered")
+            }
+        }
+    }
+}
+
+impl std::error::Error for RegistryError {}
+
+fn metadata(id: &str) -> RecognizerMetadata {
+    RecognizerMetadata::new(
+        RecognizerId::new(id).expect("built-in recognizer identifier is valid"),
+    )
+    .with_version(env!("CARGO_PKG_VERSION"))
+}
+
+fn predefined_metadata() -> Vec<RecognizerMetadata> {
+    vec![
+        metadata("builtin.credit-card"),
+        metadata("builtin.us-ssn"),
+        metadata("builtin.email"),
+        metadata("builtin.us-phone"),
+        metadata("builtin.ip-address"),
+        metadata("builtin.mac-address"),
+        metadata("builtin.iban"),
+        metadata("builtin.crypto-wallet"),
+        metadata("builtin.url"),
+        metadata("builtin.us-itin"),
+        metadata("builtin.api-key"),
+    ]
+}
+
 fn predefined() -> Vec<PatternRecognizer> {
     vec![
         PatternRecognizer {

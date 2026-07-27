@@ -22,7 +22,7 @@ path = "src/lib.rs"
 
 [dependencies]
 regex = "1"
-sha2 = "0.10"
+sha2 = "0.11"
 serde = { version = "1", features = ["derive"], optional = true }
 
 [features]

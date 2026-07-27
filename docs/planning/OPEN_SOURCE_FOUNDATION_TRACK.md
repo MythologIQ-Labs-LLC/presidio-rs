@@ -1,32 +1,43 @@
-# Stealth Open-Source Foundation Track
+# Open-Source Foundation Track
 
 ## Purpose
 
-The primary strategic objective of private development is to create a credible foundation for future open-source use.
+The primary strategic objective is to create a credible open-source Rust foundation.
 
-The project remains private so architecture, naming, provenance, security, maintenance, and release boundaries can be corrected before public expectations become irreversible. Privacy is a development condition, not the product goal.
+The repository is targeted to become publicly readable on **Thursday, July 30, 2026**. Public visibility accelerates feedback and collaboration, but it does not convert incomplete evidence into production readiness or create an automatic package-release or advertising commitment.
 
-Public release remains a separate explicit decision. The foundation should be strong enough that publication, collaboration, or a clean public export can occur without first rewriting the project around open-source expectations.
+The project must be safe and authorized to expose on July 30, then continue foundation work in public.
 
 ## Operating principle
 
-> Build privately, design publicly, disclose deliberately.
+> Build deliberately, expose honestly, promote only by decision.
 
 Every merged change should be understandable, testable, attributable, supportable, and useful outside any one internal consumer.
 
-Stealth development means:
+The accelerated open-source posture means:
 
-- repository access remains restricted;
-- no public launch, marketing, or availability claim is implied;
+- repository visibility becomes public after the release-week gate;
+- no launch campaign, package publication, or production claim is implied;
 - documentation is written for an unfamiliar external Rust consumer;
 - architecture avoids confidential product assumptions and internal-only coupling;
-- licenses, provenance, security practices, and contribution terms are maintained continuously;
-- release and package metadata remain capable of supporting a clean public export; and
-- public-readiness weaknesses are treated as development work rather than postponed launch chores.
+- licenses, provenance, security practices, and contribution terms remain continuously maintained;
+- public weaknesses are visible and tracked instead of hidden behind repository access controls; and
+- release maturity is communicated through explicit gates rather than one overloaded word such as “public.”
+
+## Release decisions are separate
+
+The project distinguishes:
+
+1. **Public repository visibility**: source and history are publicly readable.
+2. **Contributor-ready public alpha**: unfamiliar contributors can build, test, understand, and extend the project.
+3. **Consumer-ready public beta**: multiple consumers validate the supported contracts and compatibility behavior.
+4. **Package release**: a version is published to crates.io or another registry.
+5. **Advertised launch**: maintainers actively promote the project and accept the resulting attention and support load.
+6. **Stable release**: long-term compatibility expectations are explicitly accepted.
+
+Only public repository visibility is committed for July 30.
 
 ## Foundation workstreams
-
-The following workstreams apply across every development phase.
 
 ### 1. Public API and compatibility
 
@@ -40,7 +51,7 @@ The project must maintain:
 - semantic-version impact assessment for public API changes; and
 - migration notes whenever behavior or contracts change.
 
-A feature is not foundation-ready merely because it compiles. An unfamiliar consumer must be able to understand what is stable, transitional, legacy-compatible, or intentionally unsupported.
+A feature is not foundation-ready merely because it compiles. An unfamiliar consumer must understand what is stable-for-alpha, transitional, legacy-compatible, experimental, deprecated, or unsupported.
 
 ### 2. Contributor experience
 
@@ -75,17 +86,19 @@ The foundation should include:
 
 ### 4. Evidence and claims
 
-The project must distinguish:
+The project distinguishes:
 
 - implemented behavior demonstrated by source and tests;
 - measured behavior supported by reproducible artifacts; and
 - planned behavior that is not yet available.
 
-Accuracy, performance, security, production-readiness, compliance, and cost claims require evidence. Architecture properties must not be presented as benchmark results.
+Accuracy, performance, security, production readiness, compliance, and cost claims require evidence. Architecture properties must not be presented as benchmark results.
+
+Public visibility does not authorize stronger claims. It makes weak claims easier for strangers to notice, which is useful if somewhat rude.
 
 ### 5. Packaging and release discipline
 
-Private development should continuously preserve the ability to create a clean public release.
+Public source development should continuously preserve the ability to create a clean package and release.
 
 This includes:
 
@@ -95,9 +108,9 @@ This includes:
 - changelog and release-note discipline;
 - tag-to-package identity;
 - docs.rs compatibility;
-- a clean-history export plan;
+- a clean-history or clean-export plan;
 - secret, confidential-reference, and provenance audits; and
-- an explicit release approval record.
+- explicit package and launch approval records.
 
 ### 6. Governance and maintainership
 
@@ -107,7 +120,7 @@ The project must define:
 
 - maintainers and review ownership;
 - compatibility and release authority;
-- security-triage responsibility;
+- public issue and security-triage responsibility;
 - expected response times that match actual capacity;
 - contribution and decision escalation paths;
 - succession or archive criteria; and
@@ -115,7 +128,7 @@ The project must define:
 
 ### 7. Ecosystem fit
 
-The project must remain under active comparison with related Rust and Presidio-compatible efforts.
+The project remains under active comparison with related Rust and Presidio-compatible efforts.
 
 Independent implementation should continue only when it provides a defensible benefit for Rust consumers. Adoption, upstream contribution, collaboration, component reuse, or migration are valid successful outcomes.
 
@@ -127,79 +140,107 @@ Each material pull request should answer:
 
 1. Which reusable consumer problem does this solve?
 2. Does the change belong in the core, an optional adapter, an example, or an application?
-3. What public API or behavior becomes stable, transitional, or deprecated?
+3. What public API or behavior becomes stable-for-alpha, transitional, experimental, deprecated, or unsupported?
 4. Which security, privacy, compatibility, and maintenance risks change?
 5. Which tests or evidence prove the claimed behavior?
-6. Which README, guide, ADR, changelog, or migration document must change?
-7. Does the change improve or weaken future public release readiness?
+6. Which README, guide, ADR, changelog, migration document, or evaluation receipt must change?
+7. Does the change improve or weaken future package and launch readiness?
 8. Has a better existing Rust component or project emerged?
 
 A change that cannot answer these questions should be narrowed, deferred, or kept outside the reusable core.
 
 ## Near-term priority order
 
-The next work should prioritize foundation completeness over feature breadth:
+The next work prioritizes public safety and foundation completeness over feature breadth:
 
-1. fallible anonymization over document-bound findings;
-2. explicit candidate-resolution policy and overlap semantics;
-3. reproducible evaluation fixtures and error analysis;
-4. fuzzing and property tests for spans, resolution, and anonymization;
-5. downstream compile fixtures and at least two distinct consumer pilots;
-6. public API inventory, semantic-version baseline, and migration guide;
-7. contributor examples and a minimal custom-backend reference implementation;
-8. package and clean-export rehearsal;
-9. naming, licensing, provenance, and legal review; and
-10. measured private-beta readiness evidence.
+1. complete the July 30 visibility safety, history, provenance, naming, documentation, and operations gate;
+2. verify anonymous clone, CI, security reporting, templates, and branch protection after visibility;
+3. add contributor examples, ownership documentation, API inventory, and migration guidance;
+4. define explicit candidate-resolution policy and overlap semantics;
+5. add fallible anonymization over document-bound findings;
+6. create reproducible evaluation fixtures and error analysis;
+7. add fuzzing and property tests for spans, requests, resolution, and anonymization;
+8. add downstream compile fixtures and two distinct consumer pilots;
+9. rehearse package publication without publishing; and
+10. decide crates.io publication and advertising from evidence.
 
 Semantic recognition remains optional and outside the critical path unless consumer evidence makes it necessary.
 
 ## Foundation maturity gates
 
-### Gate A: Contributor-ready privately
+### Gate V: Public visibility safety
+
+Target: **July 30, 2026**
+
+- the intended public tree and history contain no known secrets or unauthorized confidential material;
+- source, fixtures, patterns, documentation, and dependencies have acceptable licensing and provenance;
+- naming and non-affiliation language are reviewed;
+- public-facing documentation is accurate about early-stage limitations;
+- CI and documented local verification pass;
+- public issue, contribution, and security-reporting paths are usable;
+- maintainers and the visibility-change operator are identified; and
+- the visibility or clean-export runbook and rollback plan are recorded.
+
+This gate permits public inspection. It does not certify package, beta, production, or support maturity.
+
+### Gate A: Contributor-ready public alpha
+
+Target: **August 14, 2026**
 
 - repository standards are enforceable;
 - architecture and current behavior are documented;
 - local verification is reproducible;
+- runnable extension examples exist;
 - contribution and security processes are usable;
+- ownership and triage responsibilities are explicit;
 - core tests and dependency checks are green; and
 - no internal product context is required to understand the library.
 
-### Gate B: Consumer-ready private alpha
+### Gate B: Consumer-ready public beta
+
+Target: **September 25, 2026**
 
 - at least two materially different Rust consumers compile and integrate;
 - compatibility fixtures exist;
-- core operations have explicit failure and resource behavior;
-- supported scope and limitations are evidence-backed; and
+- resolution and anonymization have explicit failure and resource behavior;
+- supported scope and limitations are evidence-backed;
+- evaluation and initial fuzz evidence exist; and
 - upgrade and migration expectations are documented.
 
-### Gate C: Public-release candidate foundation
+### Gate C: Package and advertised-launch candidate
 
-- provenance, history, legal, security, and package audits are complete;
-- evaluation, fuzzing, and benchmark evidence support published claims;
+Target: **October 30, 2026**
+
+- provenance, history, legal, security, and package reviews are complete;
+- evaluation, fuzzing, and benchmark evidence support intended claims;
 - maintainership and incident response are realistic;
 - package and documentation release rehearsals pass;
 - name and ecosystem positioning are approved; and
-- a clean public export or visibility-change plan is accepted.
+- package publication and active promotion are decided separately.
 
-### Gate D: Publication decision
+### Gate D: Stable-release decision
 
-Maintainers explicitly choose one of:
+No fixed date is implied.
 
-- publish the complete core;
+Maintainers may choose to:
+
+- publish or continue a pre-1.0 crate;
+- begin a `1.0` stability program;
 - publish a narrower component;
 - collaborate with or migrate to another project;
-- continue private development; or
+- remain quietly public; or
 - stop or redirect the effort.
 
-The decision must cite evidence. A green CI badge, elapsed time, or accumulated code volume is not approval.
+The decision must cite evidence. A public repository, green CI badge, elapsed time, or accumulated code volume does not create stability.
 
 ## Definition of success
 
-The stealth program succeeds when the project can be evaluated as a serious open-source Rust library before it is public:
+The accelerated program succeeds when:
 
-- external consumers can understand and integrate it from documentation alone;
-- maintainers can support its declared scope;
+- the repository becomes public without exposing unauthorized or confidential material;
+- external consumers can understand and evaluate it from documentation alone;
+- maintainers can support the declared early-stage scope;
 - security and correctness claims match evidence;
-- the API can evolve without avoidable consumer harm;
-- contribution and release processes are operational; and
-- publication is a controlled strategic choice rather than a rescue project for private code.
+- the API evolves without avoidable consumer harm;
+- contribution and release processes become operational on the compressed roadmap; and
+- package publication and promotion remain controlled strategic choices rather than accidental consequences of a visibility setting.

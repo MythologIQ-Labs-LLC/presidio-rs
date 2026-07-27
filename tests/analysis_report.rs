@@ -1,6 +1,6 @@
 use presidio::{
     AnalysisIssue, AnalysisOptions, AnalyzerEngine, EntityType, Evidence, Pattern,
-    PatternRecognizer, RecognizerRegistry,
+    PatternRecognizer, RecognitionMechanism, RecognizerRegistry,
 };
 
 fn registry_with(recognizer: PatternRecognizer) -> RecognizerRegistry {
@@ -169,12 +169,21 @@ fn issue_details_are_deterministically_bounded() {
 }
 
 #[test]
-fn report_records_engine_version_not_recognizer_version() {
+fn builtin_reports_expose_authoritative_recognizer_metadata() {
     let report = AnalyzerEngine::new().analyze_report("jane@example.com", None);
-
-    assert_eq!(report.engine_version(), env!("CARGO_PKG_VERSION"));
-    assert!(report
+    let email = report
         .candidates()
         .iter()
-        .all(|finding| finding.recognizer().is_none()));
+        .find(|finding| finding.entity().as_str() == "EMAIL_ADDRESS")
+        .expect("email finding");
+    let recognizer_id = email.recognizer().expect("builtin recognizer ID");
+    let metadata = report
+        .recognizer_metadata(recognizer_id)
+        .expect("builtin recognizer metadata");
+
+    assert_eq!(report.engine_version(), env!("CARGO_PKG_VERSION"));
+    assert_eq!(recognizer_id.as_str(), "builtin.email");
+    assert_eq!(metadata.version().as_str(), env!("CARGO_PKG_VERSION"));
+    assert_eq!(metadata.mechanism(), RecognitionMechanism::Pattern);
+    assert!(metadata.default_enabled());
 }

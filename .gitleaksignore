@@ -1,0 +1,6 @@
+# Historical README examples used an obviously synthetic sequential-digit GitHub
+# token solely to exercise the API-key recognizer. These exact fingerprints are
+# not credentials. Keep the allowlist fingerprint-scoped so future findings in
+# the same file or rule still fail the public-visibility audit.
+cbdafb5e5569e347574975a872499158d1110522:README.md:github-pat:128
+090c04f1a8ce2448c48979b9772163d8a7df0c17:README.md:github-pat:128

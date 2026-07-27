@@ -1,6 +1,8 @@
 name: Public visibility audit
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:

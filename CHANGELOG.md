@@ -9,7 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - Open-source-grade contribution, governance, conduct, security, and release-readiness policies.
-- A stealth open-source foundation track with contributor, consumer, security, evidence, package, governance, ecosystem, merge, and maturity gates.
+- An open-source foundation track with contributor, consumer, security, evidence, package, governance, ecosystem, merge, and maturity gates.
+- A public repository release-week runbook targeting July 30, 2026.
+- Separate visibility, contributor-alpha, consumer-beta, package-publication, advertised-launch, and stable-release gates.
 - CI gates for formatting, Clippy, tests, documentation, package verification, MSRV, dependency audit, and DCO sign-off.
 - Standalone public-facing project documentation and expected-use-case boundaries.
 - Validated structural spans, bounded open identifiers, constrained confidence values, evidence, and findings.
@@ -23,10 +25,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- Package metadata prepared for MIT-licensed distribution.
+- Rebaselined the project from a 30-week private-first plan to public repository visibility on July 30, 2026, contributor-ready alpha by August 14, consumer-ready beta by September 25, and a package and advertised-launch decision by October 30.
+- Package publication and active promotion are now explicitly separate from GitHub repository visibility.
+- Package metadata remains prepared for MIT-licensed distribution without implying crates.io publication.
 - Documentation separates implemented, measured, and planned capabilities.
-- The governing private-development posture now states that the open-source foundation is the primary objective while publication timing remains separately controlled.
-- The release checklist now requires contributor, consumer, and public-release-candidate foundation maturity gates.
+- The governing development posture states that the open-source foundation is the primary objective.
+- The release checklist now permits early public source visibility while preserving stronger later gates for evidence, compatibility, packaging, support, and stability.
 - Built-in pattern recognizers now use validated metadata-backed registration.
 - New request-oriented integrations use exact document binding and authoritative recognizer provenance.
 - The existing analyzer, `RecognizerResult`, pattern registry, and anonymizer APIs remain available for compatibility.
@@ -34,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Security
 
 - Added a coordinated vulnerability disclosure process.
+- Added an explicit pre-visibility history, secret, confidential-reference, licensing, and provenance gate.
 - Prevented supported custom backends from bypassing entity, span, confidence, provenance, source-binding, and candidate-limit invariants.
 - Added bounded metadata and failure codes to reduce accidental plaintext capture in reports.
 - Added exact-source validation before document-bound findings can be sliced or applied.

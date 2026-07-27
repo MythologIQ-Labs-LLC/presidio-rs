@@ -10,6 +10,7 @@
 //! - nearby context-word scoring
 //! - replace, redact, mask, and deterministic hash operators
 //! - custom recognizer and validator registration
+//! - additive validated value types for the next-generation finding contract
 //!
 //! It performs no network or filesystem I/O and requires no Python runtime.
 //! Person names, prose locations, and other semantic entities are not detected
@@ -39,6 +40,7 @@ mod entity;
 mod recognizer;
 mod registry;
 mod result;
+mod types;
 pub mod validators;
 
 pub use analyzer::{AnalyzerEngine, DEFAULT_SCORE_THRESHOLD};
@@ -47,3 +49,7 @@ pub use entity::EntityType;
 pub use recognizer::{Pattern, PatternRecognizer, Validator};
 pub use registry::RecognizerRegistry;
 pub use result::RecognizerResult;
+pub use types::{
+    Confidence, ConfidenceError, EntityId, Evidence, Finding, FindingConversionError,
+    IdentifierError, MetadataId, RecognizerId, Span, SpanError,
+};

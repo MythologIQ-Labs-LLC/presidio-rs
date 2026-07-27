@@ -1,15 +1,15 @@
 //! The analyzer engine: runs a [`RecognizerRegistry`], applies validators and
 //! context scoring, resolves overlaps, and filters by a score threshold.
-//!
-//! Mirrors Presidio's `AnalyzerEngine`.
 
 use std::cmp::Ordering;
 
 use crate::context;
 use crate::entity::EntityType;
-use crate::recognizer::PatternRecognizer;
+use crate::recognizer::{PatternRecognizer, RecognizerMetadata};
 use crate::registry::RecognizerRegistry;
+use crate::report::{AnalysisError, AnalysisIssue, AnalysisReport, CandidateIssue};
 use crate::result::RecognizerResult;
+use crate::types::{Confidence, EntityId, Evidence, Finding, Span};
 
 /// Default minimum score a result must reach to be returned.
 pub const DEFAULT_SCORE_THRESHOLD: f32 = 0.3;
@@ -54,7 +54,7 @@ impl AnalyzerEngine {
         &self.registry
     }
 
-    /// Mutable access to the registry (register custom recognizers).
+    /// Mutable access to the registry.
     pub fn registry_mut(&mut self) -> &mut RecognizerRegistry {
         &mut self.registry
     }
@@ -64,61 +64,179 @@ impl AnalyzerEngine {
         self.registry.add(recognizer);
     }
 
-    /// Detect PII in `text`. When `entities` is `Some`, only those entity types
-    /// are scanned for; `None` scans for all.
+    /// Detect PII and apply the legacy overlap behavior.
     pub fn analyze(&self, text: &str, entities: Option<&[EntityType]>) -> Vec<RecognizerResult> {
-        let mut out: Vec<RecognizerResult> = Vec::new();
-        for rec in self.registry.recognizers() {
-            if entities.is_some_and(|f| !f.contains(&rec.entity_type)) {
+        let mut out = Vec::new();
+        for recognizer in self.registry.recognizers() {
+            if entities.is_some_and(|filter| !filter.contains(&recognizer.entity_type)) {
                 continue;
             }
-            run_recognizer(text, rec, &mut out);
+            run_recognizer(text, recognizer, &mut out);
         }
         dedupe_overlaps(&mut out);
-        out.retain(|r| r.score >= self.score_threshold);
-        out.sort_by_key(|r| r.start);
+        out.retain(|result| result.score >= self.score_threshold);
+        out.sort_by_key(|result| result.start);
         out
+    }
+
+    /// Analyze text into an unresolved, evidence-bearing report.
+    pub fn analyze_report(
+        &self,
+        text: &str,
+        entities: Option<&[EntityType]>,
+    ) -> Result<AnalysisReport, AnalysisError> {
+        let threshold =
+            Confidence::new(self.score_threshold).map_err(AnalysisError::InvalidThreshold)?;
+        let mut candidates = Vec::new();
+        let mut issues = Vec::new();
+
+        for (recognizer, metadata) in self.registry.entries() {
+            if entities.is_some_and(|filter| !filter.contains(&recognizer.entity_type)) {
+                continue;
+            }
+            run_recognizer_report(
+                text,
+                recognizer,
+                metadata,
+                threshold,
+                &mut candidates,
+                &mut issues,
+            );
+        }
+
+        Ok(AnalysisReport::new(threshold, candidates, issues))
     }
 }
 
-fn run_recognizer(text: &str, rec: &PatternRecognizer, out: &mut Vec<RecognizerResult>) {
-    for pat in &rec.patterns {
-        for m in pat.regex.find_iter(text) {
-            let mut score = pat.base_score;
-            if let Some(validate) = rec.validator {
-                match validate(m.as_str()) {
+fn run_recognizer(text: &str, recognizer: &PatternRecognizer, out: &mut Vec<RecognizerResult>) {
+    for pattern in &recognizer.patterns {
+        for matched in pattern.regex.find_iter(text) {
+            let mut score = pattern.base_score;
+            if let Some(validate) = recognizer.validator {
+                match validate(matched.as_str()) {
                     Some(true) => score = 1.0,
                     Some(false) => continue,
                     None => {}
                 }
             }
-            score = context::enhance(text, m.start(), m.end(), score, rec.context);
+            score = context::enhance(
+                text,
+                matched.start(),
+                matched.end(),
+                score,
+                recognizer.context,
+            );
             out.push(RecognizerResult::new(
-                rec.entity_type,
-                m.start(),
-                m.end(),
+                recognizer.entity_type,
+                matched.start(),
+                matched.end(),
                 score,
             ));
         }
     }
 }
 
-/// Keep the highest-scoring result among overlapping spans.
-fn dedupe_overlaps(results: &mut Vec<RecognizerResult>) {
-    results.sort_by(|a, b| {
-        a.start
-            .cmp(&b.start)
-            .then_with(|| b.score.partial_cmp(&a.score).unwrap_or(Ordering::Equal))
-    });
-    let mut kept: Vec<RecognizerResult> = Vec::with_capacity(results.len());
-    for r in results.drain(..) {
-        match kept.last_mut() {
-            Some(last) if r.start < last.end => {
-                if r.score > last.score {
-                    *last = r;
+fn run_recognizer_report(
+    text: &str,
+    recognizer: &PatternRecognizer,
+    metadata: &RecognizerMetadata,
+    threshold: Confidence,
+    candidates: &mut Vec<Finding>,
+    issues: &mut Vec<AnalysisIssue>,
+) {
+    for pattern in &recognizer.patterns {
+        for matched in pattern.regex.find_iter(text) {
+            let mut score = pattern.base_score;
+            let mut evidence = vec![Evidence::Pattern {
+                pattern_id: pattern.name.to_owned(),
+            }];
+
+            if let Some(validate) = recognizer.validator {
+                match validate(matched.as_str()) {
+                    Some(true) => {
+                        score = 1.0;
+                        evidence.push(Evidence::Validator {
+                            validator_id: format!("{}.validator", metadata.id()),
+                            accepted: true,
+                        });
+                    }
+                    Some(false) => continue,
+                    None => {}
                 }
             }
-            _ => kept.push(r),
+
+            score = context::enhance(
+                text,
+                matched.start(),
+                matched.end(),
+                score,
+                recognizer.context,
+            );
+
+            let span = match Span::new(matched.start(), matched.end()).and_then(|span| {
+                span.validate_for(text)?;
+                Ok(span)
+            }) {
+                Ok(span) => span,
+                Err(error) => {
+                    issues.push(AnalysisIssue::new(
+                        metadata.id().clone(),
+                        pattern.name,
+                        CandidateIssue::InvalidSpan(error),
+                    ));
+                    continue;
+                }
+            };
+
+            let confidence = match Confidence::new(score) {
+                Ok(confidence) => confidence,
+                Err(error) => {
+                    issues.push(AnalysisIssue::new(
+                        metadata.id().clone(),
+                        pattern.name,
+                        CandidateIssue::InvalidConfidence(error),
+                    ));
+                    continue;
+                }
+            };
+
+            if confidence < threshold {
+                continue;
+            }
+
+            let mut finding = Finding::new(
+                EntityId::from(recognizer.entity_type),
+                span,
+                confidence,
+                metadata.id().clone(),
+            )
+            .with_evidence(evidence);
+            if let Some(version) = metadata.version() {
+                finding = finding.with_recognizer_version(version);
+            }
+            candidates.push(finding);
+        }
+    }
+}
+
+fn dedupe_overlaps(results: &mut Vec<RecognizerResult>) {
+    results.sort_by(|left, right| {
+        left.start.cmp(&right.start).then_with(|| {
+            right
+                .score
+                .partial_cmp(&left.score)
+                .unwrap_or(Ordering::Equal)
+        })
+    });
+    let mut kept: Vec<RecognizerResult> = Vec::with_capacity(results.len());
+    for result in results.drain(..) {
+        match kept.last_mut() {
+            Some(last) if result.start < last.end => {
+                if result.score > last.score {
+                    *last = result;
+                }
+            }
+            _ => kept.push(result),
         }
     }
     *results = kept;

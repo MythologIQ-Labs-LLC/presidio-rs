@@ -1,7 +1,9 @@
 //! Recognizers: regex patterns + optional checksum validator + context words.
 
-use crate::entity::EntityType;
 use regex::Regex;
+
+use crate::entity::EntityType;
+use crate::types::RecognizerId;
 
 /// A checksum validator. See [`crate::validators`] for the return convention.
 pub type Validator = fn(&str) -> Option<bool>;
@@ -20,6 +22,42 @@ impl Pattern {
             regex: Regex::new(regex).expect("predefined pattern must compile"),
             base_score,
         }
+    }
+}
+
+/// Stable metadata for a registered recognizer.
+///
+/// Metadata is stored by [`crate::RecognizerRegistry`] beside the existing
+/// [`PatternRecognizer`] value. Keeping it out of `PatternRecognizer` preserves
+/// compatibility for consumers that construct recognizers with struct literals.
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub struct RecognizerMetadata {
+    id: RecognizerId,
+    version: Option<String>,
+}
+
+impl RecognizerMetadata {
+    /// Construct metadata with a stable recognizer identifier.
+    pub fn new(id: RecognizerId) -> Self {
+        Self { id, version: None }
+    }
+
+    /// Attach a recognizer implementation or rule-set version.
+    pub fn with_version(mut self, version: impl Into<String>) -> Self {
+        let version = version.into();
+        self.version = (!version.trim().is_empty()).then_some(version);
+        self
+    }
+
+    /// Stable recognizer identifier.
+    pub fn id(&self) -> &RecognizerId {
+        &self.id
+    }
+
+    /// Optional recognizer implementation or rule-set version.
+    pub fn version(&self) -> Option<&str> {
+        self.version.as_deref()
     }
 }
 

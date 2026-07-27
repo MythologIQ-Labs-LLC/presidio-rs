@@ -16,6 +16,8 @@ jobs:
   audit:
     name: History, provenance, and package audit
     runs-on: ubuntu-latest
+    env:
+      AUDIT_DIR: ${{ runner.temp }}/public-visibility-audit
     steps:
       - name: Check out complete repository history
         uses: actions/checkout@v4
@@ -37,20 +39,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p audit
-          git for-each-ref --format='%(refname)%09%(objectname)' | sort > audit/refs.tsv
-          git log --all --date=iso-strict --format='%H%x09%an%x09%ae%x09%ad%x09%s' > audit/commits.tsv
-          git rev-list --objects --all > audit/objects.tsv
-          git count-objects -vH > audit/object-count.txt
-          git fsck --full --no-reflogs --unreachable > audit/git-fsck.txt 2>&1 || true
+          mkdir -p "$AUDIT_DIR"
+          git for-each-ref --format='%(refname)%09%(objectname)' | sort > "$AUDIT_DIR/refs.tsv"
+          git log --all --date=iso-strict --format='%H%x09%an%x09%ae%x09%ad%x09%s' > "$AUDIT_DIR/commits.tsv"
+          git rev-list --objects --all > "$AUDIT_DIR/objects.tsv"
+          git count-objects -vH > "$AUDIT_DIR/object-count.txt"
+          git fsck --full --no-reflogs --unreachable > "$AUDIT_DIR/git-fsck.txt" 2>&1 || true
 
           patterns='Bicameral|Qortara|Accountable\.Live|empty-flagon|Celestara|mythologiq\.studio'
-          : > audit/internal-reference-paths.txt
+          : > "$AUDIT_DIR/internal-reference-paths.txt"
           while read -r commit; do
             git grep -IlE "$patterns" "$commit" -- . 2>/dev/null || true
-          done < <(git rev-list --all) | sort -u > audit/internal-reference-paths.txt
+          done < <(git rev-list --all) | sort -u > "$AUDIT_DIR/internal-reference-paths.txt"
 
-          cut -f3 audit/commits.tsv | sort -u > audit/author-emails.txt
+          cut -f3 "$AUDIT_DIR/commits.tsv" | sort -u > "$AUDIT_DIR/author-emails.txt"
 
       - name: Install verified Gitleaks release
         shell: bash
@@ -69,7 +71,7 @@ jobs:
           test -n "$expected"
           echo "$expected  /tmp/gitleaks.tar.gz" | sha256sum --check
           tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
-          /tmp/gitleaks version | tee audit/gitleaks-version.txt
+          /tmp/gitleaks version | tee "$AUDIT_DIR/gitleaks-version.txt"
 
       - name: Scan current tree and all fetched history for secrets
         shell: bash
@@ -79,44 +81,44 @@ jobs:
             --log-opts='--all --full-history' \
             --redact \
             --report-format=json \
-            --report-path=audit/gitleaks-history.json \
+            --report-path="$AUDIT_DIR/gitleaks-history.json" \
             --exit-code=0
           /tmp/gitleaks dir . \
             --redact \
             --report-format=json \
-            --report-path=audit/gitleaks-tree.json \
+            --report-path="$AUDIT_DIR/gitleaks-tree.json" \
             --exit-code=0
-          test -f audit/gitleaks-history.json || echo '[]' > audit/gitleaks-history.json
-          test -f audit/gitleaks-tree.json || echo '[]' > audit/gitleaks-tree.json
+          test -f "$AUDIT_DIR/gitleaks-history.json" || echo '[]' > "$AUDIT_DIR/gitleaks-history.json"
+          test -f "$AUDIT_DIR/gitleaks-tree.json" || echo '[]' > "$AUDIT_DIR/gitleaks-tree.json"
 
-      - name: Inspect package contents and dependency license metadata
+      - name: Install stable Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Produce package and license evidence
         shell: bash
         run: |
           set -euo pipefail
-          cargo package --list --allow-dirty > audit/cargo-package-list.txt
+          cargo package --list --allow-dirty > "$AUDIT_DIR/cargo-package-list.txt"
           cargo package --allow-dirty
-          cargo metadata --locked --all-features --format-version 1 > audit/cargo-metadata.json
+          cargo metadata --locked --all-features --format-version 1 > "$AUDIT_DIR/cargo-metadata.json"
           jq -r '.packages[] | [.name, .version, (.license // "MISSING"), (.source // "workspace")] | @tsv' \
-            audit/cargo-metadata.json | sort -u > audit/dependency-licenses.tsv
+            "$AUDIT_DIR/cargo-metadata.json" | sort -u > "$AUDIT_DIR/dependency-licenses.tsv"
 
       - name: Summarize audit
         id: summary
         shell: bash
         run: |
           set -euo pipefail
-          history_findings=$(jq 'length' audit/gitleaks-history.json)
-          tree_findings=$(jq 'length' audit/gitleaks-tree.json)
-          refs=$(wc -l < audit/refs.tsv)
-          commits=$(wc -l < audit/commits.tsv)
-          objects=$(wc -l < audit/objects.tsv)
-          package_files=$(wc -l < audit/cargo-package-list.txt)
-          internal_paths=$(wc -l < audit/internal-reference-paths.txt)
-          missing_licenses=$(awk -F '\t' '$3 == "MISSING" {count++} END {print count+0}' audit/dependency-licenses.tsv)
+          history_findings=$(jq 'length' "$AUDIT_DIR/gitleaks-history.json")
+          tree_findings=$(jq 'length' "$AUDIT_DIR/gitleaks-tree.json")
+          refs=$(wc -l < "$AUDIT_DIR/refs.tsv")
+          commits=$(wc -l < "$AUDIT_DIR/commits.tsv")
+          objects=$(wc -l < "$AUDIT_DIR/objects.tsv")
+          package_files=$(wc -l < "$AUDIT_DIR/cargo-package-list.txt")
+          internal_paths=$(wc -l < "$AUDIT_DIR/internal-reference-paths.txt")
+          missing_licenses=$(awk -F '\t' '$3 == "MISSING" {count++} END {print count+0}' "$AUDIT_DIR/dependency-licenses.tsv")
 
-          cat > audit/AUDIT-SUMMARY.md <<EOF
+          cat > "$AUDIT_DIR/AUDIT-SUMMARY.md" <<EOF
           # Public visibility audit summary
 
           - Commit: $GITHUB_SHA
@@ -131,7 +133,7 @@ jobs:
 
           This automated result supplements, but does not replace, maintainer review of naming, copyright ownership, provenance, contribution terms, GitHub settings, and acceptable author metadata.
           EOF
-          cat audit/AUDIT-SUMMARY.md >> "$GITHUB_STEP_SUMMARY"
+          cat "$AUDIT_DIR/AUDIT-SUMMARY.md" >> "$GITHUB_STEP_SUMMARY"
 
           if [[ "$history_findings" -ne 0 || "$tree_findings" -ne 0 || "$missing_licenses" -ne 0 ]]; then
             echo '::error::Public visibility audit found secret or dependency-license findings requiring review.'
@@ -143,6 +145,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: public-visibility-audit
-          path: audit/
+          path: ${{ runner.temp }}/public-visibility-audit/
           if-no-files-found: error
           retention-days: 14

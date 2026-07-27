@@ -11,6 +11,7 @@
 //! - replace, redact, mask, and deterministic hash operators
 //! - custom recognizer and validator registration
 //! - additive validated value types for the next-generation finding contract
+//! - unresolved analysis reports with explicit resolution policies
 //!
 //! It performs no network or filesystem I/O and requires no Python runtime.
 //! Person names, prose locations, and other semantic entities are not detected
@@ -39,6 +40,7 @@ pub mod context;
 mod entity;
 mod recognizer;
 mod registry;
+mod report;
 mod result;
 mod types;
 pub mod validators;
@@ -46,8 +48,11 @@ pub mod validators;
 pub use analyzer::{AnalyzerEngine, DEFAULT_SCORE_THRESHOLD};
 pub use anonymizer::{anonymize, AnonymizerEngine, Operator};
 pub use entity::EntityType;
-pub use recognizer::{Pattern, PatternRecognizer, Validator};
-pub use registry::RecognizerRegistry;
+pub use recognizer::{Pattern, PatternRecognizer, RecognizerMetadata, Validator};
+pub use registry::{RecognizerRegistry, RegistryError};
+pub use report::{
+    AnalysisError, AnalysisIssue, AnalysisReport, CandidateIssue, ResolutionPolicy,
+};
 pub use result::RecognizerResult;
 pub use types::{
     Confidence, ConfidenceError, EntityId, Evidence, Finding, FindingConversionError,

@@ -8,7 +8,7 @@ use core::fmt;
 /// checksum validator. The [`EntityType::Person`], [`EntityType::Location`],
 /// and [`EntityType::Nrp`] variants have no regex form; they are reserved for a
 /// future offline model (NER) backend and are never emitted by the current
-/// [`crate::AnalyzerEngine`].
+/// [`crate::AnalyzerEngine`] legacy path.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[non_exhaustive]
@@ -51,6 +51,27 @@ impl EntityType {
             EntityType::Person => "PERSON",
             EntityType::Location => "LOCATION",
             EntityType::Nrp => "NRP",
+        }
+    }
+
+    /// Convert a canonical open entity identifier into the legacy taxonomy.
+    pub fn from_tag(tag: &str) -> Option<Self> {
+        match tag {
+            "CREDIT_CARD" => Some(Self::CreditCard),
+            "US_SSN" => Some(Self::Ssn),
+            "EMAIL_ADDRESS" => Some(Self::Email),
+            "PHONE_NUMBER" => Some(Self::PhoneNumber),
+            "IP_ADDRESS" => Some(Self::IpAddress),
+            "MAC_ADDRESS" => Some(Self::MacAddress),
+            "IBAN_CODE" => Some(Self::IbanCode),
+            "CRYPTO" => Some(Self::CryptoWallet),
+            "URL" => Some(Self::Url),
+            "US_ITIN" => Some(Self::UsItin),
+            "API_KEY" => Some(Self::ApiKey),
+            "PERSON" => Some(Self::Person),
+            "LOCATION" => Some(Self::Location),
+            "NRP" => Some(Self::Nrp),
+            _ => None,
         }
     }
 }

@@ -5,6 +5,28 @@
 - [Target architecture](architecture/ARCHITECTURE.md)
 - [ADR 0001: Develop privately with open-source-grade practices](adr/0001-private-open-source-posture.md)
 - [ADR 0002: Backend-neutral core with optional capability adapters](adr/0002-backend-neutral-core-and-optional-adapters.md)
+- [ADR 0003: Stage validated core types before engine migration](adr/0003-stage-core-types-before-engine-migration.md)
+- [ADR 0004: Add candidate-preserving analysis reports](adr/0004-add-candidate-preserving-analysis-report.md)
+- [ADR 0005: Add recognizer metadata and validated registration](adr/0005-add-recognizer-metadata-and-validated-registration.md)
+- [ADR 0006: Bind findings and reports to exact text documents](adr/0006-bind-findings-to-text-documents.md)
+- [ADR 0007: Add analysis requests and a backend-neutral recognizer trait](adr/0007-add-analysis-request-and-recognizer-trait.md)
+
+## Implemented architecture status
+
+The private development branch now includes:
+
+- structurally validated spans and bounded open identifiers;
+- candidate-preserving reports with typed issues and deterministic limits;
+- authoritative recognizer metadata and strict pattern registration;
+- exact document identity and source-content binding;
+- bounded `AnalysisRequest` selection and resource controls;
+- an object-safe backend-neutral `Recognizer` trait;
+- validated candidate emission; and
+- typed non-plaintext backend failures.
+
+The existing legacy analyzer and anonymizer APIs remain available. The request-oriented path is additive and is the target integration surface for new Rust consumers.
+
+The next architectural slice is fallible anonymization over document-bound findings with an explicit resolution policy.
 
 ## Development planning
 

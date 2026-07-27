@@ -11,15 +11,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Open-source-grade contribution, governance, conduct, security, and release-readiness policies.
 - CI gates for formatting, Clippy, tests, documentation, package verification, MSRV, dependency audit, and DCO sign-off.
 - Standalone public-facing project documentation and expected-use-case boundaries.
+- Validated structural spans, bounded open identifiers, constrained confidence values, evidence, and findings.
+- Candidate-preserving `AnalysisReport` output with typed issues and deterministic candidate and issue limits.
+- Authoritative recognizer metadata, strict pattern registration, stable built-in recognizer IDs, and report provenance catalogs.
+- `TextDocument`, document identity, exact-content fingerprints, document-bound findings, and report validation.
+- Bounded `AnalysisRequest` controls for entities, recognizers, locale, capabilities, confidence, input size, candidates, and issues.
+- Object-safe backend-neutral `Recognizer` execution and validated `CandidateEmitter` output.
+- Typed non-plaintext backend failures and explicit legacy-projection completeness status.
+- Adversarial tests for Unicode spans, provenance, limits, document mismatch, custom backends, legacy compatibility, and failure handling.
 
 ### Changed
 
 - Package metadata prepared for MIT-licensed distribution.
-- Documentation separated implemented, measured, and planned capabilities.
+- Documentation separates implemented, measured, and planned capabilities.
+- Built-in pattern recognizers now use validated metadata-backed registration.
+- New request-oriented integrations use exact document binding and authoritative recognizer provenance.
+- The existing analyzer, `RecognizerResult`, pattern registry, and anonymizer APIs remain available for compatibility.
 
 ### Security
 
 - Added a coordinated vulnerability disclosure process.
+- Prevented supported custom backends from bypassing entity, span, confidence, provenance, source-binding, and candidate-limit invariants.
+- Added bounded metadata and failure codes to reduce accidental plaintext capture in reports.
+- Added exact-source validation before document-bound findings can be sliced or applied.
 
 ## [0.1.0] - Unreleased
 

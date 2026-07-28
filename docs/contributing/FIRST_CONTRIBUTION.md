@@ -99,4 +99,4 @@ When uncertain, open an issue before building the abstraction. The repository pr
 
 ## Security reports
 
-Do not open a public issue for a suspected vulnerability. Follow [`SECURITY.md`](../../SECURITY.md) and use GitHub private vulnerability reporting when available.
+Do not open a public issue for a suspected vulnerability. Email **admin@mythologiq.studio** with the subject line `presidio-rs security report` and follow [`SECURITY.md`](../../SECURITY.md). Use synthetic details in the first message and request a safer transfer method before sending sensitive proof-of-concept material.

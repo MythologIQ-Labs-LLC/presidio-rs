@@ -12,10 +12,9 @@ After stable releases begin, this file will list supported release lines explici
 
 Do not disclose suspected vulnerabilities in a public issue, pull request, discussion, or social post before maintainers have had a reasonable opportunity to investigate.
 
-Preferred reporting path:
+Send confidential reports to **admin@mythologiq.studio** with the subject line `presidio-rs security report`.
 
-1. Use GitHub private vulnerability reporting or a private repository security advisory when available.
-2. If that feature is unavailable, contact a repository administrator through a private MythologIQ Labs LLC communication channel and request a secure reporting path.
+GitHub private vulnerability reporting is not currently available for this repository. Email is therefore the authoritative confidential reporting path until that capability becomes available or a replacement secure intake system is documented here.
 
 Include:
 
@@ -28,7 +27,7 @@ Include:
 - suggested mitigation, if known; and
 - whether the report has been shared elsewhere.
 
-Do not include real personal data, production secrets, or customer information. Use synthetic examples.
+Do not include real personal data, production secrets, or customer information. Use synthetic examples. When a proof of concept requires sensitive material, first send a minimal description and request a safer transfer method.
 
 ## Response process
 

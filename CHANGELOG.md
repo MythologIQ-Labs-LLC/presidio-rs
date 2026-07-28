@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - A Presidio architecture archaeology and secure-alpha decision program.
 - ADR 0008 establishing an evidence-gated secure functional alpha pipeline.
 - A roadmap that distinguishes public foundation alpha from secure functional alpha.
+- A first secure-alpha development-round plan for explicit, versioned candidate resolution before anonymization.
 
 ### Changed
 
@@ -43,6 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The existing analyzer, `RecognizerResult`, pattern registry, and anonymizer APIs remain available for compatibility.
 - Contributor onboarding now starts from a documented, runnable path rather than private project context.
 - Resolution now precedes authoritative anonymization, and recognizer expansion follows the secure functional alpha gate.
+- The first implementation round is split into an evidence and contract freeze, a pure resolution engine, and additive `AnalysisReport` integration while legacy output remains unchanged.
 - Deterministic hashing remains legacy-compatible and is excluded from authoritative secure-alpha assumptions until reviewed semantics are implemented or the operator is disabled.
 
 ### Security

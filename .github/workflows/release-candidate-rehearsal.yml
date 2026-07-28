@@ -77,6 +77,7 @@ jobs:
         env:
           SOURCE_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
           SOURCE_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
           candidate="$RUNNER_TEMP/public-candidate"
@@ -87,7 +88,7 @@ jobs:
           git -c credential.helper= -c http.extraHeader= clone --no-checkout --filter=blob:none "$public_url" "$candidate"
           git -C "$candidate" -c credential.helper= -c http.extraHeader= fetch --depth 1 origin "refs/heads/${SOURCE_REF}"
           git -C "$candidate" checkout --detach FETCH_HEAD
-          test "$(git -C "$candidate" rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C "$candidate" rev-parse HEAD)" = "$EXPECTED_SHA"
           git -C "$candidate" clean -xffd
           test -z "$(git -C "$candidate" status --porcelain)"
           echo "path=$candidate" >> "$GITHUB_OUTPUT"

@@ -57,20 +57,21 @@ The immediate post-visibility architecture work is explicit candidate resolution
 - [Public visibility and rollback runbook](release/PUBLIC_VISIBILITY_RUNBOOK.md)
 - [Source and dependency provenance inventory](release/SOURCE_AND_DEPENDENCY_PROVENANCE.md)
 
-The evidence records are updated throughout release week. A planning target, checklist, candidate branch, or green build does not itself authorize public visibility.
+The repository became public on July 28, 2026. Evidence records remain authoritative for the exact tested commits and release operations.
 
 ## Accelerated release baseline
 
-The repository is targeted to become publicly readable on **Thursday, July 30, 2026**.
+The repository became publicly readable on **Tuesday, July 28, 2026**, two days ahead of the original target.
 
-That visibility change is separate from contributor-ready alpha, consumer-ready beta, crates.io publication, an advertised launch, production certification, and stable API commitments.
+Public visibility remains separate from contributor-ready alpha, consumer-ready beta, crates.io publication, an advertised launch, production certification, and stable API commitments.
 
 Current target gates:
 
-- public repository visibility: July 30, 2026;
-- contributor-ready public alpha: August 14, 2026;
-- consumer-ready public beta: September 25, 2026; and
-- package and advertised-launch decision: October 30, 2026.
+- public repository visibility: completed July 28, 2026;
+- contributor-ready public alpha: August 3, 2026;
+- correctness, evaluation, and initial fuzzing: August 21, 2026;
+- consumer-ready public beta: September 4, 2026; and
+- package and advertised-launch decision: October 2, 2026.
 
 The original February 26, 2027 horizon remains a broader maturity checkpoint rather than the first possible publication date.
 

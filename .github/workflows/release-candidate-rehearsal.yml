@@ -71,15 +71,23 @@ jobs:
       - name: Verify relative Markdown links
         run: python3 tools/verify_markdown_links.py
 
-      - name: Create isolated credential-free clone
+      - name: Create unauthenticated public network clone
         id: clone
         shell: bash
+        env:
+          SOURCE_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          SOURCE_REF: ${{ github.event.pull_request.head.ref || github.ref_name }}
         run: |
           set -euo pipefail
           candidate="$RUNNER_TEMP/public-candidate"
-          git clone --no-local "$GITHUB_WORKSPACE" "$candidate"
-          git -C "$candidate" checkout --detach "$GITHUB_SHA"
-          git -C "$candidate" config --local --unset-all http.https://github.com/.extraheader || true
+          public_url="https://github.com/${SOURCE_REPOSITORY}.git"
+          export GIT_TERMINAL_PROMPT=0
+          export GIT_CONFIG_NOSYSTEM=1
+          export GIT_CONFIG_GLOBAL=/dev/null
+          git -c credential.helper= -c http.extraHeader= clone --no-checkout --filter=blob:none "$public_url" "$candidate"
+          git -C "$candidate" -c credential.helper= -c http.extraHeader= fetch --depth 1 origin "refs/heads/${SOURCE_REF}"
+          git -C "$candidate" checkout --detach FETCH_HEAD
+          test "$(git -C "$candidate" rev-parse HEAD)" = "$GITHUB_SHA"
           git -C "$candidate" clean -xffd
           test -z "$(git -C "$candidate" status --porcelain)"
           echo "path=$candidate" >> "$GITHUB_OUTPUT"
@@ -143,7 +151,8 @@ jobs:
           # Release candidate rehearsal
 
           - Candidate commit: $(git rev-parse HEAD)
-          - Fresh isolated clone: passed
+          - Unauthenticated public GitHub network clone: passed
+          - Exact candidate SHA verification: passed
           - Required public files: passed
           - Repository YAML parsing: passed
           - Relative Markdown links: passed
@@ -151,8 +160,6 @@ jobs:
           - Documented examples: passed
           - Cargo package inspection: passed
           - Cargo publish dry run: passed
-
-          This is a credential-free local clone rehearsal while the repository remains internal. A truly anonymous network clone can only be verified after visibility changes.
           EOF
           cat "$evidence/REHEARSAL-SUMMARY.md" >> "$GITHUB_STEP_SUMMARY"
 

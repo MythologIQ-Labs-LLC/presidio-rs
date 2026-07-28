@@ -27,6 +27,8 @@ The current `main` branch includes:
 
 The legacy analyzer and anonymizer APIs remain available. The request-oriented path is additive and is the target integration surface for new Rust consumers.
 
+The active implementation round is explicit candidate resolution. See [First Secure-Alpha Development Round](planning/FIRST_DEVELOPMENT_ROUND.md).
+
 The secure functional alpha critical path is:
 
 1. Presidio evidence and alpha contract;
@@ -53,6 +55,7 @@ The secure functional alpha critical path is:
 ## Development planning
 
 - [Secure functional alpha roadmap](planning/DEVELOPMENT_PLAN.md)
+- [First secure-alpha development round](planning/FIRST_DEVELOPMENT_ROUND.md)
 - [Public repository release week](planning/PUBLIC_RELEASE_WEEK.md)
 - [Open-source foundation track](planning/OPEN_SOURCE_FOUNDATION_TRACK.md)
 - [Development risk and assumption register](planning/RISK_REGISTER.md)

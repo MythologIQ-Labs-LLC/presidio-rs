@@ -33,7 +33,8 @@ Public repository visibility is separate from:
 The project may remain quietly public while correctness, evaluation, fuzzing, compatibility, and consumer validation continue.
 
 - [Public repository release week](docs/planning/PUBLIC_RELEASE_WEEK.md)
-- [Rebaselined roadmap](docs/planning/DEVELOPMENT_PLAN.md)
+- [Secure functional alpha roadmap](docs/planning/DEVELOPMENT_PLAN.md)
+- [First secure-alpha development round](docs/planning/FIRST_DEVELOPMENT_ROUND.md)
 - [Release checklist](OPEN_SOURCE_RELEASE_CHECKLIST.md)
 
 ## What is implemented
@@ -110,7 +111,7 @@ assert_eq!(
 );
 ```
 
-`AnalysisReport::candidates()` is authoritative for this path. `legacy_compatible_results()` is a compatibility projection. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.
+`AnalysisReport::candidates()` is authoritative raw evidence for this path. `legacy_compatible_results()` is a transitional compatibility projection that still uses the legacy overlap behavior. The first secure-alpha implementation round adds explicit, versioned resolution while preserving the original candidates. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.
 
 Migration and compatibility references:
 
@@ -260,7 +261,7 @@ The current anonymizer consumes legacy `RecognizerResult` values and supports:
 - `Mask`; and
 - deterministic salted SHA-256 `Hash`.
 
-Fallible anonymization over document-bound findings and an explicit permanent resolution policy are immediate post-visibility roadmap work.
+Explicit candidate resolution is the active first development round. Fallible anonymization over document-bound resolved findings follows only after the resolution contract is versioned and tested.
 
 Deterministic hashing enables correlation. It does not guarantee irreversible anonymity, especially for low-entropy values or disclosed salts.
 
@@ -283,7 +284,7 @@ TextDocument + AnalysisRequest
 
 Architecture documents:
 
-- [Target architecture](docs/architecture/ARCHITECTURE.md)
+- [Active architecture](docs/architecture/ARCHITECTURE.md)
 - [ADR 0001: Open-source-grade posture](docs/adr/0001-private-open-source-posture.md)
 - [ADR 0002: Backend-neutral core and optional adapters](docs/adr/0002-backend-neutral-core-and-optional-adapters.md)
 - [ADR 0003: Validated core types](docs/adr/0003-stage-core-types-before-engine-migration.md)
@@ -291,6 +292,8 @@ Architecture documents:
 - [ADR 0005: Recognizer metadata and validated registration](docs/adr/0005-add-recognizer-metadata-and-validated-registration.md)
 - [ADR 0006: Exact document binding](docs/adr/0006-bind-findings-to-text-documents.md)
 - [ADR 0007: Requests and recognizer execution](docs/adr/0007-add-analysis-request-and-recognizer-trait.md)
+- [ADR 0008: Evidence-gated secure functional alpha](docs/adr/0008-stage-secure-functional-alpha-through-evidence-gated-pipeline.md)
+- [First secure-alpha development round](docs/planning/FIRST_DEVELOPMENT_ROUND.md)
 - [Documentation index](docs/README.md)
 
 ## Security and privacy boundaries
@@ -316,7 +319,9 @@ Report vulnerabilities confidentially to **admin@mythologiq.studio**. See [SECUR
 The accelerated roadmap records public repository visibility on July 28, public foundation alpha by August 3, secure functional alpha by August 21, consumer-validated beta by September 4, and separate package and promotion decisions by October 2.
 
 - [Public repository release week](docs/planning/PUBLIC_RELEASE_WEEK.md)
-- [Rebaselined development roadmap](docs/planning/DEVELOPMENT_PLAN.md)
+- [Secure functional alpha roadmap](docs/planning/DEVELOPMENT_PLAN.md)
+- [First secure-alpha development round](docs/planning/FIRST_DEVELOPMENT_ROUND.md)
+- [Presidio archaeology and secure-alpha model](docs/research/PRESIDIO_ARCHAEOLOGY_AND_ALPHA_MODEL.md)
 - [Open-source foundation track](docs/planning/OPEN_SOURCE_FOUNDATION_TRACK.md)
 - [Risk and assumption register](docs/planning/RISK_REGISTER.md)
 - [Active Rust privacy landscape watch](docs/research/ACTIVE_LANDSCAPE_WATCH.md)

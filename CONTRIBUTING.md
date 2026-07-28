@@ -4,6 +4,8 @@ Thank you for contributing to `presidio-rs`. The project is preparing for public
 
 This project handles security-sensitive text processing. Changes should be small, explainable, tested, and honest about their limits.
 
+New contributors should begin with the [First Contribution Guide](docs/contributing/FIRST_CONTRIBUTION.md). It provides a smaller setup path, suitable first issues, synthetic-data rules, and evidence expectations without requiring private project context.
+
 ## Interim public contribution intake
 
 After the repository becomes public, anyone may open issues and pull requests for discussion and review.
@@ -62,9 +64,14 @@ Before submitting a pull request, run:
 cargo fmt --all -- --check
 cargo clippy --all-targets --all-features -- -D warnings
 cargo test --all-features
-cargo doc --no-deps --all-features
-cargo package --allow-dirty
+cargo test --doc --all-features
+RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
+cargo run --example strict_pattern_recognizer
+cargo run --example custom_backend
+cargo publish --dry-run
 ```
+
+`cargo publish --dry-run` validates package assembly but does not publish the crate. Package publication remains separately authorized, because apparently one command needs both a rehearsal mode and the capacity to create permanent consequences.
 
 ## What belongs in this repository
 

@@ -1,161 +1,275 @@
-# Target Architecture
+# Architecture
 
 ## Status
 
-- **Document state:** Proposed target architecture
-- **Applies to:** private development toward a reusable Rust library
-- **Last updated:** 2026-07-27
-- **Decision model:** architecture decisions are recorded through ADRs and may change when evidence changes
+- **Document state:** Active target architecture
+- **Applies to:** Public development of a reusable Rust privacy library
+- **Last updated:** 2026-07-28
+- **Decision model:** Material decisions are recorded through ADRs and may change when evidence changes
+- **Current governing decision:** [ADR 0008](../adr/0008-stage-secure-functional-alpha-through-evidence-gated-pipeline.md)
 
 ## Purpose
 
-`presidio-rs` is intended to become a reusable, offline-first Rust library for detecting and transforming supported sensitive-data spans in text.
+`presidio-rs` is an offline-first Rust library for detecting and transforming supported sensitive-data spans in UTF-8 text.
 
-The architecture must support more than one Rust consumer without allowing any one consumer to define the core library around its private policy, runtime, or product assumptions.
+The project is not attempting to reproduce every Microsoft Presidio feature or Python class boundary. It is building a small, explainable Rust privacy kernel whose behavior can be bounded, measured, and adopted by more than one consumer without product-specific coupling.
 
-The project is not trying to reproduce every Microsoft Presidio feature. It is building a small, explainable Rust privacy kernel with optional capabilities and measurable behavior.
+The useful inheritance from Python Presidio includes architecture, release history, design discussions, failures, fixes, false-positive tradeoffs, security changes, evaluation practices, configuration evolution, and governance lessons. Those lessons inform decisions but do not make Python behavior a compatibility oracle.
+
+## Alpha gates
+
+The project distinguishes two alpha states.
+
+### Public foundation alpha
+
+The repository is:
+
+- publicly readable and anonymously cloneable;
+- buildable and testable from public documentation;
+- governed through contribution, security, provenance, and release controls;
+- explicit about maturity and unsupported behavior; and
+- usable by contributors without private project context.
+
+This gate establishes a credible public project. It does not establish a safe transformation boundary.
+
+### Secure functional alpha
+
+The authoritative text pipeline is:
+
+- bounded;
+- source-exact;
+- explicit about supported and unsupported scope;
+- deterministic under named policies;
+- failure-safe;
+- auditable without plaintext by default;
+- reproducibly evaluated; and
+- exercised through regressions, fuzzing, and an external consumer path.
+
+A secure functional alpha does not guarantee complete PII detection, production certification, regulatory compliance, stable `1.0` compatibility, or drop-in compatibility with Microsoft Presidio.
 
 ## Architectural goals
 
-1. Preserve byte-accurate findings against original UTF-8 input.
-2. Separate detection evidence from consumer policy decisions.
-3. Support pattern, structural, contextual, and future semantic recognizers through one extensible contract.
-4. Preserve candidate provenance before overlap or policy resolution.
-5. Make anonymization fallible, observable, and testable.
-6. Keep the default model-free core offline, synchronous, dependency-light, and embeddable.
-7. Allow multiple Rust consumers to adopt the crate without product-specific coupling.
-8. Keep optional heavy capabilities, especially semantic models, outside the default dependency graph.
-9. Treat public APIs, serialized formats, entity identifiers, and output semantics as compatibility surfaces.
-10. Require evaluation evidence before changing default recognizers, thresholds, or superiority claims.
+1. Preserve exact byte coordinates against original UTF-8 input.
+2. Bind findings and transformations to the exact source document.
+3. Preserve recognition evidence before threshold, context, or resolution policy changes it.
+4. Separate recognition mechanics, context, thresholding, resolution, and transformation.
+5. Make resolution explicit, deterministic, and versioned.
+6. Make anonymization fallible, atomic, observable, and testable.
+7. Keep the default core offline, synchronous, dependency-light, and embeddable.
+8. Require conservative, locale-aware, measured defaults.
+9. Keep semantic models and other heavy capabilities outside the default dependency graph.
+10. Treat public APIs, entity IDs, recognizer IDs, policy IDs, serialized formats, errors, and output semantics as compatibility surfaces.
+11. Require evidence before changing defaults or making quality, security, compatibility, or performance claims.
+12. Preserve the option to adopt, collaborate with, or migrate to a better Rust project.
 
-## Non-goals
+## Explicit non-goals for secure functional alpha
 
-The core project does not initially aim to provide:
+The alpha does not include:
 
-- a hosted service;
-- a general policy-management platform;
+- hosted HTTP services;
+- authentication or authorization infrastructure;
+- general policy-management software;
+- structured or tabular de-identification orchestration;
 - OCR, image, DICOM, audio, or video redaction;
-- a legal or regulatory compliance guarantee;
-- arbitrary structured-data de-identification;
 - automatic runtime model downloads;
-- a permanent commitment to any specific NER runtime or model;
-- a stable C ABI before the Rust API stabilizes;
-- `no_std` support without a demonstrated consumer requirement; or
+- streaming redaction;
+- stable cross-language bindings;
+- a stable serialized configuration format;
+- broad semantic recognition in the default crate;
+- `no_std` support without a demonstrated consumer requirement;
+- a legal or regulatory compliance guarantee; or
 - full behavioral compatibility with Microsoft Presidio.
+
+## Decision and delivery order
+
+Material alpha work follows this order:
+
+```text
+Presidio evidence and decision ledger
+        |
+        v
+Secure alpha contract and threat model
+        |
+        v
+Bounded document and request contracts
+        |
+        v
+Recognition, evidence, and safe defaults
+        |
+        v
+Context and threshold policy
+        |
+        v
+Named resolution policy
+        |
+        v
+Complete anonymization-plan validation
+        |
+        v
+Atomic execution and auditable report
+        |
+        v
+Evaluation, regressions, fuzzing, and consumer validation
+```
+
+Resolution precedes authoritative anonymization. Recognizer expansion follows the secure functional alpha gate rather than competing with it.
 
 ## System context
 
 ```text
-                         Consumer-owned boundary
+                           Consumer-owned boundary
 
-  logs      prompts      documents      tool output      custom text
-    │          │              │               │                │
-    └──────────┴──────────────┴───────────────┴────────────────┘
-                               │
-                               ▼
-                    ┌─────────────────────┐
-                    │   presidio-rs core  │
-                    │                     │
-                    │ TextDocument        │
-                    │ RecognizerRegistry  │
-                    │ Analyzer            │
-                    │ Resolver            │
-                    │ Anonymizer          │
-                    └─────────────────────┘
-                               │
-                     Findings and reports
-                               │
-                               ▼
-                    Consumer-owned policy
-                  allow | block | redact | review
+  logs       prompts       documents       tool output       custom text
+    |           |               |                |                 |
+    +-----------+---------------+----------------+-----------------+
+                                |
+                                v
+                     +-----------------------+
+                     |   presidio-rs core    |
+                     |                       |
+                     | TextDocument          |
+                     | AnalysisRequest       |
+                     | Recognizer selection  |
+                     | Candidate collection  |
+                     | Context and threshold |
+                     | Resolution            |
+                     | Anonymization plan    |
+                     | Atomic execution      |
+                     +-----------------------+
+                                |
+                      Reports and operations
+                                |
+                                v
+                      Consumer-owned decision
+                     allow | block | redact | review
 
- Optional capability crates:
+ Optional capability boundaries:
 
-  presidio-rs-eval          evaluation and error analysis
-  presidio-rs-ner-*         semantic recognizer adapters
-  consumer adapters         maintained outside the core unless broadly reusable
+   evaluation tools       corpus, metrics, errors, differential learning
+   semantic adapters      tokenizer, model, device, artifact lifecycle
+   consumer adapters      services, storage, orchestration, interfaces
 ```
 
-The library detects and transforms. The consumer decides whether output may proceed, whether errors fail open or fail closed, what telemetry is appropriate, and what data-handling obligations apply.
+The core detects and transforms text. The consumer decides whether output may proceed, whether incomplete analysis fails open or closed, what telemetry is appropriate, and which legal, operational, and data-handling obligations apply.
+
+## Authoritative pipeline
+
+```text
+Input validation and limits
+        |
+        v
+TextDocument and exact source identity
+        |
+        v
+Recognizer selection by metadata and request policy
+        |
+        v
+Validated source-bound candidate emission
+        |
+        v
+Boundary-aware context and threshold decisions
+        |
+        v
+Named and versioned resolution policy
+        |
+        v
+AnalysisReport with candidates, resolved findings, issues, and limits
+        |
+        v
+AnonymizationPolicy and complete plan validation
+        |
+        v
+Atomic transformation
+        |
+        v
+AnonymizationReport with source-to-output operation records
+```
+
+Each stage has a distinct input, output, error contract, and diagnostic evidence surface.
 
 ## Core value types
 
-The current public model of `EntityType`, raw `usize` offsets, and `f32` scores is useful for a prototype but too weak for a durable multi-consumer contract.
-
-The target value model is:
+The durable public model uses validated values rather than raw primitive fields.
 
 ```rust
 pub struct Span {
-    pub start: usize,
-    pub end: usize,
+    start: usize,
+    end: usize,
 }
 
 pub struct EntityId(Arc<str>);
-
 pub struct Confidence(f32);
-
 pub struct RecognizerId(Arc<str>);
+pub struct DocumentId(Arc<str>);
 
 pub struct Finding {
-    pub entity: EntityId,
-    pub span: Span,
-    pub confidence: Confidence,
-    pub recognizer: RecognizerId,
-    pub recognizer_version: Arc<str>,
-    pub evidence: Vec<Evidence>,
-    pub locale: Option<Locale>,
+    entity: EntityId,
+    span: Span,
+    confidence: Confidence,
+    recognizer: RecognizerId,
+    recognizer_version: Arc<str>,
+    evidence: Vec<Evidence>,
+    locale: Option<Locale>,
+    document_binding: DocumentBinding,
 }
 ```
 
 Required invariants:
 
-- spans are ordered, non-negative byte ranges into the original UTF-8 input;
-- span construction validates character boundaries where transformation requires them;
+- spans are ordered byte ranges into original UTF-8 input;
+- transformation spans begin and end on UTF-8 character boundaries;
 - confidence is finite and constrained to `[0.0, 1.0]`;
-- entity and recognizer identifiers are stable, validated, and serialization-safe;
-- a finding records which recognizer produced it and why;
-- scores from different recognizer families are not assumed to be calibrated equivalents.
+- identifiers are bounded, validated, and serialization-safe;
+- findings preserve recognizer identity, version, source binding, and evidence;
+- scores from different recognizer families are not assumed to be calibrated equivalents; and
+- no raw sensitive value is required in a finding or diagnostic record.
 
-The existing `EntityType` enum should remain as a temporary compatibility facade while the open identifier model is introduced.
+`EntityType` and `RecognizerResult` remain legacy-compatible facades until consumers migrate to the authoritative path.
 
-## Text and offset model
+## Text and source-coordinate model
 
 `TextDocument` owns the relationship among:
 
 - original UTF-8 text;
-- normalized views;
-- tokenized views;
-- normalized-to-original offset mappings;
-- input size limits; and
-- document identity used to prevent applying findings to the wrong text.
-
-```rust
-pub struct TextDocument<'a> {
-    original: &'a str,
-    document_id: DocumentId,
-    // lazily computed normalized and tokenized views
-}
-```
-
-### Offset rule
+- opaque document identity;
+- source byte length;
+- source fingerprint;
+- normalized or tokenized views when available;
+- normalized-to-original offset mappings; and
+- input-size limits.
 
 All externally visible spans use byte offsets into the original input.
 
-Recognizers may operate on normalized or tokenized representations only when they can map findings back to original input coordinates. A recognizer that cannot provide valid source offsets must return an error or explicitly unsupported result rather than an approximate span.
+Recognizers may operate on normalized, tokenized, or model-specific views only when they can map findings exactly back to original coordinates. A recognizer that cannot produce exact source offsets returns a typed failure or unsupported result. Approximate spans cannot enter resolution or transformation.
 
-### Input limits
+Document fingerprints are integrity metadata, not encryption or anonymity. Consumers must treat document IDs, fingerprints, and reports according to their sensitivity and retention policies.
 
-Consumers must be able to configure maximum input size and maximum finding count. The library should expose deterministic behavior when limits are reached:
+## Resource model
 
-- reject the request;
-- return a truncated analysis with an explicit status; or
-- process bounded windows under a documented policy.
+Resource behavior is deterministic and explicit.
+
+The authoritative request supports limits for:
+
+- input bytes;
+- selected recognizers;
+- candidates;
+- retained issues;
+- diagnostic evidence;
+- backend work where the backend supports a limit contract; and
+- transformed output size.
+
+A limit may produce:
+
+- request rejection;
+- a typed incomplete-analysis status;
+- a bounded report with explicit truncation; or
+- a policy-defined refusal to transform.
 
 Silent truncation is not acceptable at a privacy boundary.
 
 ## Recognizer contract
 
-The analyzer should depend on a backend-neutral recognizer interface rather than on `PatternRecognizer` directly.
+The analyzer depends on one backend-neutral contract.
 
 ```rust
 pub trait Recognizer: Send + Sync {
@@ -163,164 +277,173 @@ pub trait Recognizer: Send + Sync {
 
     fn supports(&self, request: &AnalysisRequest) -> bool;
 
-    fn analyze(
+    fn recognize(
         &self,
         document: &TextDocument<'_>,
         request: &AnalysisRequest,
-        findings: &mut Vec<Finding>,
+        emitter: &mut CandidateEmitter<'_, '_>,
     ) -> Result<(), RecognitionError>;
 }
 ```
 
-`PatternRecognizer` becomes one implementation. Future implementations may include:
+`PatternRecognizer` is one implementation. Optional implementations may include:
 
-- checksum or structural recognizers;
-- dictionary or gazetteer recognizers;
+- structural and checksum recognizers;
+- dictionaries or gazetteers;
 - vendor-secret recognizers;
-- phone-number or country-specific parsing libraries;
-- semantic token-classification recognizers; and
-- organization-specific recognizers supplied by consumers.
+- mature phone-number or country-specific parsing libraries;
+- semantic token-classification adapters; and
+- organization-specific consumer recognizers.
 
-### Recognizer metadata
+The candidate emitter enforces entity declaration, exact spans, finite confidence, authoritative recognizer identity, source binding, and remaining resource limits.
+
+## Recognizer metadata and default promotion
 
 Each recognizer exposes:
 
 - stable recognizer ID;
 - version;
 - supported entities;
-- supported locales or countries;
+- supported locales and countries;
 - detection mechanism;
 - required capabilities;
-- default-enabled status;
-- source or prior-art attribution; and
-- evaluation receipt identifier when available.
+- source and prior-art attribution;
+- default-enabled status; and
+- evaluation receipt identity when available.
 
-This metadata supports diagnostics, regression analysis, configuration, and consumer compatibility.
+A recognizer may be default-enabled only when all of these are true:
+
+1. its intended locale and country scope are explicit;
+2. its source and provenance are acceptable;
+3. false-positive and false-negative regressions exist;
+4. its evaluation receipt identifies corpus, version, configuration, and limitations;
+5. its context and threshold behavior are documented;
+6. its performance and resource behavior fit the default core; and
+7. maintainers accept its ongoing maintenance cost.
+
+Country-specific, weak-pattern, highly ambiguous, or unevaluated recognizers remain opt-in.
+
+Recognizer count is not a maturity metric.
 
 ## Registry and construction
 
-The analyzer is immutable after construction and shareable through `Arc`.
+Programmatic typed construction is the primary alpha API.
+
+The target builder is immutable after construction and shareable through `Arc`.
 
 ```rust
 let analyzer = AnalyzerBuilder::new()
-    .with_predefined_recognizers()
+    .with_default_recognizers()
     .with_recognizer(custom)
+    .with_context_policy(context)
     .with_resolution_policy(ResolutionPolicy::ConservativeRedaction)
     .build()?;
 ```
 
-Runtime mutation of the registry should be deprecated after an equivalent builder API exists. Immutable construction makes concurrent use and consumer reasoning simpler.
-
-Registry filtering should support:
+Selection supports:
 
 - entity IDs;
 - recognizer IDs;
 - locale and country;
-- capability requirements;
-- default or explicitly enabled recognizers; and
-- consumer-provided allow and deny lists.
+- capabilities;
+- default or explicitly enabled recognizers;
+- allowlists and denylists; and
+- consumer-provided policy.
 
-## Analysis pipeline
-
-```text
-Input validation
-      │
-      ▼
-TextDocument and source-coordinate model
-      │
-      ▼
-Recognizer selection
-      │
-      ▼
-Candidate collection with evidence
-      │
-      ▼
-Candidate validation and context enhancement
-      │
-      ▼
-Thresholding under explicit policy
-      │
-      ▼
-Conflict and overlap resolution
-      │
-      ▼
-AnalysisReport
-```
-
-The analyzer must preserve all qualifying candidates until an explicit resolution stage.
+The mutable legacy registry remains supported for compatibility but is not the target alpha construction model.
 
 ## Evidence and explainability
 
-`Evidence` should be an extensible enum or tagged structure containing information such as:
+Recognition and policy decisions produce bounded evidence.
+
+Evidence may identify:
 
 - pattern ID and match method;
-- checksum or structural validation result;
-- supporting or negative context token;
-- prefilter or keyword hit;
-- model identity and label;
-- raw model probability;
-- normalization applied;
-- allowlist or deny-list decision; and
-- resolution decision.
+- structural or checksum validation;
+- supporting or negative context token identity without raw matched text;
+- prefilter or keyword decision;
+- model identity, label, and raw probability;
+- normalization or mapping applied;
+- allowlist or denylist decision;
+- threshold decision;
+- limit decision;
+- resolution decision; and
+- evaluation receipt identity.
 
-The library should support two report levels:
+The library supports two report levels:
 
-- **compact:** findings and essential status for normal runtime use;
-- **diagnostic:** detailed evidence for tests, debugging, evaluation, and audits.
+- **compact:** candidates or resolved findings plus essential status and issues;
+- **diagnostic:** bounded decision evidence for tests, debugging, evaluation, and audits.
 
-Diagnostic reports must avoid copying plaintext sensitive values unless the caller explicitly opts in.
+Diagnostic reports do not copy source plaintext by default. Plaintext diagnostic output, if ever supported, requires explicit caller opt-in and prominent warnings.
 
-## Context handling
+## Context and threshold policy
 
-Substring context matching should be replaced with token- or boundary-aware matching.
+Context enhancement is separate from recognition mechanics.
 
-The context subsystem should support:
+The alpha context contract supports:
 
 - positive context;
 - negative context;
+- token- or boundary-aware matching;
 - configurable proximity;
-- case handling;
-- locale-aware tokenization where available; and
-- evidence explaining the score change.
+- case behavior;
+- locale behavior;
+- optional cross-entity evidence; and
+- evidence explaining every score change.
 
-Context rules must not imply that all scores are statistically calibrated. They are heuristic evidence unless an evaluation demonstrates otherwise.
+Context does not imply score calibration. Scores remain heuristic unless a pinned evaluation demonstrates calibration for a specific recognizer, corpus, and configuration.
 
-## Conflict and overlap resolution
+Thresholding is an explicit policy stage and does not destroy original candidate evidence.
 
-Resolution is a policy stage, not an incidental sort operation.
+## Resolution
 
-The core should provide at least:
+Resolution is a named policy stage, not an incidental sort.
 
-- `ReportAll`: retain all qualifying candidates;
-- `BestCandidate`: choose one candidate according to explicit priority rules;
-- `ConservativeRedaction`: merge the union of qualifying overlapping spans for transformation safety; and
-- a custom resolver interface.
+The core provides at least:
 
-The analysis report records both source candidates and resolved findings when diagnostics are enabled.
+- `ReportAll`: preserve all qualifying candidates;
+- `BestCandidate`: select candidates through explicit deterministic priority rules;
+- `ConservativeRedaction`: produce transformation-safe unions for overlapping qualifying spans; and
+- a future custom resolver interface after the built-in contracts stabilize.
 
-Resolution rules must define tie-breaking, nested spans, adjacent spans, equal scores, entity priority, and same-recognizer duplicates.
+Every policy defines:
+
+- full overlap;
+- containment and nesting;
+- partial intersection;
+- adjacency;
+- equal confidence;
+- entity priority;
+- recognizer priority;
+- same-recognizer duplicates; and
+- stable tie-breaking.
+
+The report preserves original candidates separately from resolved findings and records the policy identity, version, and decision evidence.
+
+Resolution must be stable before authoritative anonymization is implemented.
 
 ## Anonymization architecture
 
-Anonymization should be split into planning and execution.
+Anonymization is split into planning and execution.
 
 ```text
-AnalysisReport
-      │
-      ▼
+AnalysisReport or resolved findings
+        |
+        v
 AnonymizationPolicy
-      │
-      ▼
-AnonymizationPlan
-      │
-      ▼
-Validated transformation
-      │
-      ▼
+        |
+        v
+AnonymizationPlan validation
+        |
+        v
+Atomic transformation
+        |
+        v
 AnonymizationReport
 ```
 
-The public API should become fallible:
+The authoritative API is fallible and document-bound.
 
 ```rust
 pub fn anonymize(
@@ -330,224 +453,310 @@ pub fn anonymize(
 ) -> Result<AnonymizationReport, AnonymizationError>;
 ```
 
+The complete plan validates before any output is returned.
+
+Validation includes:
+
+- exact document identity and fingerprint;
+- UTF-8-safe source spans;
+- resolved overlap requirements;
+- supported entity and operator combinations;
+- replacement and mask constraints;
+- output-size bounds; and
+- policy version and required capabilities.
+
+A failure produces no successful transformed result. Partial transformation cannot be represented as complete success.
+
 The report contains:
 
 - transformed text;
 - applied operations;
-- source and output spans;
-- skipped or rejected operations;
-- warnings;
-- document identity;
-- policy version; and
-- engine version.
+- source spans;
+- output spans;
+- policy and engine identity;
+- warnings and typed issues;
+- rejected operations when planning fails before execution; and
+- document identity.
 
-Invalid offsets, overlapping plans, unsupported operators, and mismatched document identity must not be silently ignored.
+The legacy anonymizer remains available but is not the authoritative secure-alpha boundary.
 
-## Pseudonymization and cryptography
+## Operators and cryptography
 
-The current salted SHA-256 operator should be deprecated before a production-oriented release.
+The authoritative alpha supports:
 
-The preferred direction is keyed pseudonymization, such as HMAC-SHA-256, with:
+- replacement;
+- redaction; and
+- masking with explicit validated semantics.
+
+Deterministic salted SHA-256 remains legacy-compatible and security-sensitive. It is not an ordinary authoritative-alpha operator.
+
+Before hashing or pseudonymization is enabled on the authoritative path, the project must choose reviewed semantics under issue #37. A keyed design requires:
 
 - caller-provided secret material;
-- secret wrappers that avoid accidental `Debug` output;
-- zeroization where practical;
-- explicit domain separation;
+- secret wrappers without accidental `Debug` or serialization;
+- domain separation;
 - tenant or context isolation;
-- output format and truncation policy;
-- collision analysis; and
-- documented rotation and correlation behavior.
+- output encoding and truncation policy;
+- collision analysis;
+- test vectors;
+- rotation and migration behavior;
+- explicit correlation and linkability semantics; and
+- independent review where practical.
 
-Cryptographic changes require an ADR, independent review where practical, and test vectors.
+Reversible encryption is outside the core until key management, authenticated metadata, nonce handling, rotation, and consumer demand are designed.
 
-Encryption-based reversible anonymization is not part of the core until key management, authenticated metadata, nonce handling, and consumer demand are explicitly designed.
+## Evaluation and Presidio differential learning
+
+Evaluation tooling is separable from the runtime dependency graph.
+
+The evidence program includes:
+
+- a versioned synthetic and redistributable corpus schema;
+- exact-span and overlap-tolerant metrics;
+- per-entity, recognizer, locale, country, and corpus-family analysis;
+- false-positive and false-negative regressions;
+- corpus provenance and licensing;
+- machine-readable receipts;
+- historical Presidio failure fixtures; and
+- classification of Rust and Python differences.
+
+Python Presidio is a comparison source, not the expected output oracle.
+
+Differences are classified as:
+
+- intentional Rust safety improvement;
+- intentional scope difference;
+- Python behavior worth matching;
+- Rust defect;
+- upstream defect or disputed behavior;
+- taxonomy mismatch; or
+- unresolved evidence gap.
+
+Synthetic template families are split across training and evaluation boundaries as families rather than only as generated rows to reduce leakage.
+
+No quality, compatibility, or superiority claim is made without pinned engine, recognizer, policy, corpus, configuration, metric, and reproduction identity.
+
+## Fuzzing and property testing
+
+Initial secure-alpha targets cover:
+
+- span construction and UTF-8 boundaries;
+- request construction and limits;
+- candidate emission;
+- context and threshold policy;
+- resolution;
+- anonymization planning and execution;
+- source-to-output mapping; and
+- report serialization when enabled.
+
+Minimized failures become retained regression fixtures.
+
+Fuzzing supplements, but does not replace, explicit historical and semantic test cases.
 
 ## Configuration
 
-Programmatic construction is the primary API during early development.
+Programmatic typed construction remains primary through the secure functional alpha.
 
-A serialized configuration format should be introduced only after the underlying concepts stabilize. When added, it requires:
+Serialized configuration is deferred until recognition, context, threshold, resolution, operator, and report contracts stabilize.
 
-- an explicit schema version;
-- stable recognizer and entity IDs;
+A future serialized format requires:
+
+- explicit schema version;
+- stable identifiers;
 - validation without panics;
 - unknown-field behavior;
 - migration guidance;
-- secure defaults; and
-- configuration fingerprints for reproducibility.
+- secure defaults;
+- configuration fingerprints; and
+- compatibility fixtures.
 
-Configuration evolution must not be allowed to become an undocumented second public API.
+Configuration must not become an undocumented second public API.
 
 ## Crate boundaries
 
-### Initial shape
+The architecture keeps one primary crate while the core contracts are moving.
 
-Keep one primary crate while the architecture is still moving. Internal modules may be reorganized without imposing premature package boundaries.
+A separate crate is justified when it:
 
-### Split criteria
+- introduces a materially heavier dependency graph;
+- has a distinct release, licensing, or platform lifecycle;
+- is independently consumable;
+- requires a different MSRV or support matrix; or
+- prevents default consumers from paying build, binary, memory, startup, or audit cost.
 
-Create a separate crate only when at least one of these is true:
+Likely future boundaries include:
 
-- it introduces a materially heavier optional dependency graph;
-- it has a different release or licensing lifecycle;
-- it can be consumed independently;
-- it requires a different MSRV or platform support matrix; or
-- isolating it prevents default consumers from paying build, binary, or audit cost.
+- evaluation and error-analysis tooling;
+- backend-named semantic adapters;
+- optional CLI tooling after the library contract stabilizes; and
+- consumer-specific services or application adapters outside the core.
 
-Expected future crates:
-
-- `presidio-rs-eval`: corpus formats, evaluation, error analysis, and reports;
-- `presidio-rs-ner-candle` or another backend-named semantic adapter;
-- optional CLI tooling after the library contract stabilizes.
-
-The project should not create microcrates merely to make the repository look architectural.
+The project does not create microcrates for architectural appearance.
 
 ## Consumer integration surfaces
 
-### Primary: Rust library
+### Primary Rust API
 
-The primary supported integration is an in-process Rust library with synchronous APIs.
+The supported alpha integration is an in-process synchronous Rust library.
 
-Reasons:
+The synchronous core remains runtime-neutral and can be called from asynchronous applications through consumer-owned bounded worker strategies.
 
-- pattern analysis is CPU-bound and does not require async I/O;
-- consumers may use Tokio, async-std, no runtime, or embedded executors;
-- synchronous core APIs remain easy to call from async applications through bounded worker strategies; and
-- avoiding an async trait contract keeps the core runtime-neutral.
+### Batch
 
-### Batch analysis
-
-Batch APIs may be added for amortized setup and semantic-model efficiency. They should be synchronous iterators or explicit batch requests unless a concrete consumer requires async orchestration.
+Batch processing is deferred until the single-document contract is stable. A batch design must preserve per-document identity, limits, issues, and receipts.
 
 ### Streaming
 
-Streaming redaction is a later capability. A PII value can cross arbitrary chunk boundaries, so naive per-chunk redaction is unsafe.
+Streaming redaction is deferred because sensitive values may cross arbitrary chunk boundaries.
 
-Any streaming design requires:
-
-- bounded lookbehind;
-- a commit watermark;
-- explicit maximum recognizer span assumptions;
-- final-buffer flush semantics;
-- tests for chunk boundary permutations; and
-- a documented degraded-guarantee mode when full detection cannot be preserved.
+Any future design requires bounded lookbehind, commit watermarks, maximum-span assumptions, final-buffer semantics, chunk-boundary permutation tests, and documented degraded guarantees.
 
 ### WASM
 
-WASM is a feasibility target, not an initial guarantee. The core should avoid unnecessary blockers, but WASM support requires a dedicated platform matrix, performance evaluation, and clear entropy or cryptographic behavior.
+WASM remains a feasibility target requiring a dedicated support matrix, performance evidence, and explicit cryptographic behavior.
 
-### FFI
+### FFI and language bindings
 
-C ABI, Python, Node, or other bindings should follow Rust API stabilization. Bindings multiply compatibility and security surfaces and must not drive the core prematurely.
+C, Python, Node, and other bindings follow Rust API stabilization. Bindings multiply compatibility and security surfaces and do not drive the core prematurely.
 
 ### `no_std`
 
-`no_std` is deferred. The current regex and allocation model make it non-trivial, and no demonstrated consumer requirement currently justifies the complexity.
+`no_std` remains deferred without a demonstrated consumer requirement.
 
-## Semantic recognition adapters
+## Semantic adapters
 
-Semantic recognition is optional and outside the critical path for the model-free core.
+Semantic recognition is optional and outside the secure functional alpha critical path.
 
-The core exposes the recognizer contract; a semantic adapter owns:
+A semantic adapter owns:
 
 - tokenizer and model loading;
-- model artifact provenance;
-- model licensing;
+- model artifact provenance and licensing;
 - label mapping;
-- source-offset alignment;
+- exact source-offset alignment;
 - windowing and truncation;
 - device selection;
 - inference errors;
 - resource limits; and
 - model-specific evaluation.
 
-No runtime downloads are permitted in the default project posture. Model bundles must be vendored or supplied by the consumer with immutable identity and integrity checks.
+The core does not download models, own global model caches, select devices, or require an async runtime.
 
-A semantic backend is adopted only when evaluation demonstrates that the quality gain justifies dependency, artifact-size, startup, memory, and maintenance costs.
+A semantic backend is adopted only when evaluation demonstrates that its quality gain justifies dependency, artifact-size, startup, memory, platform, and maintenance costs.
 
 ## Compatibility policy
-
-Before the first published release, the project still treats downstream Rust consumers as real compatibility partners.
 
 Compatibility surfaces include:
 
 - public Rust API;
 - feature names and defaults;
 - entity and recognizer IDs;
+- policy IDs and versions;
 - serialized findings and reports;
 - byte-offset semantics;
-- score and threshold semantics;
+- score, context, and threshold semantics;
+- resolution behavior;
 - anonymization output; and
 - error classifications.
 
-Required controls:
+Required controls include:
 
-- consumer compile fixtures;
+- downstream compile fixtures;
 - `cargo-semver-checks` after a versioned baseline exists;
 - deprecation before removal where practical;
-- migration notes for breaking changes;
+- migration notes;
 - feature-matrix CI; and
-- downstream pilot tests before releases that change semantics.
+- downstream pilot tests before semantic changes are released.
+
+Behavioral compatibility with Microsoft Presidio is claimed only for pinned fixtures where it has been demonstrated.
 
 ## Security architecture
 
-The core security posture includes:
+The default core:
 
-- no library-initiated network or filesystem I/O in the default core;
-- crate-local `unsafe` forbidden;
-- bounded input, candidate, and output behavior;
-- validated offsets and transformations;
-- explicit failure states;
-- minimal plaintext duplication in diagnostics;
-- dependency and license controls;
-- fuzzing and adversarial tests;
-- corpus provenance and privacy review; and
-- documented caller responsibilities.
+- initiates no network or filesystem I/O;
+- forbids crate-local `unsafe` code;
+- bounds input, candidates, issues, evidence, backend work, and output;
+- validates source identity, offsets, resolution, and transformations;
+- exposes explicit incomplete and failure states;
+- minimizes plaintext duplication;
+- keeps diagnostics plaintext-free by default;
+- maintains dependency, license, provenance, history, DCO, MSRV, and package gates;
+- uses fuzzing, adversarial tests, and retained regressions;
+- reviews corpus provenance and privacy; and
+- documents caller responsibilities.
 
 Rust memory safety does not prove detection correctness, cryptographic correctness, availability, or safe consumer behavior.
+
+The secure-alpha threat model must cover:
+
+- wrong-document application;
+- Unicode and offset confusion;
+- overlap and partial-intersection ambiguity;
+- partial transformation;
+- false confidence from weak defaults;
+- diagnostic data leakage;
+- algorithmic denial of service;
+- unbounded custom backends;
+- linkable or brute-forceable pseudonyms;
+- configuration drift;
+- dependency or release compromise; and
+- consumer fail-open behavior.
 
 ## Observability
 
 The library returns structured reports and does not emit sensitive plaintext logs by default.
 
-Optional tracing integration may emit:
+Optional tracing may emit:
 
-- recognizer IDs;
+- recognizer ID and version;
+- policy ID and version;
 - duration;
 - input length;
-- finding count;
-- resolution count;
+- candidate and resolved counts;
+- operation count;
 - limit status; and
 - error class.
 
-It must not emit matched values or full input unless a caller explicitly enables a diagnostic mode with appropriate warnings.
+Tracing must not emit matched values or full input unless a caller explicitly enables a diagnostic mode with appropriate warnings and controls.
 
 ## Architecture governance
 
-Architecture is developed continuously rather than frozen in an initial design phase.
+Architecture is developed continuously and evidence-first.
 
 Required cadence:
 
-- weekly architecture review during active development;
-- ADRs for material public API, dependency, semantic, normalization, resolution, cryptographic, and compatibility decisions;
-- a phase-exit architecture review before each roadmap gate;
-- a consumer compatibility review at least every four weeks;
-- a landscape review at least every eight weeks while parallel Rust efforts are evolving; and
-- explicit validation or reversal of assumptions after spikes and pilots.
+- primary-source Presidio archaeology before material alpha decisions;
+- a decision ledger entry for adopt, adapt, reject, defer, or investigate outcomes;
+- ADRs for public API, dependency, normalization, context, resolution, cryptography, configuration, serialization, and compatibility decisions;
+- weekly architecture review during active alpha work;
+- a phase-exit review before each roadmap gate;
+- consumer compatibility review at least every four weeks;
+- active Rust landscape monitoring; and
+- explicit validation or reversal of assumptions after evaluation and pilots.
+
+## Roadmap and issue mapping
+
+- #33: Presidio architecture archaeology and decision ledger
+- #34: secure functional alpha contract
+- #35: explainability, context evidence, and safe defaults
+- #36: differential learning and historical regression harness
+- #37: authoritative hash and pseudonymization decision
+- #14: secure functional alpha delivery
+- #15: two-consumer and compatibility validation
 
 ## Open architectural questions
 
-The following remain intentionally unresolved:
+1. Final public project and package name before crates.io publication.
+2. Whether another Rust project should be adopted, extended, or collaborated with.
+3. Final immutable builder and registry shape.
+4. Exact context policy representation and calibration evidence.
+5. Whether phone recognition should use a mature parsing crate.
+6. Whether keyed pseudonymization belongs in the core or a separate cryptographic adapter.
+7. Which locales and countries qualify for the supported alpha quality envelope.
+8. What evidence threshold qualifies a recognizer for default enablement beyond the minimum policy in this document.
+9. Whether report serialization belongs in the core and when it becomes a durable wire contract.
+10. Which semantic backend, if any, is justified after the model-free alpha.
+11. Whether WASM becomes a real consumer requirement.
+12. What consumer evidence is sufficient to freeze a beta API baseline.
 
-1. Final public project and crate name.
-2. Whether an existing Rust project should be adopted, extended, or collaborated with instead of duplicating its scope.
-3. Exact open entity-identifier representation and compatibility bridge from `EntityType`.
-4. Whether configuration belongs in the core crate or a separate adapter.
-5. Whether phone-number support should depend on a mature parsing crate.
-6. Whether semantic recognition should use Candle, ONNX Runtime, Tract, or another backend.
-7. Whether keyed pseudonymization belongs in the core or a separate cryptographic adapter.
-8. Which locales and countries are in the supported quality envelope.
-9. Whether WASM is a real consumer requirement.
-10. What evidence threshold qualifies a recognizer for default enablement.
-
-These questions are scheduled as decisions in the development plan rather than disguised as implementation details.
+These remain scheduled decisions rather than hidden implementation assumptions.

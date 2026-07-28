@@ -1,0 +1,97 @@
+name: One-time first development round documentation
+
+on:
+  push:
+    branches: [docs/round-one-resolution-plan]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align public documentation with round one
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              text = file.read_text()
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"expected one occurrence in {path}, found {count}: {old!r}")
+              file.write_text(text.replace(old, new, 1))
+
+          replace_once(
+              "README.md",
+              "- [Rebaselined roadmap](docs/planning/DEVELOPMENT_PLAN.md)\n- [Release checklist](OPEN_SOURCE_RELEASE_CHECKLIST.md)",
+              "- [Secure functional alpha roadmap](docs/planning/DEVELOPMENT_PLAN.md)\n- [First secure-alpha development round](docs/planning/FIRST_DEVELOPMENT_ROUND.md)\n- [Release checklist](OPEN_SOURCE_RELEASE_CHECKLIST.md)",
+          )
+          replace_once(
+              "README.md",
+              "`AnalysisReport::candidates()` is authoritative for this path. `legacy_compatible_results()` is a compatibility projection. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.",
+              "`AnalysisReport::candidates()` is authoritative raw evidence for this path. `legacy_compatible_results()` is a transitional compatibility projection that still uses the legacy overlap behavior. The first secure-alpha implementation round adds explicit, versioned resolution while preserving the original candidates. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.",
+          )
+          replace_once(
+              "README.md",
+              "Fallible anonymization over document-bound findings and an explicit permanent resolution policy are immediate post-visibility roadmap work.",
+              "Explicit candidate resolution is the active first development round. Fallible anonymization over document-bound resolved findings follows only after the resolution contract is versioned and tested.",
+          )
+          replace_once(
+              "README.md",
+              "- [Target architecture](docs/architecture/ARCHITECTURE.md)",
+              "- [Active architecture](docs/architecture/ARCHITECTURE.md)",
+          )
+          replace_once(
+              "README.md",
+              "- [ADR 0007: Requests and recognizer execution](docs/adr/0007-add-analysis-request-and-recognizer-trait.md)\n- [Documentation index](docs/README.md)",
+              "- [ADR 0007: Requests and recognizer execution](docs/adr/0007-add-analysis-request-and-recognizer-trait.md)\n- [ADR 0008: Evidence-gated secure functional alpha](docs/adr/0008-stage-secure-functional-alpha-through-evidence-gated-pipeline.md)\n- [First secure-alpha development round](docs/planning/FIRST_DEVELOPMENT_ROUND.md)\n- [Documentation index](docs/README.md)",
+          )
+          replace_once(
+              "README.md",
+              "- [Rebaselined development roadmap](docs/planning/DEVELOPMENT_PLAN.md)\n- [Open-source foundation track](docs/planning/OPEN_SOURCE_FOUNDATION_TRACK.md)",
+              "- [Secure functional alpha roadmap](docs/planning/DEVELOPMENT_PLAN.md)\n- [First secure-alpha development round](docs/planning/FIRST_DEVELOPMENT_ROUND.md)\n- [Presidio archaeology and secure-alpha model](docs/research/PRESIDIO_ARCHAEOLOGY_AND_ALPHA_MODEL.md)\n- [Open-source foundation track](docs/planning/OPEN_SOURCE_FOUNDATION_TRACK.md)",
+          )
+
+          replace_once(
+              "docs/README.md",
+              "- [Secure functional alpha roadmap](planning/DEVELOPMENT_PLAN.md)\n- [Public repository release week](planning/PUBLIC_RELEASE_WEEK.md)",
+              "- [Secure functional alpha roadmap](planning/DEVELOPMENT_PLAN.md)\n- [First secure-alpha development round](planning/FIRST_DEVELOPMENT_ROUND.md)\n- [Public repository release week](planning/PUBLIC_RELEASE_WEEK.md)",
+          )
+          replace_once(
+              "docs/README.md",
+              "The secure functional alpha critical path is:\n\n1. Presidio evidence and alpha contract;",
+              "The active implementation round is explicit candidate resolution. See [First Secure-Alpha Development Round](planning/FIRST_DEVELOPMENT_ROUND.md).\n\nThe secure functional alpha critical path is:\n\n1. Presidio evidence and alpha contract;",
+          )
+
+          replace_once(
+              "CHANGELOG.md",
+              "- A roadmap that distinguishes public foundation alpha from secure functional alpha.",
+              "- A roadmap that distinguishes public foundation alpha from secure functional alpha.\n- A first secure-alpha development-round plan for explicit, versioned candidate resolution before anonymization.",
+          )
+          replace_once(
+              "CHANGELOG.md",
+              "- Resolution now precedes authoritative anonymization, and recognizer expansion follows the secure functional alpha gate.",
+              "- Resolution now precedes authoritative anonymization, and recognizer expansion follows the secure functional alpha gate.\n- The first implementation round is split into an evidence and contract freeze, a pure resolution engine, and additive `AnalysisReport` integration while legacy output remains unchanged.",
+          )
+          PY
+
+      - name: Commit documentation and remove bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/round-one-docs-bootstrap.yml
+          git config user.name "Kevin Knapp"
+          git config user.email "krknapp@gmail.com"
+          git add README.md docs/README.md CHANGELOG.md
+          git commit -s -m "docs: identify the first secure-alpha development round"
+          git push origin HEAD

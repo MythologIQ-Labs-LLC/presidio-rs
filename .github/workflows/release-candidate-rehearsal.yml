@@ -1,0 +1,156 @@
+name: Release candidate rehearsal
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-candidate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rehearsal:
+    name: Fresh clone, public surfaces, docs, examples, package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify required public repository files
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            README.md
+            LICENSE
+            SECURITY.md
+            CONTRIBUTING.md
+            CODE_OF_CONDUCT.md
+            GOVERNANCE.md
+            CONTRIBUTOR_LICENSE_AGREEMENT.md
+            CHANGELOG.md
+            Cargo.toml
+            Cargo.lock
+            .github/CODEOWNERS
+            .github/PULL_REQUEST_TEMPLATE.md
+            .github/ISSUE_TEMPLATE/bug_report.yml
+            .github/ISSUE_TEMPLATE/feature_request.yml
+            .github/ISSUE_TEMPLATE/config.yml
+            .github/dependabot.yml
+            docs/README.md
+            tools/verify_markdown_links.py
+            examples/legacy_quickstart.rs
+            examples/document_analysis.rs
+          )
+          for path in "${required[@]}"; do
+            test -f "$path" || { echo "::error::Missing required public file: $path"; exit 1; }
+          done
+
+      - name: Validate repository YAML
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e 'require "yaml"; ARGV.each { |path| YAML.load_file(path); puts "validated #{path}" }' \
+            .github/dependabot.yml \
+            .github/ISSUE_TEMPLATE/bug_report.yml \
+            .github/ISSUE_TEMPLATE/feature_request.yml \
+            .github/ISSUE_TEMPLATE/config.yml
+
+      - name: Verify relative Markdown links
+        run: python3 tools/verify_markdown_links.py
+
+      - name: Create isolated credential-free clone
+        id: clone
+        shell: bash
+        run: |
+          set -euo pipefail
+          candidate="$RUNNER_TEMP/public-candidate"
+          git clone --no-local "$GITHUB_WORKSPACE" "$candidate"
+          git -C "$candidate" checkout --detach "$GITHUB_SHA"
+          git -C "$candidate" config --local --unset-all http.https://github.com/.extraheader || true
+          git -C "$candidate" clean -xffd
+          test -z "$(git -C "$candidate" status --porcelain)"
+          echo "path=$candidate" >> "$GITHUB_OUTPUT"
+
+      - name: Install stable Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Build and test fresh clone
+        working-directory: ${{ steps.clone.outputs.path }}
+        shell: bash
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: |
+          set -euo pipefail
+          cargo fmt --all -- --check
+          cargo clippy --all-targets --all-features -- -D warnings
+          cargo build --all-features --locked
+          cargo test --all-features --locked
+          cargo test --doc --all-features --locked
+          cargo doc --no-deps --all-features
+
+      - name: Run README-backed examples
+        working-directory: ${{ steps.clone.outputs.path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo run --locked --example legacy_quickstart
+          cargo run --locked --example document_analysis
+
+      - name: Inspect package from fresh clone
+        working-directory: ${{ steps.clone.outputs.path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release-candidate-evidence"
+          cargo package --locked
+          cargo package --list --locked > "$RUNNER_TEMP/release-candidate-evidence/cargo-package-list.txt"
+          if grep -E '^(\.github/|target/|audit/)' "$RUNNER_TEMP/release-candidate-evidence/cargo-package-list.txt"; then
+            echo "::error::Package contains repository-only or generated files."
+            exit 1
+          fi
+
+      - name: Record candidate identity and toolchain
+        working-directory: ${{ steps.clone.outputs.path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/release-candidate-evidence"
+          mkdir -p "$evidence"
+          git rev-parse HEAD > "$evidence/commit-sha.txt"
+          git status --porcelain > "$evidence/git-status.txt"
+          rustc --version > "$evidence/rustc-version.txt"
+          cargo --version > "$evidence/cargo-version.txt"
+          sha256sum README.md LICENSE Cargo.lock Cargo.toml > "$evidence/core-file-sha256.txt"
+          cat > "$evidence/REHEARSAL-SUMMARY.md" <<EOF
+          # Release candidate rehearsal
+
+          - Candidate commit: $(git rev-parse HEAD)
+          - Fresh isolated clone: passed
+          - Required public files: passed
+          - Repository YAML parsing: passed
+          - Relative Markdown links: passed
+          - Formatting, Clippy, build, tests, doctests, and rustdoc: passed
+          - Runnable README-backed examples: passed
+          - Cargo package inspection: passed
+
+          This is a credential-free local clone rehearsal while the repository remains internal. A truly anonymous network clone can only be verified after visibility changes.
+          EOF
+          cat "$evidence/REHEARSAL-SUMMARY.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release candidate evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-candidate-rehearsal
+          path: ${{ runner.temp }}/release-candidate-evidence/
+          if-no-files-found: error
+          retention-days: 14

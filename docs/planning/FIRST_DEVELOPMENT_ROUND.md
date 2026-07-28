@@ -148,9 +148,9 @@ This round does not:
 
 The preferred implementation sequence is three reviewable PRs:
 
-1. **Evidence and contract freeze:** complete the overlap decision ledger, threat assumptions, ADR, and test matrix specification.
-2. **Pure resolution engine:** implement value types, three policies, deterministic behavior, and table-driven tests without analyzer integration.
-3. **Analysis-report integration:** expose the additive authoritative entry point, preserve document binding, add examples and migration guidance, and run downstream compile evidence.
+1. **#40 Evidence and contract freeze:** complete the overlap decision ledger, threat assumptions, ADR, and test matrix specification.
+2. **#41 Pure resolution engine:** implement value types, three policies, deterministic behavior, and table-driven tests without analyzer integration.
+3. **#42 Analysis-report integration:** expose the additive authoritative entry point, preserve document binding, add examples and migration guidance, and run downstream compile evidence.
 
 The second PR is the first substantive Rust implementation. It should remain small enough that reviewers can reason about every conflict case without scrolling through unrelated analyzer refactors.
 

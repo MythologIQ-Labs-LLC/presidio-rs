@@ -112,6 +112,11 @@ assert_eq!(
 
 `AnalysisReport::candidates()` is authoritative for this path. `legacy_compatible_results()` is a compatibility projection. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.
 
+Migration and compatibility references:
+
+- [Public API status](docs/api/PUBLIC_API_STATUS.md)
+- [Legacy-to-request migration guide](docs/api/MIGRATION_GUIDE.md)
+
 ## Expected use cases
 
 Good fits include:
@@ -185,6 +190,11 @@ Legacy pattern registrations made through `RecognizerRegistry::add` have unknown
 ## Custom backends
 
 Consumer backends implement `Recognizer` and emit candidates through `CandidateEmitter`.
+
+Runnable extension references:
+
+- [Strict metadata-backed pattern recognizer](examples/strict_pattern_recognizer.rs)
+- [Backend-neutral custom recognizer](examples/custom_backend.rs)
 
 ```rust
 use presidio::{
@@ -319,9 +329,15 @@ The build-versus-adopt-versus-collaborate decision remains active. Sunk cost is 
 ```bash
 cargo build --all-features
 cargo test --all-features
+cargo test --doc --all-features
 cargo fmt --all -- --check
 cargo clippy --all-targets --all-features -- -D warnings
-cargo doc --no-deps --all-features
+RUSTDOCFLAGS="-D warnings" cargo doc --no-deps --all-features
+cargo run --example legacy_anonymization
+cargo run --example document_analysis
+cargo run --example strict_pattern_recognizer
+cargo run --example custom_backend
+cargo publish --dry-run
 cargo audit
 ```
 
@@ -329,7 +345,7 @@ Rust 1.74 is the declared minimum and is verified in CI.
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md). Contributions require the [Contributor License Agreement](CONTRIBUTOR_LICENSE_AGREEMENT.md), DCO sign-off, tests, documentation, attribution, and a responsible human contributor who can explain the change.
+Start with the [first contribution guide](docs/contributing/FIRST_CONTRIBUTION.md), then read [CONTRIBUTING.md](CONTRIBUTING.md). Contributions require the [Contributor License Agreement](CONTRIBUTOR_LICENSE_AGREEMENT.md), DCO sign-off, tests, documentation, attribution, and a responsible human contributor who can explain the change.
 
 ## Claims policy
 

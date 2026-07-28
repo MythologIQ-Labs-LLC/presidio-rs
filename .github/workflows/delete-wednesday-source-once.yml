@@ -1,0 +1,27 @@
+name: Delete Wednesday source branch once
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'release/delete-wednesday-source'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged source and disposable cleanup branches
+        shell: bash
+        run: |
+          set -euo pipefail
+          git init cleanup
+          cd cleanup
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push origin --delete release/wednesday-candidate || true
+          git push origin --delete release/delete-wednesday-source || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

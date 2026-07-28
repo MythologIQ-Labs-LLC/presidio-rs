@@ -26,10 +26,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - A first-contribution guide for unfamiliar contributors using synthetic fixtures only.
 - A public alpha API-status inventory and migration guide from legacy analysis to document-aware requests.
 - A release rehearsal that validates contributor examples and performs `cargo publish --dry-run` without publishing.
+- A Presidio architecture archaeology and secure-alpha decision program.
+- ADR 0008 establishing an evidence-gated secure functional alpha pipeline.
+- A roadmap that distinguishes public foundation alpha from secure functional alpha.
 
 ### Changed
 
-- Rebaselined the project from a 30-week private-first plan to public repository visibility on July 30, 2026, contributor-ready alpha by August 14, consumer-ready beta by September 25, and a package and advertised-launch decision by October 30.
+- Rebaselined the project around completed public visibility on July 28, public foundation alpha by August 3, secure functional alpha by August 21, consumer-validated beta by September 4, and separate package and promotion decisions by October 2.
 - Package publication and active promotion are now explicitly separate from GitHub repository visibility.
 - Package metadata remains prepared for MIT-licensed distribution without implying crates.io publication.
 - Documentation separates implemented, measured, and planned capabilities.
@@ -39,6 +42,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - New request-oriented integrations use exact document binding and authoritative recognizer provenance.
 - The existing analyzer, `RecognizerResult`, pattern registry, and anonymizer APIs remain available for compatibility.
 - Contributor onboarding now starts from a documented, runnable path rather than private project context.
+- Resolution now precedes authoritative anonymization, and recognizer expansion follows the secure functional alpha gate.
+- Deterministic hashing remains legacy-compatible and is excluded from authoritative secure-alpha assumptions until reviewed semantics are implemented or the operator is disabled.
 
 ### Security
 

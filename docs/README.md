@@ -35,13 +35,15 @@ The immediate post-visibility architecture work is explicit candidate resolution
 - [Open-source foundation track](planning/OPEN_SOURCE_FOUNDATION_TRACK.md)
 - [Development risk and assumption register](planning/RISK_REGISTER.md)
 
-## Release evidence
+## Release evidence and operations
 
 - [July 30 public visibility evidence](release/2026-07-30-PUBLIC-VISIBILITY-EVIDENCE.md)
 - [Tuesday automated audit evidence](release/2026-07-27-TUESDAY-AUDIT-EVIDENCE.md)
+- [Wednesday release-candidate evidence](release/2026-07-30-WEDNESDAY-CANDIDATE.md)
+- [Public visibility and rollback runbook](release/PUBLIC_VISIBILITY_RUNBOOK.md)
 - [Source and dependency provenance inventory](release/SOURCE_AND_DEPENDENCY_PROVENANCE.md)
 
-The evidence records are updated throughout release week. A planning target, checklist, or green build does not itself authorize public visibility.
+The evidence records are updated throughout release week. A planning target, checklist, candidate branch, or green build does not itself authorize public visibility.
 
 ## Accelerated release baseline
 

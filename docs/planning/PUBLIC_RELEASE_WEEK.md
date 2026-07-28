@@ -79,38 +79,43 @@ These items block later maturity gates, not public inspection of an explicitly e
 
 Monday evidence: [July 30 Public Visibility Evidence](../release/2026-07-30-PUBLIC-VISIBILITY-EVIDENCE.md).
 
-Open Monday-derived trackers:
-
-- #18 public name and Presidio positioning;
-- #19 history, secret, confidentiality, and provenance scan;
-- #20 publication authority, license posture, and contribution intake;
-- #21 security reporting, branch protection, and stale refs;
-- #22 source and dependency provenance inventory;
-- #23 confidential-reference boundary; and
-- #24 current history versus clean export decision.
-
 ### Tuesday, July 28
 
-- Complete secret and confidential-history scanning.
-- Complete source, fixture, pattern, algorithm, and documentation provenance review.
-- Review name, package identity, Microsoft references, and non-affiliation language.
-- Verify license, CLA, contribution, conduct, governance, and security documents.
-- Add or correct CODEOWNERS, issue templates, pull-request template, security-reporting guidance, and branch-protection documentation.
-- Run `cargo package` and inspect package contents.
+- [x] Complete automated secret and confidential-history scanning.
+- [x] Complete the technical source, fixture, pattern, algorithm, documentation, and dependency provenance inventory.
+- [x] Review name, package identity, Microsoft references, and non-affiliation language and route the unresolved risk to a rename decision.
+- [x] Verify license, CLA, contribution, conduct, governance, and security documents.
+- [x] Add or prepare CODEOWNERS, issue-template configuration, pull-request template, security-reporting guidance, and branch-protection documentation.
+- [x] Run `cargo package` and inspect intentional package contents.
 
-**Exit:** legal, provenance, history, and repository-operation blockers are either closed or routed to a clean export or rename plan.
+**Exit:** the automated audit passed, provenance and package evidence are recorded, and remaining blockers are explicit human or GitHub-administration decisions.
+
+Tuesday evidence:
+
+- [Tuesday automated audit evidence](../release/2026-07-27-TUESDAY-AUDIT-EVIDENCE.md)
+- [Source and dependency provenance inventory](../release/SOURCE_AND_DEPENDENCY_PROVENANCE.md)
 
 ### Wednesday, July 29
 
-- Run the release-candidate CI suite on a pinned commit.
-- Perform a fresh anonymous-clone rehearsal in a clean environment.
-- Build documentation from the clone and verify README examples.
-- Verify all repository documentation links.
-- Verify public issue, discussion, and vulnerability-reporting behavior.
-- Prepare the visibility-change runbook, rollback steps, known-limitations notice, and optional unadvertised announcement text.
-- Record the final go or no-go evidence bundle.
+- [x] Add the release-candidate rehearsal and run it on the candidate branch.
+- [x] Perform a fresh credential-free isolated-clone rehearsal in a clean directory.
+- [x] Build documentation from the clone and verify both README-backed examples.
+- [x] Verify all relative repository documentation links.
+- [x] Verify required public files, issue forms, pull-request template, CODEOWNERS, and Dependabot configuration.
+- [x] Prepare the visibility-change runbook, rollback steps, known-limitations boundary, and operator assignments.
+- [x] Delete the allowlisted obsolete source branches identified by the audit.
+- [ ] Pin the final candidate after merge and record final run identifiers and artifact digests.
+- [ ] Verify private vulnerability reporting and branch protection through repository administration.
+- [ ] Record the final human go or no-go authorization.
 
-**Exit:** one pinned commit satisfies the visibility gate and can be made public without further code changes.
+**Exit:** one pinned commit satisfies every automatable visibility gate. Remaining work is the final name, email, publication-authority, history, repository-setting, and authorization decisions.
+
+Wednesday evidence:
+
+- [Wednesday release-candidate evidence](../release/2026-07-30-WEDNESDAY-CANDIDATE.md)
+- [Public visibility and rollback runbook](../release/PUBLIC_VISIBILITY_RUNBOOK.md)
+
+A truly anonymous network clone cannot be tested while the repository remains internal. It must be verified immediately after the visibility change before Thursday's release is considered complete.
 
 ### Thursday, July 30
 

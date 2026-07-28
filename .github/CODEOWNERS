@@ -1,0 +1,16 @@
+# Default maintainer ownership
+* @Knapp-Kevin
+
+# Security, governance, release, and repository controls
+/SECURITY.md @Knapp-Kevin
+/GOVERNANCE.md @Knapp-Kevin
+/CONTRIBUTING.md @Knapp-Kevin
+/CONTRIBUTOR_LICENSE_AGREEMENT.md @Knapp-Kevin
+/OPEN_SOURCE_RELEASE_CHECKLIST.md @Knapp-Kevin
+/.github/ @Knapp-Kevin
+/docs/release/ @Knapp-Kevin
+/docs/planning/ @Knapp-Kevin
+
+# Core API and security-sensitive implementation
+/src/ @Knapp-Kevin
+/tests/ @Knapp-Kevin

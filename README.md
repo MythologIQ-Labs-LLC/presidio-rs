@@ -309,7 +309,7 @@ A document fingerprint is an integrity mechanism, not encryption or anonymizatio
 
 Before deployment at a security boundary, define required coverage, test adversarial inputs, choose fail-open or fail-closed behavior, validate Unicode handling, and establish review and regression-monitoring policy.
 
-Report vulnerabilities through GitHub private vulnerability reporting. See [SECURITY.md](SECURITY.md).
+Report vulnerabilities confidentially to **admin@mythologiq.studio**. See [SECURITY.md](SECURITY.md).
 
 ## Development program
 

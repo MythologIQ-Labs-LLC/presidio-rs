@@ -28,6 +28,20 @@ The legacy analyzer and anonymizer APIs remain available. The request-oriented p
 
 The immediate post-visibility architecture work is explicit candidate resolution followed by fallible anonymization over document-bound findings.
 
+## API and migration
+
+- [Public API status](api/PUBLIC_API_STATUS.md)
+- [Migration from legacy analysis to document-aware requests](api/MIGRATION_GUIDE.md)
+- [Strict pattern recognizer example](../examples/strict_pattern_recognizer.rs)
+- [Custom backend example](../examples/custom_backend.rs)
+
+## Contributor onboarding
+
+- [First contribution guide](contributing/FIRST_CONTRIBUTION.md)
+- [Contribution policy](../CONTRIBUTING.md)
+- [Code of Conduct](../CODE_OF_CONDUCT.md)
+- [Contributor License Agreement](../CONTRIBUTOR_LICENSE_AGREEMENT.md)
+
 ## Development planning
 
 - [Public repository release week](planning/PUBLIC_RELEASE_WEEK.md)
@@ -71,7 +85,6 @@ The build-versus-adopt-versus-collaborate question remains active. The Rust priv
 
 - [Project governance](../GOVERNANCE.md)
 - [Security policy](../SECURITY.md)
-- [Contribution guide](../CONTRIBUTING.md)
 - [Open-source release checklist](../OPEN_SOURCE_RELEASE_CHECKLIST.md)
 
 Public access does not weaken architecture, security, provenance, evidence, documentation, package, compatibility, or maintainership standards. It changes when the work is visible, not what responsible completion requires.

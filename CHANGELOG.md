@@ -22,6 +22,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Object-safe backend-neutral `Recognizer` execution and validated `CandidateEmitter` output.
 - Typed non-plaintext backend failures and explicit legacy-projection completeness status.
 - Adversarial tests for Unicode spans, provenance, limits, document mismatch, custom backends, legacy compatibility, and failure handling.
+- Runnable examples for strict metadata-backed pattern recognition and backend-neutral custom recognition.
+- A first-contribution guide for unfamiliar contributors using synthetic fixtures only.
+- A public alpha API-status inventory and migration guide from legacy analysis to document-aware requests.
+- A release rehearsal that validates contributor examples and performs `cargo publish --dry-run` without publishing.
 
 ### Changed
 
@@ -34,6 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Built-in pattern recognizers now use validated metadata-backed registration.
 - New request-oriented integrations use exact document binding and authoritative recognizer provenance.
 - The existing analyzer, `RecognizerResult`, pattern registry, and anonymizer APIs remain available for compatibility.
+- Contributor onboarding now starts from a documented, runnable path rather than private project context.
 
 ### Security
 

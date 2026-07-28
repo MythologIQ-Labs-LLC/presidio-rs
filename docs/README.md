@@ -77,8 +77,11 @@ The original February 26, 2027 horizon remains a broader maturity checkpoint rat
 
 ## Research and external landscape
 
+- [Presidio archaeology and secure alpha model](research/PRESIDIO_ARCHAEOLOGY_AND_ALPHA_MODEL.md)
 - [Active Rust privacy landscape watch](research/ACTIVE_LANDSCAPE_WATCH.md)
 - [Parallel efforts and architectural lessons](research/PARALLEL_EFFORTS_AND_LESSONS.md)
+
+The Presidio archaeology program converts upstream architecture, changelog, issues, failures, fixes, security changes, evaluation practices, and governance history into explicit adopt, adapt, reject, defer, or investigate decisions for the Rust project.
 
 The build-versus-adopt-versus-collaborate question remains active. The Rust privacy landscape is watched weekly and escalated immediately when another project could invalidate planned work or provide a better path for consumers.
 

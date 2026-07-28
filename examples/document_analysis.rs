@@ -22,9 +22,7 @@ fn main() {
         .expect("email candidate");
 
     assert_eq!(
-        email
-            .slice_document(&document)
-            .expect("bound source slice"),
+        email.slice_document(&document).expect("bound source slice"),
         "jane@acme.com"
     );
 

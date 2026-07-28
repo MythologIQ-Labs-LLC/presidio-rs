@@ -313,7 +313,7 @@ Report vulnerabilities confidentially to **admin@mythologiq.studio**. See [SECUR
 
 ## Development program
 
-The accelerated roadmap records public repository visibility on July 28, contributor-ready alpha by August 3, correctness and evaluation by August 21, consumer-ready beta by September 4, and a separate package and advertised-launch decision by October 2.
+The accelerated roadmap records public repository visibility on July 28, public foundation alpha by August 3, secure functional alpha by August 21, consumer-validated beta by September 4, and separate package and promotion decisions by October 2.
 
 - [Public repository release week](docs/planning/PUBLIC_RELEASE_WEEK.md)
 - [Rebaselined development roadmap](docs/planning/DEVELOPMENT_PLAN.md)

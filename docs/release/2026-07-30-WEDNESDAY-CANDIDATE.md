@@ -44,6 +44,14 @@ The workflow:
 
 Because the repository is still internal, this is a credential-free local clone rehearsal rather than a truly anonymous network clone. The anonymous network clone must be verified immediately after the visibility change.
 
+## Canonical formatting correction
+
+The first rehearsal reached the isolated clone and passed required-file, YAML, and Markdown-link checks, but rejected the new examples at the formatting gate.
+
+A one-run formatter was added only to `release/wednesday-candidate`. It ran `cargo fmt --all`, committed the canonical result with DCO sign-off, and deleted its own workflow file in the same commit. The branch returned immediately to read-only CI, visibility-audit, and rehearsal workflows.
+
+The final candidate checks must run from a normal maintainer-authored commit after that bootstrap so GitHub does not treat a workflow-authored commit as requiring separate action approval.
+
 ## Candidate pin procedure
 
 After this change merges and all required checks pass:

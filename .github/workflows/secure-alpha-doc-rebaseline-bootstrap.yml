@@ -1,0 +1,70 @@
+name: One-time secure alpha documentation alignment
+
+on:
+  push:
+    branches: [docs/secure-functional-alpha-architecture]
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Align public roadmap language
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              text = file.read_text()
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"expected one occurrence in {path}, found {count}: {old!r}")
+              file.write_text(text.replace(old, new, 1))
+
+          replace_once(
+              "README.md",
+              "The accelerated roadmap records public repository visibility on July 28, contributor-ready alpha by August 3, correctness and evaluation by August 21, consumer-ready beta by September 4, and a separate package and advertised-launch decision by October 2.",
+              "The accelerated roadmap records public repository visibility on July 28, public foundation alpha by August 3, secure functional alpha by August 21, consumer-validated beta by September 4, and separate package and promotion decisions by October 2.",
+          )
+
+          changelog = Path("CHANGELOG.md")
+          text = changelog.read_text()
+          anchor = "- A release rehearsal that validates contributor examples and performs `cargo publish --dry-run` without publishing.\n"
+          addition = anchor + "- A Presidio architecture archaeology and secure-alpha decision program.\n- ADR 0008 establishing an evidence-gated secure functional alpha pipeline.\n- A roadmap that distinguishes public foundation alpha from secure functional alpha.\n"
+          if text.count(anchor) != 1:
+              raise SystemExit("expected changelog added-section anchor exactly once")
+          text = text.replace(anchor, addition, 1)
+
+          old = "- Rebaselined the project from a 30-week private-first plan to public repository visibility on July 30, 2026, contributor-ready alpha by August 14, consumer-ready beta by September 25, and a package and advertised-launch decision by October 30."
+          new = "- Rebaselined the project around completed public visibility on July 28, public foundation alpha by August 3, secure functional alpha by August 21, consumer-validated beta by September 4, and separate package and promotion decisions by October 2."
+          if text.count(old) != 1:
+              raise SystemExit("expected outdated roadmap line exactly once")
+          text = text.replace(old, new, 1)
+
+          anchor_changed = "- Contributor onboarding now starts from a documented, runnable path rather than private project context.\n"
+          changed_addition = anchor_changed + "- Resolution now precedes authoritative anonymization, and recognizer expansion follows the secure functional alpha gate.\n- Deterministic hashing remains legacy-compatible and is excluded from authoritative secure-alpha assumptions until reviewed semantics are implemented or the operator is disabled.\n"
+          if text.count(anchor_changed) != 1:
+              raise SystemExit("expected changelog changed-section anchor exactly once")
+          changelog.write_text(text.replace(anchor_changed, changed_addition, 1))
+          PY
+
+      - name: Commit changes and remove bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm .github/workflows/secure-alpha-doc-rebaseline-bootstrap.yml
+          git config user.name "Kevin Knapp"
+          git config user.email "krknapp@gmail.com"
+          git add README.md CHANGELOG.md
+          git commit -s -m "docs: align public language with secure functional alpha"
+          git push origin HEAD

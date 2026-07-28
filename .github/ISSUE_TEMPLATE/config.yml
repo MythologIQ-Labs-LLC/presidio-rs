@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/MythologIQ-Labs-LLC/presidio-rs/security/policy
+    about: Report suspected vulnerabilities through the private process described in SECURITY.md. Do not include real PII, credentials, or customer data.

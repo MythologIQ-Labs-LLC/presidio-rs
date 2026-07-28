@@ -45,9 +45,14 @@ jobs:
             .github/ISSUE_TEMPLATE/config.yml
             .github/dependabot.yml
             docs/README.md
+            docs/api/PUBLIC_API_STATUS.md
+            docs/api/MIGRATION_GUIDE.md
+            docs/contributing/FIRST_CONTRIBUTION.md
             tools/verify_markdown_links.py
             examples/legacy_quickstart.rs
             examples/document_analysis.rs
+            examples/strict_pattern_recognizer.rs
+            examples/custom_backend.rs
           )
           for path in "${required[@]}"; do
             test -f "$path" || { echo "::error::Missing required public file: $path"; exit 1; }
@@ -98,15 +103,17 @@ jobs:
           cargo test --doc --all-features --locked
           cargo doc --no-deps --all-features
 
-      - name: Run README-backed examples
+      - name: Run documented examples
         working-directory: ${{ steps.clone.outputs.path }}
         shell: bash
         run: |
           set -euo pipefail
           cargo run --locked --example legacy_quickstart
           cargo run --locked --example document_analysis
+          cargo run --locked --example strict_pattern_recognizer
+          cargo run --locked --example custom_backend
 
-      - name: Inspect package from fresh clone
+      - name: Inspect package and rehearse publication
         working-directory: ${{ steps.clone.outputs.path }}
         shell: bash
         run: |
@@ -118,6 +125,7 @@ jobs:
             echo "::error::Package contains repository-only or generated files."
             exit 1
           fi
+          cargo publish --dry-run --locked
 
       - name: Record candidate identity and toolchain
         working-directory: ${{ steps.clone.outputs.path }}
@@ -140,8 +148,9 @@ jobs:
           - Repository YAML parsing: passed
           - Relative Markdown links: passed
           - Formatting, Clippy, build, tests, doctests, and rustdoc: passed
-          - Runnable README-backed examples: passed
+          - Documented examples: passed
           - Cargo package inspection: passed
+          - Cargo publish dry run: passed
 
           This is a credential-free local clone rehearsal while the repository remains internal. A truly anonymous network clone can only be verified after visibility changes.
           EOF

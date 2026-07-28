@@ -2,9 +2,9 @@
 
 ## Executive decision
 
-`presidio-rs` is targeted to become a **publicly readable GitHub repository on Thursday, July 30, 2026**.
+`presidio-rs` became a **publicly readable GitHub repository on Tuesday, July 28, 2026**, two days ahead of the original target.
 
-This supersedes the original 30-week private-development sequencing. The project will expose its source earlier while continuing foundation work in public.
+This supersedes the original 30-week private-development sequencing. The project exposed its source early and continues foundation work in public.
 
 Public visibility is not equivalent to:
 
@@ -34,7 +34,7 @@ The accelerated schedule spends the recovered architecture time on visibility sa
 
 ## Operating principles
 
-- **Public by default after July 30; promotion by explicit decision.**
+- **Public since July 28; promotion by explicit decision.**
 - **Foundation before breadth.** No recognizer accumulation merely to make a feature table longer.
 - **Honest maturity language.** Early-stage limitations remain prominent.
 - **One current `main`.** Completed slices merge promptly after review and green gates.
@@ -86,13 +86,13 @@ Not yet complete:
 
 | Phase | Dates | Primary outcome |
 |---|---|---|
-| R0. Public visibility release | Jul 27 to Jul 30, 2026 | Safely expose the repository without advertising or package publication |
-| R1. Contributor-ready public alpha | Jul 31 to Aug 14, 2026 | Complete release operations, examples, ownership, compatibility inventory, and first public contribution path |
-| R2. Correctness and evaluation sprint | Aug 3 to Sep 4, 2026 | Deliver explicit resolution, fallible anonymization, evaluation baseline, and critical fuzz targets |
-| R3. Consumer and compatibility sprint | Aug 17 to Sep 25, 2026 | Integrate two distinct consumers and establish downstream compatibility evidence |
-| R4. Public beta candidate | Sep 28 to Oct 16, 2026 | Harden supported scope, package contents, API migration, security, and measured claims |
-| R5. Package and launch decision | Oct 19 to Oct 30, 2026 | Decide crates.io publication and whether to actively announce the project |
-| R6. Post-public maturity program | Nov 2, 2026 to Feb 26, 2027 | Continue hardening, broader evaluation, governance maturity, and optional semantic feasibility |
+| R0. Public visibility release | Jul 27 to Jul 28, 2026 | Completed public exposure without advertising or package publication |
+| R1. Contributor-ready public alpha | Jul 28 to Aug 3, 2026 | Complete public operations, ownership, observation, and contribution-intake verification |
+| R2. Correctness and evaluation sprint | Jul 28 to Aug 21, 2026 | Deliver explicit resolution, fallible anonymization, evaluation baseline, and critical fuzz targets |
+| R3. Consumer and compatibility sprint | Aug 3 to Sep 4, 2026 | Integrate two distinct consumers and establish downstream compatibility evidence |
+| R4. Public beta candidate | Sep 4 to Sep 18, 2026 | Harden supported scope, package contents, API migration, security, and measured claims |
+| R5. Package and launch decision | Sep 18 to Oct 2, 2026 | Decide crates.io publication and whether to actively announce the project |
+| R6. Post-public maturity program | Oct 5, 2026 to Feb 26, 2027 | Continue hardening, broader evaluation, governance maturity, and optional semantic feasibility |
 
 The schedule is intentionally aggressive. Workstreams overlap, but public visibility is not allowed to erase the correctness and evidence work required for later maturity claims.
 
@@ -100,8 +100,8 @@ The schedule is intentionally aggressive. Workstreams overlap, but public visibi
 
 ## R0: Public visibility release
 
-**Dates:** July 27 to July 30, 2026  
-**Target:** Public source access by Thursday, July 30
+**Dates:** July 27 to July 28, 2026  
+**Status:** Completed with public source access on Tuesday, July 28
 
 ### Objective
 
@@ -158,7 +158,7 @@ Detailed runbook: [Public Repository Release Week](PUBLIC_RELEASE_WEEK.md).
 
 ## R1: Contributor-ready public alpha
 
-**Dates:** July 31 to August 14, 2026
+**Dates:** July 28 to August 3, 2026
 
 ### Objectives
 
@@ -191,7 +191,7 @@ Detailed runbook: [Public Repository Release Week](PUBLIC_RELEASE_WEEK.md).
 
 ## R2: Correctness and evaluation sprint
 
-**Dates:** August 3 to September 4, 2026
+**Dates:** July 28 to August 21, 2026
 
 ### Workstream A: explicit candidate resolution
 
@@ -241,7 +241,7 @@ Add initial targets for:
 
 ## R3: Consumer and compatibility sprint
 
-**Dates:** August 17 to September 25, 2026
+**Dates:** August 3 to September 4, 2026
 
 ### Consumer pilots
 
@@ -277,7 +277,7 @@ Two wrappers around the same application do not count.
 
 ## R4: Public beta candidate
 
-**Dates:** September 28 to October 16, 2026
+**Dates:** September 4 to September 18, 2026
 
 ### Objectives
 
@@ -310,7 +310,7 @@ Two wrappers around the same application do not count.
 
 ## R5: Package and advertised-launch decision
 
-**Dates:** October 19 to October 30, 2026
+**Dates:** September 18 to October 2, 2026
 
 ### Separate decisions
 
@@ -343,7 +343,7 @@ A public repository does not create an obligation to publish a crate or organize
 
 ## R6: Post-public maturity program
 
-**Dates:** November 2, 2026 to February 26, 2027
+**Dates:** October 5, 2026 to February 26, 2027
 
 This period remains available for:
 

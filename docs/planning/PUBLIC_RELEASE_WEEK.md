@@ -1,8 +1,10 @@
 # Public Repository Release Week
 
+> Status: Public visibility completed Tuesday, July 28, 2026. This document remains the historical release runbook.
+
 ## Decision
 
-The repository is targeted to become publicly readable on **Thursday, July 30, 2026**.
+The repository became publicly readable on **Tuesday, July 28, 2026**, two days ahead of the original target.
 
 This is a source-visibility release, not an advertised product launch, crates.io publication, production-readiness declaration, or promise of support beyond the documented maintainer capacity.
 
@@ -17,7 +19,7 @@ The project uses four separate release decisions:
 3. **Package release** means a version is published to crates.io or another package registry.
 4. **Advertised launch** means the maintainers actively promote availability and accept the resulting community and support load.
 
-Only the first decision is scheduled for July 30. The others require separate approval.
+The first decision completed on July 28. The other decisions still require separate approval.
 
 ## Scope freeze
 
@@ -44,7 +46,7 @@ The repository may become public only when all of the following are true:
 
 A blocker in these categories requires correction, a clean-history export, a rename, or removal of the affected material before public visibility. The deadline does not authorize exposing secrets or material the project does not have the right to publish.
 
-## Explicit non-blockers for July 30
+## Explicit non-blockers for public visibility
 
 The following remain important but do not block public source visibility when limitations are documented honestly:
 
@@ -66,7 +68,7 @@ These items block later maturity gates, not public inspection of an explicitly e
 
 ### Monday, July 27
 
-- [x] Rebaseline the roadmap around July 30 visibility.
+- [x] Rebaseline the roadmap around accelerated public visibility.
 - [x] Freeze non-release scope.
 - [x] Create the release tracking issue and assign owners.
 - [x] Inventory visibility blockers and create focused owner-assigned issues.

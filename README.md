@@ -20,7 +20,7 @@ An embeddable library for identifying and transforming structured sensitive data
 
 ## Release status
 
-The repository is targeted to become publicly readable on **Thursday, July 30, 2026**.
+The repository became publicly readable on **Tuesday, July 28, 2026**, two days ahead of the original target.
 
 Public repository visibility is separate from:
 
@@ -313,7 +313,7 @@ Report vulnerabilities confidentially to **admin@mythologiq.studio**. See [SECUR
 
 ## Development program
 
-The accelerated roadmap targets public repository visibility on July 30, contributor-ready alpha by August 14, consumer-ready beta by September 25, and a separate package and advertised-launch decision by October 30.
+The accelerated roadmap records public repository visibility on July 28, contributor-ready alpha by August 3, correctness and evaluation by August 21, consumer-ready beta by September 4, and a separate package and advertised-launch decision by October 2.
 
 - [Public repository release week](docs/planning/PUBLIC_RELEASE_WEEK.md)
 - [Rebaselined development roadmap](docs/planning/DEVELOPMENT_PLAN.md)

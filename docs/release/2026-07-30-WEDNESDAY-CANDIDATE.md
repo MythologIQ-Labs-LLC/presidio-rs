@@ -50,7 +50,7 @@ The first rehearsal reached the isolated clone and passed required-file, YAML, a
 
 A one-run formatter was added only to `release/wednesday-candidate`. It ran `cargo fmt --all`, committed the canonical result with DCO sign-off, and deleted its own workflow file in the same commit. The branch returned immediately to read-only CI, visibility-audit, and rehearsal workflows.
 
-The final candidate checks must run from a normal maintainer-authored commit after that bootstrap so GitHub does not treat a workflow-authored commit as requiring separate action approval.
+A normal maintainer-authored commit reran the permanent gates after that bootstrap.
 
 ## Candidate pin procedure
 
@@ -62,9 +62,9 @@ After this change merges and all required checks pass:
 4. record the CI, visibility-audit, and rehearsal run identifiers and artifact digests; and
 5. replace the pin only if a later change is approved and all evidence is rerun.
 
-## Stale branch disposition
+## Stale branch cleanup
 
-The Tuesday audit identified obsolete backup, bootstrap, documentation, feature, reconstruction, and completed release branches. These should be deleted before visibility:
+Workflow run `30318442615` deleted the following allowlisted obsolete source branches:
 
 - `backup/candidate-report-adversarial-remediation`;
 - `backup/core-value-types-adversarial-remediation`;
@@ -81,7 +81,9 @@ The Tuesday audit identified obsolete backup, bootstrap, documentation, feature,
 - `release/tuesday-evidence`; and
 - `release/tuesday-visibility-audit`.
 
-Open Dependabot branches remain active until their pull requests are reviewed or closed. GitHub-managed pull-request refs may remain reachable after source branches are deleted and must be considered in the history-versus-clean-export decision.
+The one-run write-capable cleanup workflow removed itself from the candidate branch in the same signed commit. `main`, `release/wednesday-candidate`, and open Dependabot branches were not targeted.
+
+GitHub-managed pull-request refs may remain reachable after source branches are deleted and must be considered in the history-versus-clean-export decision. The active Wednesday source branch should be deleted after merge and candidate pinning.
 
 ## Accountable operators
 
@@ -103,7 +105,7 @@ Public visibility remains blocked until all are recorded:
 2. personal commit-email privacy decision;
 3. MythologIQ Labs LLC publication-authority and MIT-distribution attestation;
 4. current-history versus clean-export decision;
-5. stale source-branch deletion or explicit retention;
+5. deletion of the active Wednesday source branch after merge and candidate pinning;
 6. private vulnerability reporting enabled and tested;
 7. `main` branch protection and required checks configured;
 8. final candidate SHA and evidence identifiers; and

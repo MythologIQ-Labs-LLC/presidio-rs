@@ -1,0 +1,61 @@
+name: Clean stale release branches once
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'release/wednesday-candidate'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out candidate branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Delete allowlisted stale branches and remove bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          branches=(
+            backup/candidate-report-adversarial-remediation
+            backup/core-value-types-adversarial-remediation
+            chore/open-source-readiness
+            docs/public-by-july-30-rebaseline
+            docs/stealth-open-source-foundation
+            feat/analysis-report
+            feat/analysis-request-recognizer-trait
+            feat/candidate-analysis-report
+            feat/core-value-types
+            feat/recognizer-metadata-contract
+            feat/text-document-binding
+            release/public-visibility-monday
+            release/tuesday-evidence
+            release/tuesday-visibility-audit
+          )
+
+          : > /tmp/stale-branch-cleanup.txt
+          for branch in "${branches[@]}"; do
+            if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+              git push origin --delete "$branch"
+              echo "deleted $branch" >> /tmp/stale-branch-cleanup.txt
+            else
+              echo "already absent $branch" >> /tmp/stale-branch-cleanup.txt
+            fi
+          done
+
+          rm .github/workflows/cleanup-stale-release-branches.yml
+          git add -A
+          git config user.name 'Kevin Knapp'
+          git config user.email 'krknapp@gmail.com'
+          git commit -m 'chore: remove stale release branch cleanup bootstrap' \
+            -m 'Signed-off-by: Kevin Knapp <krknapp@gmail.com>'
+          git push origin HEAD:${GITHUB_HEAD_REF}
+
+          cat /tmp/stale-branch-cleanup.txt

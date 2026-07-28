@@ -2,7 +2,7 @@
 
 ## Architecture
 
-- [Target architecture](architecture/ARCHITECTURE.md)
+- [Active architecture](architecture/ARCHITECTURE.md)
 - [ADR 0001: Develop with open-source-grade practices](adr/0001-private-open-source-posture.md)
 - [ADR 0002: Backend-neutral core with optional capability adapters](adr/0002-backend-neutral-core-and-optional-adapters.md)
 - [ADR 0003: Stage validated core types before engine migration](adr/0003-stage-core-types-before-engine-migration.md)
@@ -10,6 +10,7 @@
 - [ADR 0005: Add recognizer metadata and validated registration](adr/0005-add-recognizer-metadata-and-validated-registration.md)
 - [ADR 0006: Bind findings and reports to exact text documents](adr/0006-bind-findings-to-text-documents.md)
 - [ADR 0007: Add analysis requests and a backend-neutral recognizer trait](adr/0007-add-analysis-request-and-recognizer-trait.md)
+- [ADR 0008: Stage the secure functional alpha through an evidence-gated pipeline](adr/0008-stage-secure-functional-alpha-through-evidence-gated-pipeline.md)
 
 ## Implemented architecture status
 
@@ -26,7 +27,14 @@ The current `main` branch includes:
 
 The legacy analyzer and anonymizer APIs remain available. The request-oriented path is additive and is the target integration surface for new Rust consumers.
 
-The immediate post-visibility architecture work is explicit candidate resolution followed by fallible anonymization over document-bound findings.
+The secure functional alpha critical path is:
+
+1. Presidio evidence and alpha contract;
+2. explicit candidate resolution;
+3. fallible document-bound anonymization;
+4. explainability, context, and conservative defaults;
+5. reproducible evaluation, historical regressions, fuzzing, and a downstream fixture; and
+6. two materially different consumer validations.
 
 ## API and migration
 
@@ -44,8 +52,8 @@ The immediate post-visibility architecture work is explicit candidate resolution
 
 ## Development planning
 
+- [Secure functional alpha roadmap](planning/DEVELOPMENT_PLAN.md)
 - [Public repository release week](planning/PUBLIC_RELEASE_WEEK.md)
-- [Rebaselined development roadmap](planning/DEVELOPMENT_PLAN.md)
 - [Open-source foundation track](planning/OPEN_SOURCE_FOUNDATION_TRACK.md)
 - [Development risk and assumption register](planning/RISK_REGISTER.md)
 
@@ -59,21 +67,18 @@ The immediate post-visibility architecture work is explicit candidate resolution
 
 The repository became public on July 28, 2026. Evidence records remain authoritative for the exact tested commits and release operations.
 
-## Accelerated release baseline
+## Current roadmap gates
 
-The repository became publicly readable on **Tuesday, July 28, 2026**, two days ahead of the original target.
-
-Public visibility remains separate from contributor-ready alpha, consumer-ready beta, crates.io publication, an advertised launch, production certification, and stable API commitments.
-
-Current target gates:
+Public visibility remains separate from a secure transformation boundary, crates.io publication, active promotion, production certification, and stable API commitments.
 
 - public repository visibility: completed July 28, 2026;
-- contributor-ready public alpha: August 3, 2026;
-- correctness, evaluation, and initial fuzzing: August 21, 2026;
-- consumer-ready public beta: September 4, 2026; and
-- package and advertised-launch decision: October 2, 2026.
+- public foundation alpha: August 3, 2026;
+- secure functional alpha: August 21, 2026;
+- consumer-validated public beta: September 4, 2026;
+- hardened public beta: September 18, 2026; and
+- package and promotion decision: October 2, 2026.
 
-The original February 26, 2027 horizon remains a broader maturity checkpoint rather than the first possible publication date.
+The February 26, 2027 horizon remains a broader maturity checkpoint.
 
 ## Research and external landscape
 
@@ -83,7 +88,7 @@ The original February 26, 2027 horizon remains a broader maturity checkpoint rat
 
 The Presidio archaeology program converts upstream architecture, changelog, issues, failures, fixes, security changes, evaluation practices, and governance history into explicit adopt, adapt, reject, defer, or investigate decisions for the Rust project.
 
-The build-versus-adopt-versus-collaborate question remains active. The Rust privacy landscape is watched weekly and escalated immediately when another project could invalidate planned work or provide a better path for consumers.
+The build-versus-adopt-versus-collaborate question remains active. The Rust privacy landscape is watched continuously and escalated when another project could invalidate planned work or provide a better path for consumers.
 
 ## Governance and release
 

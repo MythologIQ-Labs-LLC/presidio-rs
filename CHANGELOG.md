@@ -30,6 +30,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - ADR 0008 establishing an evidence-gated secure functional alpha pipeline.
 - A roadmap that distinguishes public foundation alpha from secure functional alpha.
 - A first secure-alpha development-round plan for explicit, versioned candidate resolution before anonymization.
+- ADR 0009 freezing `report_all/v1`, `best_candidate/v1`, and `conservative_redaction/v1` semantics.
+- A Presidio resolution decision ledger and normative resolution conformance matrix.
 
 ### Changed
 
@@ -45,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Contributor onboarding now starts from a documented, runnable path rather than private project context.
 - Resolution now precedes authoritative anonymization, and recognizer expansion follows the secure functional alpha gate.
 - The first implementation round is split into an evidence and contract freeze, a pure resolution engine, and additive `AnalysisReport` integration while legacy output remains unchanged.
+- The accepted resolver contract now defines strict overlap, separate adjacency, canonical candidate ordinals, deterministic total precedence, conservative connected-component unions, and explicit mixed-entity output.
 - Deterministic hashing remains legacy-compatible and is excluded from authoritative secure-alpha assumptions until reviewed semantics are implemented or the operator is disabled.
 
 ### Security
@@ -54,6 +57,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Prevented supported custom backends from bypassing entity, span, confidence, provenance, source-binding, and candidate-limit invariants.
 - Added bounded metadata and failure codes to reduce accidental plaintext capture in reports.
 - Added exact-source validation before document-bound findings can be sliced or applied.
+- Rejected arbitrary equal-score resolution and transformation-coupled partial-overlap behavior for the authoritative path.
 
 ## [0.1.0] - Unreleased
 

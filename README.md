@@ -51,7 +51,8 @@ The current crate provides:
 - bounded request selection for entities, recognizers, locale, capabilities, confidence, input size, candidates, and issues;
 - an object-safe backend-neutral `Recognizer` trait;
 - validated candidate emission that enforces source, provenance, entity, confidence, and resource invariants;
-- typed non-plaintext backend failures; and
+- typed non-plaintext backend failures;
+- pure versioned `ReportAll`, `BestCandidate`, and `ConservativeRedaction` resolution policies; and
 - legacy replacement, redaction, masking, and deterministic hashing.
 
 The crate itself performs no network or filesystem I/O. Its direct dependencies are `regex`, `sha2`, and optional `serde`.
@@ -111,12 +112,49 @@ assert_eq!(
 );
 ```
 
-`AnalysisReport::candidates()` is authoritative raw evidence for this path. `legacy_compatible_results()` is a transitional compatibility projection that still uses the legacy overlap behavior. The first secure-alpha implementation round adds explicit, versioned resolution while preserving the original candidates. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.
+`AnalysisReport::candidates()` is authoritative raw evidence for this path. `legacy_compatible_results()` is a transitional compatibility projection that still uses the legacy overlap behavior. Explicit versioned resolution is now available as a separate pure step while preserving the original candidates. When an open entity cannot be represented by the legacy taxonomy, `report.status().legacy_projection_incomplete()` is true.
 
 Migration and compatibility references:
 
 - [Public API status](docs/api/PUBLIC_API_STATUS.md)
 - [Legacy-to-request migration guide](docs/api/MIGRATION_GUIDE.md)
+
+### Explicit candidate resolution
+
+```rust
+use presidio::{
+    resolve_candidates, AnalysisRequest, AnalyzerEngine, DocumentId,
+    ResolutionOptions, ResolutionPolicy, TextDocument,
+};
+
+let document = TextDocument::new(
+    DocumentId::new("request-42").expect("valid document ID"),
+    "Email jane@acme.com",
+);
+let report = AnalyzerEngine::new()
+    .analyze_request(&document, &AnalysisRequest::new())
+    .expect("bounded analysis");
+report
+    .validate_for_document(&document)
+    .expect("matching source document");
+
+let resolved = resolve_candidates(
+    report.candidates(),
+    &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
+)
+.expect("complete resolution");
+
+assert!(resolved.status().output_complete());
+assert_eq!(resolved.policy_id(), "conservative_redaction");
+```
+
+`ReportAll` preserves all qualifying candidates. `BestCandidate` selects a deterministic non-overlapping set using explicit priority, confidence, span, and stable tie-breaking. `ConservativeRedaction` unions connected strict-overlap components so every byte covered by a qualifying candidate remains covered. Adjacent spans remain separate.
+
+The resolver owns a canonical candidate snapshot and bounded non-plaintext decision evidence. It does not transform text. Additive `AnalysisReport` integration remains #42, and fallible document-bound anonymization follows after that contract is complete.
+
+- [ADR 0009: Version explicit candidate-resolution policies](docs/adr/0009-version-explicit-candidate-resolution.md)
+- [Resolution conformance matrix](docs/testing/RESOLUTION_CONFORMANCE_MATRIX.md)
+- [Runnable resolution example](examples/resolution_policies.rs)
 
 ## Expected use cases
 
@@ -261,7 +299,7 @@ The current anonymizer consumes legacy `RecognizerResult` values and supports:
 - `Mask`; and
 - deterministic salted SHA-256 `Hash`.
 
-Explicit candidate resolution is the active first development round. Fallible anonymization over document-bound resolved findings follows only after the resolution contract is versioned and tested.
+Pure versioned candidate resolution is implemented. `AnalysisReport` convenience integration and document-bound resolution validation remain #42. Fallible anonymization over document-bound resolved findings follows only after that integration contract is tested.
 
 Deterministic hashing enables correlation. It does not guarantee irreversible anonymity, especially for low-entropy values or disclosed salts.
 
@@ -280,6 +318,12 @@ TextDocument + AnalysisRequest
        -> recognizer metadata catalog
        -> typed issues and limit status
        -> legacy-compatible projection
+  -> resolve_candidates + ResolutionOptions
+  -> ResolutionReport
+       -> canonical candidate snapshot
+       -> resolved findings or conservative unions
+       -> bounded non-plaintext decisions
+       -> policy identity, version, and status
 ```
 
 Architecture documents:
@@ -293,6 +337,7 @@ Architecture documents:
 - [ADR 0006: Exact document binding](docs/adr/0006-bind-findings-to-text-documents.md)
 - [ADR 0007: Requests and recognizer execution](docs/adr/0007-add-analysis-request-and-recognizer-trait.md)
 - [ADR 0008: Evidence-gated secure functional alpha](docs/adr/0008-stage-secure-functional-alpha-through-evidence-gated-pipeline.md)
+- [ADR 0009: Version explicit candidate-resolution policies](docs/adr/0009-version-explicit-candidate-resolution.md)
 - [First secure-alpha development round](docs/planning/FIRST_DEVELOPMENT_ROUND.md)
 - [Documentation index](docs/README.md)
 
@@ -342,6 +387,7 @@ cargo run --example legacy_anonymization
 cargo run --example document_analysis
 cargo run --example strict_pattern_recognizer
 cargo run --example custom_backend
+cargo run --example resolution_policies
 cargo publish --dry-run
 cargo audit
 ```

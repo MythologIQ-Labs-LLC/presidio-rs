@@ -159,10 +159,8 @@ mod tests {
             .expect("analysis succeeds");
 
         assert!(matches!(
-            analysis.resolve_for_document(
-                &other,
-                &ResolutionOptions::new(ResolutionPolicy::ReportAll)
-            ),
+            analysis
+                .resolve_for_document(&other, &ResolutionOptions::new(ResolutionPolicy::ReportAll)),
             Err(AnalysisResolutionError::ReportDocument(_))
         ));
     }
@@ -246,13 +244,7 @@ mod tests {
                 emitter: &mut crate::CandidateEmitter<'_, '_>,
             ) -> Result<(), crate::RecognitionError> {
                 emitter
-                    .emit(
-                        EntityId::new("CUSTOM_SECRET").unwrap(),
-                        0,
-                        4,
-                        0.9,
-                        [],
-                    )
+                    .emit(EntityId::new("CUSTOM_SECRET").unwrap(), 0, 4, 0.9, [])
                     .expect("candidate accepted");
                 Ok(())
             }

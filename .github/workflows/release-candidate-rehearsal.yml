@@ -53,6 +53,7 @@ jobs:
             examples/document_analysis.rs
             examples/strict_pattern_recognizer.rs
             examples/custom_backend.rs
+            examples/resolution_policies.rs
           )
           for path in "${required[@]}"; do
             test -f "$path" || { echo "::error::Missing required public file: $path"; exit 1; }
@@ -121,6 +122,7 @@ jobs:
           cargo run --locked --example document_analysis
           cargo run --locked --example strict_pattern_recognizer
           cargo run --locked --example custom_backend
+          cargo run --locked --example resolution_policies
 
       - name: Inspect package and rehearse publication
         working-directory: ${{ steps.clone.outputs.path }}

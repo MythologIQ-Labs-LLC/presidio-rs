@@ -34,6 +34,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - A Presidio resolution decision ledger and normative resolution conformance matrix.
 - A pure additive candidate-resolution module with stable policy identity and version, canonical candidate snapshots, explicit priorities, bounded outputs, typed decision evidence, and document-binding consistency checks.
 - Deterministic `ReportAll`, `BestCandidate`, and `ConservativeRedaction` implementations with permutation, overlap, containment, adjacency, bridge, duplicate, priority, binding, Unicode, limit, and immutability tests.
+- `AnalysisReport::resolve_for_document`, `ResolvedAnalysisReport`, and `AnalysisResolutionError` for exact-document, fail-closed integration with the pure resolver.
+- A downstream public-API fixture covering analysis, document validation, all resolution policies, and preservation of raw evidence.
 
 ### Changed
 
@@ -50,7 +52,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Resolution now precedes authoritative anonymization, and recognizer expansion follows the secure functional alpha gate.
 - The first implementation round is split into an evidence and contract freeze, a pure resolution engine, and additive `AnalysisReport` integration while legacy output remains unchanged.
 - The accepted resolver contract now defines strict overlap, separate adjacency, canonical candidate ordinals, deterministic total precedence, conservative connected-component unions, and explicit mixed-entity output.
-- The pure resolver is now callable over `&[Finding]`; `AnalysisReport` integration remains the next additive slice under #42.
+- Document-aware consumers can now analyze, validate, and resolve through one additive path while retaining the raw candidate collection and legacy-compatible projection.
+- Fallible document-bound anonymization is now the next substantive secure-alpha development round.
 - Deterministic hashing remains legacy-compatible and is excluded from authoritative secure-alpha assumptions until reviewed semantics are implemented or the operator is disabled.
 
 ### Security
@@ -61,7 +64,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Added bounded metadata and failure codes to reduce accidental plaintext capture in reports.
 - Added exact-source validation before document-bound findings can be sliced or applied.
 - Rejected arbitrary equal-score resolution and transformation-coupled partial-overlap behavior for the authoritative path.
-- Resolution now rejects inconsistent document binding and hard candidate or output limits instead of returning an unmarked partial result.
+- Resolution rejects inconsistent document binding and hard candidate or output limits instead of returning an unmarked partial result.
+- Integrated resolution rejects unbound, mismatched, source-invalid, or candidate-truncated analysis before returning authoritative output.
 
 ## [0.1.0] - Unreleased
 

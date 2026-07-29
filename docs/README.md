@@ -23,18 +23,24 @@ The current `main` branch includes:
 - exact document identity and source-content binding;
 - bounded `AnalysisRequest` selection and resource controls;
 - an object-safe backend-neutral `Recognizer` trait;
-- validated candidate emission; and
-- typed non-plaintext backend failures.
+- validated candidate emission and typed non-plaintext backend failures;
+- pure versioned `ReportAll`, `BestCandidate`, and `ConservativeRedaction` policies;
+- canonical candidate snapshots and bounded decision evidence;
+- exact-document `AnalysisReport::resolve_for_document` integration;
+- fail-closed rejection of unbound, mismatched, or candidate-truncated analysis; and
+- a downstream public-API resolution fixture.
 
 The legacy analyzer and anonymizer APIs remain available. The request-oriented path is additive and is the target integration surface for new Rust consumers.
 
-The active implementation round is explicit candidate resolution. See [First Secure-Alpha Development Round](planning/FIRST_DEVELOPMENT_ROUND.md).
+The first secure-alpha development round is complete. See [First Secure-Alpha Development Round](planning/FIRST_DEVELOPMENT_ROUND.md).
+
+The active implementation boundary is fallible document-bound anonymization over the resolved report contract.
 
 The secure functional alpha critical path is:
 
 1. Presidio evidence and alpha contract;
-2. explicit candidate resolution;
-3. fallible document-bound anonymization;
+2. explicit candidate resolution, complete;
+3. fallible document-bound anonymization, active next;
 4. explainability, context, and conservative defaults;
 5. reproducible evaluation, historical regressions, fuzzing, and a downstream fixture; and
 6. two materially different consumer validations.
@@ -44,6 +50,7 @@ The secure functional alpha critical path is:
 - [Public API status](api/PUBLIC_API_STATUS.md)
 - [Migration from legacy analysis to document-aware requests](api/MIGRATION_GUIDE.md)
 - [Resolution conformance matrix](testing/RESOLUTION_CONFORMANCE_MATRIX.md)
+- [Resolution policy example](../examples/resolution_policies.rs)
 - [Strict pattern recognizer example](../examples/strict_pattern_recognizer.rs)
 - [Custom backend example](../examples/custom_backend.rs)
 
@@ -57,7 +64,7 @@ The secure functional alpha critical path is:
 ## Development planning
 
 - [Secure functional alpha roadmap](planning/DEVELOPMENT_PLAN.md)
-- [First secure-alpha development round](planning/FIRST_DEVELOPMENT_ROUND.md)
+- [Completed first secure-alpha development round](planning/FIRST_DEVELOPMENT_ROUND.md)
 - [Public repository release week](planning/PUBLIC_RELEASE_WEEK.md)
 - [Open-source foundation track](planning/OPEN_SOURCE_FOUNDATION_TRACK.md)
 - [Development risk and assumption register](planning/RISK_REGISTER.md)

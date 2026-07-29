@@ -1,6 +1,6 @@
 # Migration Guide: Legacy Analysis to Document-Aware Requests
 
-The legacy API remains available. Migration is recommended when consumers need exact source binding, open entities, authoritative recognizer provenance, typed backend failures, or explicit resource limits.
+The legacy API remains available. Migration is recommended when consumers need exact source binding, open entities, authoritative recognizer provenance, typed backend failures, explicit resource limits, or versioned resolution.
 
 ## Legacy shape
 
@@ -26,42 +26,44 @@ Limitations:
 ## Target shape
 
 ```rust
-use presidio::{AnalysisRequest, AnalyzerEngine, DocumentId, TextDocument};
+use presidio::{
+    AnalysisRequest, AnalyzerEngine, DocumentId, ResolutionOptions,
+    ResolutionPolicy, TextDocument,
+};
 
 let document = TextDocument::new(
     DocumentId::new("request-42").expect("valid document ID"),
     "Email jane@acme.com",
 );
-let request = AnalysisRequest::new();
 let report = AnalyzerEngine::new()
-    .analyze_request(&document, &request)
+    .analyze_request(&document, &AnalysisRequest::new())
     .expect("bounded analysis");
 
-report
-    .validate_for_document(&document)
-    .expect("matching source document");
+let resolved = report
+    .resolve_for_document(
+        &document,
+        &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
+    )
+    .expect("document-bound resolution");
 
-for finding in report.candidates() {
-    let matched = finding
-        .slice_document(&document)
-        .expect("validated source binding");
-    println!("{}: {matched}", finding.entity());
+for output in resolved.resolution().resolved() {
+    println!("{output:?}");
 }
 ```
 
-The request-oriented path preserves validated candidates and records status, issues, recognizer metadata, exact document binding, and legacy-projection completeness.
+The request-oriented path preserves validated candidates and records status, issues, recognizer metadata, exact document binding, legacy-projection completeness, and a separate versioned resolution report.
 
 ## Resolution migration state
 
-ADR 0009 has accepted the version-1 semantics for three future additive policies:
+ADR 0009 defines three implemented additive policies:
 
 - `report_all/v1` preserves all qualifying candidates;
 - `best_candidate/v1` performs deterministic precedence-based selection; and
-- `conservative_redaction/v1` unions connected overlap components without inventing a mixed source entity.
+- `conservative_redaction/v1` unions connected strict-overlap components without inventing a mixed source entity.
 
-The implementation is tracked by #41 and #42. Until those issues merge, the crate does not expose a public resolution API. Consumers should continue to treat `AnalysisReport::candidates()` as raw authoritative evidence and `legacy_compatible_results()` as compatibility output.
+`AnalysisReport::resolve_for_document` validates the exact source, rejects candidate-truncated analysis, retains analyzer version and analysis status, and returns a `ResolvedAnalysisReport` containing the pure `ResolutionReport`.
 
-Accepted semantics are documented in:
+Semantics are documented in:
 
 - [ADR 0009](../adr/0009-version-explicit-candidate-resolution.md); and
 - [Resolution conformance matrix](../testing/RESOLUTION_CONFORMANCE_MATRIX.md).
@@ -97,39 +99,47 @@ Start with `AnalysisRequest::new()`, which selects default-enabled strict recogn
 
 Check the current rustdoc for available entity, recognizer, locale, capability, confidence, input, candidate and issue controls.
 
-### 4. Consume authoritative candidates
+### 4. Inspect authoritative candidates
 
-Use `report.candidates()` rather than `legacy_compatible_results()`.
-
-Before transformation or release, validate the report against the exact source document:
-
-```rust
-report.validate_for_document(&document)?;
-```
+Use `report.candidates()` rather than `legacy_compatible_results()` when raw evidence, provenance, or evaluation matters.
 
 Use `finding.slice_document(&document)` instead of slicing directly from unchecked offsets.
 
-### 5. Resolve candidates explicitly when the API lands
+### 5. Resolve against the exact document
 
-The accepted migration sequence is:
+Choose one named policy and resolve through the report:
 
-1. inspect or retain the raw candidate collection;
-2. choose one named policy and version;
-3. resolve into a separate report;
-4. validate that report against the same document; and
-5. pass only the resolved report into the future document-bound anonymizer.
+```rust
+let integrated = report.resolve_for_document(
+    &document,
+    &ResolutionOptions::new(ResolutionPolicy::BestCandidate),
+)?;
+let resolution = integrated.resolution();
+```
+
+This call:
+
+1. validates report and candidate bindings against the exact document;
+2. rejects an unbound or mismatched report;
+3. rejects analysis that stopped at the candidate limit;
+4. preserves raw candidates separately;
+5. applies the selected policy and version;
+6. retains analyzer version, analysis status, issue count, and document binding; and
+7. returns bounded non-plaintext decision evidence.
 
 Do not overwrite the raw candidate collection. Do not infer resolution from vector order. Do not reproduce legacy overlap behavior in application code and later label it `BestCandidate`.
 
 `ConservativeRedaction` is the intended safe input for irreversible coverage-oriented redaction. `BestCandidate` is a precision-oriented selection policy and can intentionally select a contained higher-confidence span over a larger lower-confidence span.
 
+The lower-level `resolve_candidates` function remains available for validated `Finding` collections outside `AnalysisReport`, but report-based consumers should prefer `resolve_for_document`.
+
 ### 6. Inspect status and issues
 
-A successful `analyze_request` can still return a report with retained issues or limit status. Applications must decide whether those conditions fail closed, require review, reduce confidence, or are acceptable for their use case.
+A successful `analyze_request` can still return retained issues or issue-detail truncation. `ResolvedAnalysisReport::analysis_status()` and `analysis_issue_count()` preserve that context.
 
-Do not interpret a lack of retained issue details as proof that analysis was exhaustive when an issue limit was reached.
+Candidate truncation is fail-closed by `resolve_for_document`. Pure resolution candidate and output limits are hard errors. Decision-evidence truncation is explicit through `ResolutionStatus` while resolved output remains complete.
 
-Future resolution status will similarly distinguish complete output from candidate, resolved-output, or decision-evidence limits.
+Applications must still decide whether recognizer failures or retained issues block, require review, reduce confidence, or are acceptable for their use case.
 
 ### 7. Register recognizers through authoritative paths
 
@@ -151,16 +161,17 @@ See:
 
 - [`examples/strict_pattern_recognizer.rs`](../../examples/strict_pattern_recognizer.rs)
 - [`examples/custom_backend.rs`](../../examples/custom_backend.rs)
+- [`examples/resolution_policies.rs`](../../examples/resolution_policies.rs)
 
 ### 8. Delay transformation migration until the fallible API lands
 
-The current anonymizer accepts legacy `RecognizerResult` values. Fallible anonymization over a document-bound `ResolutionReport` remains the round after #42.
+The current anonymizer accepts legacy `RecognizerResult` values. Fallible atomic anonymization over `ResolvedAnalysisReport` or its contained `ResolutionReport` is the next secure-alpha development round.
 
 Until that API exists:
 
 - keep existing anonymization on the legacy path where compatibility is required;
-- use request-oriented reports for inspection, provenance, evaluation and policy decisions;
-- do not manually transform overlapping candidates without an explicit application-owned policy;
+- use request-oriented analysis and resolution for inspection, provenance, evaluation and policy decisions;
+- do not manually transform overlapping candidates;
 - do not pass unresolved request-oriented candidates into the legacy anonymizer; and
 - do not present the legacy compatibility projection as the permanent transformation contract.
 
@@ -169,27 +180,27 @@ Until that API exists:
 A consumer may run both paths temporarily:
 
 1. use `analyze_request` to collect authoritative candidates and evidence;
-2. compare `legacy_compatible_results()` with the existing `analyze` output;
-3. record any open-entity, threshold, ordering, containment, or partial-overlap differences;
-4. retain the existing anonymizer for current production behavior;
-5. adopt explicit resolution after #42; and
+2. resolve with one explicit policy through `resolve_for_document`;
+3. compare `legacy_compatible_results()` with the existing `analyze` output;
+4. record open-entity, threshold, ordering, containment, partial-overlap, and resolution differences;
+5. retain the existing anonymizer for current production behavior; and
 6. migrate transformation only after the document-bound fallible anonymizer is available.
 
-This allows evidence gathering without changing output behavior in the same deployment.
+This allows evidence gathering and policy evaluation without changing transformation behavior in the same deployment.
 
 ## Compatibility checklist
 
 Before switching a consumer:
 
 - [ ] document IDs are opaque and stable for the source lifetime;
-- [ ] every report is validated against the exact document before use;
+- [ ] every report is resolved through the exact document;
 - [ ] open entities are handled without assuming legacy representability;
 - [ ] candidate and issue limits are appropriate for expected input size;
 - [ ] backend failure and truncation policy is explicit;
 - [ ] recognizer metadata is retained where provenance matters;
 - [ ] Unicode byte offsets are tested with realistic synthetic fixtures;
 - [ ] existing overlap and anonymization behavior is regression-tested;
-- [ ] an explicit resolution policy is selected when the API is available;
+- [ ] one explicit resolution policy is selected;
 - [ ] conservative redaction is used where coverage matters more than single-candidate precision; and
 - [ ] logs do not expose plaintext, source fingerprints, or sensitive identifiers unnecessarily.
 

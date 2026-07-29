@@ -15,6 +15,7 @@
 //! - validated recognizer metadata and provenance
 //! - document identity and exact source-content binding
 //! - backend-neutral recognizer execution through validated analysis requests
+//! - pure, explicit, versioned candidate-resolution policies
 //!
 //! It performs no network or filesystem I/O and requires no Python runtime.
 //! Person names, prose locations, and other semantic entities are not detected
@@ -48,6 +49,24 @@
 //! report.validate_for_document(&document).expect("matching source");
 //! ```
 //!
+//! Raw candidates can be resolved independently from analyzer integration:
+//!
+//! ```
+//! use presidio::{resolve_candidates, ResolutionOptions, ResolutionPolicy};
+//! # use presidio::{Confidence, EntityId, Finding, Span};
+//! # let findings = vec![Finding::new(
+//! #     EntityId::new("EMAIL_ADDRESS").unwrap(),
+//! #     Span::new(0, 4).unwrap(),
+//! #     Confidence::new(0.8).unwrap(),
+//! # )];
+//! let resolved = resolve_candidates(
+//!     &findings,
+//!     &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
+//! )?;
+//! assert!(resolved.status().output_complete());
+//! # Ok::<(), presidio::ResolutionError>(())
+//! ```
+//!
 //! This is an independent open-source project. It is not affiliated with or
 //! endorsed by Microsoft. See the repository README for scope, limitations,
 //! security guidance, and acknowledgements.
@@ -65,6 +84,7 @@ mod recognizer;
 mod registry;
 mod report;
 mod request;
+mod resolution;
 mod result;
 mod types;
 pub mod validators;
@@ -92,6 +112,12 @@ pub use report::{
 pub use request::{
     AnalysisExecutionError, AnalysisRequest, AnalysisRequestError, LimitDimension,
     DEFAULT_ANALYSIS_INPUT_LIMIT,
+};
+pub use resolution::{
+    resolve_candidates, ResolutionDecision, ResolutionError, ResolutionOptions, ResolutionPolicy,
+    ResolutionReport, ResolutionStatus, ResolvedEntity, ResolvedFinding,
+    DEFAULT_RESOLUTION_CANDIDATE_LIMIT, DEFAULT_RESOLUTION_DECISION_LIMIT,
+    DEFAULT_RESOLUTION_OUTPUT_LIMIT, RESOLUTION_POLICY_VERSION_V1,
 };
 pub use result::RecognizerResult;
 pub use types::{

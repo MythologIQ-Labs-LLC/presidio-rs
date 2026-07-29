@@ -64,7 +64,9 @@ pub enum AnalysisResolutionError {
 impl fmt::Display for AnalysisResolutionError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::ReportDocument(error) => write!(formatter, "analysis report is not usable: {error}"),
+            Self::ReportDocument(error) => {
+                write!(formatter, "analysis report is not usable: {error}")
+            }
             Self::IncompleteCandidateCollection => formatter.write_str(
                 "analysis candidate collection is incomplete and cannot be authoritatively resolved",
             ),
@@ -119,7 +121,8 @@ impl AnalysisReport {
 mod tests {
     use super::*;
     use crate::{
-        AnalysisRequest, AnalyzerEngine, DocumentId, EntityId, ResolutionPolicy, TextDocument,
+        AnalysisRequest, AnalyzerEngine, DocumentId, EntityId, MetadataId, RecognitionMechanism,
+        RecognizerId, RecognizerMetadata, ResolutionPolicy, TextDocument,
     };
 
     #[test]
@@ -156,8 +159,10 @@ mod tests {
             .expect("analysis succeeds");
 
         assert!(matches!(
-            analysis
-                .resolve_for_document(&other, &ResolutionOptions::new(ResolutionPolicy::ReportAll)),
+            analysis.resolve_for_document(
+                &other,
+                &ResolutionOptions::new(ResolutionPolicy::ReportAll)
+            ),
             Err(AnalysisResolutionError::ReportDocument(_))
         ));
     }
@@ -226,25 +231,26 @@ mod tests {
     #[test]
     fn open_entities_remain_supported_through_report_integration() {
         struct OpenEntityBackend {
-            metadata: crate::RecognizerMetadata,
+            metadata: RecognizerMetadata,
         }
 
         impl crate::Recognizer for OpenEntityBackend {
-            fn metadata(&self) -> &crate::RecognizerMetadata {
+            fn metadata(&self) -> &RecognizerMetadata {
                 &self.metadata
             }
 
             fn recognize(
                 &self,
-                document: &TextDocument<'_>,
+                _document: &TextDocument<'_>,
                 _request: &AnalysisRequest,
                 emitter: &mut crate::CandidateEmitter<'_, '_>,
             ) -> Result<(), crate::RecognitionError> {
                 emitter
                     .emit(
                         EntityId::new("CUSTOM_SECRET").unwrap(),
-                        crate::Span::new_for(document.original(), 0, 4).unwrap(),
-                        crate::Confidence::new(0.9).unwrap(),
+                        0,
+                        4,
+                        0.9,
                         [],
                     )
                     .expect("candidate accepted");
@@ -252,21 +258,21 @@ mod tests {
             }
         }
 
-        let metadata = crate::RecognizerMetadata::builder(
-            crate::RecognizerId::new("custom.open").unwrap(),
-            "1",
-            crate::RecognitionMechanism::Custom,
+        let open_entity = EntityId::new("CUSTOM_SECRET").unwrap();
+        let metadata = RecognizerMetadata::new(
+            RecognizerId::new("custom.open").unwrap(),
+            MetadataId::new("1").unwrap(),
+            [open_entity.clone()],
+            RecognitionMechanism::Custom,
         )
-        .with_supported_entities([EntityId::new("CUSTOM_SECRET").unwrap()])
-        .build()
-        .unwrap();
+        .unwrap()
+        .with_default_enabled(true);
         let mut analyzer = AnalyzerEngine::new();
         analyzer
             .add_backend(OpenEntityBackend { metadata })
             .expect("backend registration");
         let document = TextDocument::new(DocumentId::new("doc-1").unwrap(), "ABCD");
-        let request =
-            AnalysisRequest::new().with_entities([EntityId::new("CUSTOM_SECRET").unwrap()]);
+        let request = AnalysisRequest::new().with_entities([open_entity]).unwrap();
         let analysis = analyzer
             .analyze_request(&document, &request)
             .expect("analysis succeeds");

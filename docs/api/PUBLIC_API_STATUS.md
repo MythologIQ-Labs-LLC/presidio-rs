@@ -63,7 +63,7 @@ Expected guarantees:
 
 Recognizers must preserve original source coordinates, declare every emitted entity, use authoritative metadata, and submit candidates through the emitter.
 
-## Accepted resolution contract, not implemented
+## Experimental resolution API
 
 ADR 0009 freezes the version-1 semantics for:
 
@@ -71,14 +71,27 @@ ADR 0009 freezes the version-1 semantics for:
 - `best_candidate/v1`; and
 - `conservative_redaction/v1`.
 
-The planned additive concepts include `ResolutionPolicy`, `ResolutionReport`, `ResolvedFinding`, bounded decision evidence, policy identity, and policy version. Names may still change during #41 review, but behavior may not drift from ADR 0009 without another explicit decision record.
+The pure additive implementation now exposes:
 
-Until #41 and #42 merge:
+- `resolve_candidates`;
+- `ResolutionPolicy`;
+- `ResolutionOptions`;
+- `ResolutionReport`;
+- `ResolvedFinding` and `ResolvedEntity`;
+- `ResolutionDecision`;
+- `ResolutionStatus`; and
+- `ResolutionError`.
 
-- no public Rust resolution API is available;
-- `AnalysisReport::candidates()` remains the raw authoritative evidence;
-- `legacy_compatible_results()` remains compatibility output only; and
-- consumers must not infer that legacy overlap behavior implements one of the accepted policies.
+This implementation operates on an explicit `&[Finding]`, preserves a canonical candidate snapshot, returns separate resolved output, enforces hard candidate and output limits, and reports decision-evidence truncation explicitly. It does not mutate source candidates or transform document text.
+
+Until #42 merges:
+
+- `AnalysisReport` has no convenience integration entry point;
+- callers must pass `report.candidates()` explicitly after validating the analysis report;
+- the resulting `ResolutionReport` is not yet validated through `AnalysisReport` ownership context; and
+- the future document-bound anonymizer is not implemented.
+
+`legacy_compatible_results()` remains compatibility output only and does not implement one of the accepted policies.
 
 The conformance contract is documented in [`docs/testing/RESOLUTION_CONFORMANCE_MATRIX.md`](../testing/RESOLUTION_CONFORMANCE_MATRIX.md).
 
@@ -109,14 +122,12 @@ The current legacy overlap and anonymization behavior is compatibility behavior,
 
 These APIs helped stage candidate preservation and document binding before `AnalysisRequest`. They remain useful, but new integrations should prefer `analyze_request`.
 
-## Experimental
+## Other experimental surfaces
 
-- optional `serde` serialization for metadata, findings, reports, requests, statuses and failures;
+- optional `serde` serialization for metadata, findings, reports, requests, statuses, failures, and resolution values;
 - recognizer evaluation receipts;
 - capability and locale selection semantics beyond the documented current behavior; and
 - any future transformation-record, evaluation-corpus or semantic-adapter interfaces until separately promoted.
-
-Resolution APIs will enter this category when first implemented, even though their version-1 behavior is already accepted by ADR 0009.
 
 Serialization is one-way for several validated types and is not a stable wire protocol.
 
@@ -134,7 +145,7 @@ Consumers must not rely on:
 - `legacy_compatible_results()` representing open entities completely;
 - SHA-256 document fingerprints providing secrecy or anonymity;
 - deterministic hashing being irreversible anonymity; or
-- pre-1.0 serialized request or report compatibility.
+- pre-1.0 serialized request, report, or resolution compatibility.
 
 ## Change policy during public alpha
 

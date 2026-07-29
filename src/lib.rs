@@ -16,6 +16,7 @@
 //! - document identity and exact source-content binding
 //! - backend-neutral recognizer execution through validated analysis requests
 //! - pure, explicit, versioned candidate-resolution policies
+//! - document-validated analysis-to-resolution integration
 //!
 //! It performs no network or filesystem I/O and requires no Python runtime.
 //! Person names, prose locations, and other semantic entities are not detected
@@ -49,22 +50,26 @@
 //! report.validate_for_document(&document).expect("matching source");
 //! ```
 //!
-//! Raw candidates can be resolved independently from analyzer integration:
+//! Document-aware reports can be resolved only after exact source validation:
 //!
 //! ```
-//! use presidio::{resolve_candidates, ResolutionOptions, ResolutionPolicy};
-//! # use presidio::{Confidence, EntityId, Finding, Span};
-//! # let findings = vec![Finding::new(
-//! #     EntityId::new("EMAIL_ADDRESS").unwrap(),
-//! #     Span::new(0, 4).unwrap(),
-//! #     Confidence::new(0.8).unwrap(),
-//! # )];
-//! let resolved = resolve_candidates(
-//!     &findings,
+//! use presidio::{
+//!     AnalysisRequest, AnalyzerEngine, DocumentId, ResolutionOptions,
+//!     ResolutionPolicy, TextDocument,
+//! };
+//!
+//! let document = TextDocument::new(
+//!     DocumentId::new("request-42").expect("valid document ID"),
+//!     "Email jane@acme.com",
+//! );
+//! let report = AnalyzerEngine::new()
+//!     .analyze_request(&document, &AnalysisRequest::new())?;
+//! let resolved = report.resolve_for_document(
+//!     &document,
 //!     &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
 //! )?;
-//! assert!(resolved.status().output_complete());
-//! # Ok::<(), presidio::ResolutionError>(())
+//! assert!(resolved.resolution().status().output_complete());
+//! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 //!
 //! This is an independent open-source project. It is not affiliated with or
@@ -83,6 +88,7 @@ mod recognition;
 mod recognizer;
 mod registry;
 mod report;
+mod report_resolution;
 mod request;
 mod resolution;
 mod result;
@@ -109,6 +115,7 @@ pub use report::{
     AnalysisIssue, AnalysisOptions, AnalysisReport, AnalysisStatus, ReportDocumentError,
     DEFAULT_REPORT_CANDIDATE_LIMIT, DEFAULT_REPORT_ISSUE_LIMIT,
 };
+pub use report_resolution::{AnalysisResolutionError, ResolvedAnalysisReport};
 pub use request::{
     AnalysisExecutionError, AnalysisRequest, AnalysisRequestError, LimitDimension,
     DEFAULT_ANALYSIS_INPUT_LIMIT,

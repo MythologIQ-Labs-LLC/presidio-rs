@@ -1,6 +1,6 @@
 use presidio::{
-    resolve_candidates, AnalysisRequest, AnalyzerEngine, DocumentId, ResolutionOptions,
-    ResolutionPolicy, ResolvedFinding, TextDocument,
+    AnalysisRequest, AnalyzerEngine, DocumentId, ResolutionOptions, ResolutionPolicy,
+    ResolvedFinding, TextDocument,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -9,7 +9,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "Email jane@example.com or call 202-555-0142.",
     );
     let analysis = AnalyzerEngine::new().analyze_request(&document, &AnalysisRequest::new())?;
-    analysis.validate_for_document(&document)?;
 
     println!("raw candidates: {}", analysis.candidates().len());
 
@@ -18,7 +17,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ResolutionPolicy::BestCandidate,
         ResolutionPolicy::ConservativeRedaction,
     ] {
-        let report = resolve_candidates(analysis.candidates(), &ResolutionOptions::new(policy))?;
+        let integrated =
+            analysis.resolve_for_document(&document, &ResolutionOptions::new(policy))?;
+        let report = integrated.resolution();
         println!(
             "{}/v{}: {} resolved outputs",
             report.policy_id(),

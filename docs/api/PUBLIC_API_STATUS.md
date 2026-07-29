@@ -71,7 +71,7 @@ ADR 0009 freezes the version-1 semantics for:
 - `best_candidate/v1`; and
 - `conservative_redaction/v1`.
 
-The pure additive implementation now exposes:
+The pure additive implementation exposes:
 
 - `resolve_candidates`;
 - `ResolutionPolicy`;
@@ -82,14 +82,15 @@ The pure additive implementation now exposes:
 - `ResolutionStatus`; and
 - `ResolutionError`.
 
-This implementation operates on an explicit `&[Finding]`, preserves a canonical candidate snapshot, returns separate resolved output, enforces hard candidate and output limits, and reports decision-evidence truncation explicitly. It does not mutate source candidates or transform document text.
+Document-aware integration adds:
 
-Until #42 merges:
+- `AnalysisReport::resolve_for_document`;
+- `ResolvedAnalysisReport`; and
+- `AnalysisResolutionError`.
 
-- `AnalysisReport` has no convenience integration entry point;
-- callers must pass `report.candidates()` explicitly after validating the analysis report;
-- the resulting `ResolutionReport` is not yet validated through `AnalysisReport` ownership context; and
-- the future document-bound anonymizer is not implemented.
+`resolve_for_document` validates the report against the exact `TextDocument`, refuses candidate-truncated analysis, retains analyzer version and source analysis status, and returns the separate pure `ResolutionReport`. Raw candidates and the legacy-compatible projection remain independently inspectable and unchanged.
+
+The resolver enforces hard candidate and output limits, reports decision-evidence truncation explicitly, and never transforms document text. The next development round is fallible atomic anonymization over the document-validated resolved contract.
 
 `legacy_compatible_results()` remains compatibility output only and does not implement one of the accepted policies.
 

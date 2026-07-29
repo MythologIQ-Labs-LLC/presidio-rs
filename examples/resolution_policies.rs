@@ -17,10 +17,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ResolutionPolicy::BestCandidate,
         ResolutionPolicy::ConservativeRedaction,
     ] {
-        let integrated = analysis.resolve_for_document(
-            &document,
-            &ResolutionOptions::new(policy),
-        )?;
+        let integrated =
+            analysis.resolve_for_document(&document, &ResolutionOptions::new(policy))?;
         let report = integrated.resolution();
         println!(
             "{}/v{}: {} resolved outputs",

@@ -23,10 +23,7 @@ fn downstream_consumer_can_analyze_validate_and_resolve() {
     assert_eq!(integrated.document_binding(), document.binding());
     assert_eq!(integrated.engine_version(), env!("CARGO_PKG_VERSION"));
     assert!(integrated.resolution().status().output_complete());
-    assert_eq!(
-        integrated.resolution().candidates(),
-        analysis.candidates()
-    );
+    assert_eq!(integrated.resolution().candidates(), analysis.candidates());
     assert!(integrated
         .resolution()
         .resolved()

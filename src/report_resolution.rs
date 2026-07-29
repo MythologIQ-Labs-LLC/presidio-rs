@@ -144,10 +144,7 @@ mod tests {
             resolved.resolution().document_binding(),
             Some(document.binding())
         );
-        assert_eq!(
-            resolved.resolution().candidates(),
-            analysis.candidates()
-        );
+        assert_eq!(resolved.resolution().candidates(), analysis.candidates());
     }
 
     #[test]
@@ -159,10 +156,8 @@ mod tests {
             .expect("analysis succeeds");
 
         assert!(matches!(
-            analysis.resolve_for_document(
-                &other,
-                &ResolutionOptions::new(ResolutionPolicy::ReportAll)
-            ),
+            analysis
+                .resolve_for_document(&other, &ResolutionOptions::new(ResolutionPolicy::ReportAll)),
             Err(AnalysisResolutionError::ReportDocument(_))
         ));
     }
@@ -185,10 +180,8 @@ mod tests {
 
     #[test]
     fn truncated_candidate_collection_is_rejected() {
-        let document = TextDocument::new(
-            DocumentId::new("doc-1").unwrap(),
-            "a@b.com c@d.com e@f.com",
-        );
+        let document =
+            TextDocument::new(DocumentId::new("doc-1").unwrap(), "a@b.com c@d.com e@f.com");
         let request = AnalysisRequest::new().with_max_candidates(1).unwrap();
         let analysis = AnalyzerEngine::new()
             .analyze_request(&document, &request)
@@ -272,8 +265,8 @@ mod tests {
             .add_backend(OpenEntityBackend { metadata })
             .expect("backend registration");
         let document = TextDocument::new(DocumentId::new("doc-1").unwrap(), "ABCD");
-        let request = AnalysisRequest::new()
-            .with_entities([EntityId::new("CUSTOM_SECRET").unwrap()]);
+        let request =
+            AnalysisRequest::new().with_entities([EntityId::new("CUSTOM_SECRET").unwrap()]);
         let analysis = analyzer
             .analyze_request(&document, &request)
             .expect("analysis succeeds");

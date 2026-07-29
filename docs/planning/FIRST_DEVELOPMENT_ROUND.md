@@ -1,16 +1,22 @@
 # First Secure-Alpha Development Round
 
+## Status
+
+**Complete through PRs #51, #52, and #53.**
+
+The repository now contains the Presidio-informed resolution contract, the pure versioned resolver, and exact-document `AnalysisReport` integration. Legacy analysis and anonymization behavior remain unchanged.
+
 ## Purpose
 
-This document defines the first legitimate implementation round after the public architecture rebaseline.
+This document records the first legitimate implementation round after the public architecture rebaseline.
 
-The round does not add recognizer breadth. It establishes the first missing authoritative contract in the secure functional alpha pipeline: explicit, deterministic candidate resolution while preserving the original candidate evidence.
+The round did not add recognizer breadth. It established the first missing authoritative contract in the secure functional alpha pipeline: explicit, deterministic candidate resolution while preserving the original candidate evidence.
 
-## Why resolution is first
+## Why resolution came first
 
-The current request-oriented path already produces validated, document-bound `Finding` candidates and preserves them in `AnalysisReport`.
+The request-oriented path already produced validated, document-bound `Finding` candidates and preserved them in `AnalysisReport`.
 
-The current legacy-compatible projection still applies a private overlap-deduplication function with transitional behavior. That behavior:
+The legacy-compatible projection still applies a private overlap-deduplication function with transitional behavior. That behavior:
 
 - is not represented by a public policy identity;
 - does not distinguish containment from partial intersection;
@@ -20,91 +26,101 @@ The current legacy-compatible projection still applies a private overlap-dedupli
 - cannot express conservative union behavior; and
 - returns only selected legacy results rather than the reasons for selection or rejection.
 
-Authoritative anonymization cannot safely begin until overlap and selection behavior is explicit. Otherwise the transformation layer would consume an accidental algorithm as if it were policy, a traditional software-development maneuver with an unusually reliable regret yield.
+Authoritative anonymization could not safely begin until overlap and selection behavior was explicit. Otherwise the transformation layer would consume an accidental algorithm as if it were policy, a traditional software-development maneuver with an unusually reliable regret yield.
 
-## Round objective
+## Delivered outcome
 
-Deliver an additive, source-preserving resolution subsystem that:
+The completed additive subsystem:
 
 - accepts validated `Finding` candidates;
-- never mutates or discards the source candidate collection;
+- never mutates or discards the caller-owned source candidate collection;
 - returns resolved findings separately;
 - identifies the exact resolution policy and version;
 - behaves deterministically across input order;
-- explains every keep, reject, merge, or tie decision using bounded non-plaintext evidence;
-- supports the secure-alpha policies `ReportAll`, `BestCandidate`, and `ConservativeRedaction`;
-- retains the legacy projection unchanged until differential evidence supports migration; and
-- gives the future anonymizer a validated, explicit input contract.
+- explains keep, reject, duplicate-collapse, and merge decisions using bounded non-plaintext evidence;
+- supports `ReportAll`, `BestCandidate`, and `ConservativeRedaction` version 1;
+- retains the legacy projection unchanged;
+- validates exact document identity before report-integrated resolution;
+- refuses candidate-truncated analysis rather than claiming complete resolution;
+- preserves analyzer version, analysis status, issue count, and source binding; and
+- gives the future anonymizer one explicit document-aware resolved-input contract.
 
-## Preconditions
+## Delivered pull requests
 
-Before the resolution API is declared stable-for-alpha:
+### PR #51: evidence and contract freeze
 
-1. Issue #33 must contain the Presidio evidence relevant to overlap, conflict handling, duplicates, score ties, containment, partial intersections, and anonymizer behavior.
-2. Issue #34 must freeze the supported resolution scope and threat assumptions.
-3. The implementation PR must include the relevant ADR, migration, README, API-status, and changelog changes.
+Delivered:
 
-Research and contract work may proceed in parallel with internal type design, but public policy semantics are not frozen until the evidence review is complete.
+- ADR 0009;
+- Presidio resolution decision ledger;
+- normative resolution conformance matrix;
+- strict-overlap and adjacency rules;
+- canonical candidate ordinals;
+- deterministic precedence;
+- mixed-entity union semantics;
+- document-binding and limit behavior; and
+- API and migration expectations.
 
-## Engineering slices
+### PR #52: pure resolution engine
 
-### Slice 1: resolution value model and pure policy engine
+Delivered:
 
-Create an additive module containing the smallest complete public contract, expected to include concepts equivalent to:
+- `resolve_candidates`;
+- `ResolutionPolicy` and stable version-1 identities;
+- `ResolutionOptions`;
+- `ResolutionReport`;
+- `ResolvedFinding` and `ResolvedEntity`;
+- `ResolutionDecision` and `ResolutionStatus`;
+- `ResolutionError`;
+- hard candidate and resolved-output limits;
+- explicit decision-evidence truncation;
+- permutation-heavy conflict tests;
+- a runnable resolution example; and
+- public-clone rehearsal coverage.
 
-- `ResolutionPolicy`;
-- `ResolutionPolicyId` or another stable policy identity;
-- `ResolvedFinding`;
-- `ResolutionDecision`;
-- `ResolutionReport`; and
-- `ResolutionError` where invalid source candidates or unsupported policy state can still be represented.
+### PR #53: analysis-report integration
 
-The exact names remain subject to implementation review. The required semantics do not.
+Delivered:
 
-The resolver must be pure with respect to source text and must not perform anonymization. It operates only on already validated findings and policy metadata.
+- `AnalysisReport::resolve_for_document`;
+- `ResolvedAnalysisReport`;
+- `AnalysisResolutionError`;
+- exact document validation before resolution;
+- fail-closed candidate-completeness enforcement;
+- retained analyzer and analysis-status context;
+- open-entity integration coverage;
+- repeated-resolution and legacy-parity coverage;
+- a downstream public-API fixture; and
+- integrated README, migration, API-status, changelog, and example updates.
 
-### Slice 2: policy semantics
+## Version-1 policies
 
-#### `ReportAll`
+### `ReportAll`
 
-- retain every qualifying candidate;
-- apply deterministic ordering;
-- record that no conflict elimination occurred.
+- retains every qualifying candidate;
+- preserves exact duplicates;
+- applies deterministic canonical ordering;
+- records that no conflict elimination occurred.
 
-#### `BestCandidate`
+### `BestCandidate`
 
-- select findings using documented precedence;
-- define full overlap, containment, partial intersection, duplicate, and equal-confidence behavior;
-- use a total deterministic tie-break order;
-- never depend on input vector order.
+- applies explicit entity and recognizer priority where configured;
+- then applies confidence, span length, source position, entity, recognizer, and canonical-ordinal precedence;
+- handles duplicates, containment, partial intersection, chained overlap, and ties;
+- never depends on caller input order.
 
-The initial precedence should use only stable evidence already present in the model. Entity or recognizer priority must not be invented implicitly. If priority is needed, it must be explicit policy input.
+### `ConservativeRedaction`
 
-#### `ConservativeRedaction`
+- merges connected strict-overlap components;
+- keeps merely adjacent spans separate;
+- retains every source candidate contributing to a union;
+- reports `Single(entity)` only when all contributors agree;
+- reports `Mixed` rather than inventing a false entity identity; and
+- preserves exact common source binding.
 
-- merge the union of overlapping qualifying spans for transformation safety;
-- define whether merely adjacent spans remain separate;
-- retain all source candidates contributing to a merged span;
-- avoid inventing a false single entity identity when multiple entities contributed; and
-- produce bounded merge evidence suitable for a later anonymization report.
+## Evidence and tests
 
-### Slice 3: report integration
-
-Add an authoritative additive entry point, such as resolving an `AnalysisReport` or a validated candidate slice under an explicit policy.
-
-Integration requirements:
-
-- `AnalysisReport::candidates()` remains unchanged and authoritative as raw evidence;
-- resolved findings are returned through a separate object or method;
-- document binding is preserved;
-- engine, policy, and policy-version identity is retained;
-- candidate and decision limits are explicit;
-- no legacy-compatible result silently changes in this round; and
-- serialization remains additive and pre-1.0 experimental unless explicitly documented otherwise.
-
-### Slice 4: differential and adversarial evidence
-
-The round requires a table-driven matrix covering at least:
+The round includes coverage for:
 
 - disjoint spans;
 - exact duplicates;
@@ -114,66 +130,61 @@ The round requires a table-driven matrix covering at least:
 - partial intersection;
 - chained overlaps involving three or more candidates;
 - adjacency;
-- equal confidence;
-- different confidence;
+- equal and different confidence;
+- explicit entity and recognizer priority;
 - input-order permutations;
 - Unicode-boundary-safe spans;
 - open entity identifiers;
-- document binding preservation; and
-- deterministic repeated execution.
+- matching, mismatched, bound, and unbound document states;
+- candidate and output limits;
+- decision-evidence truncation;
+- deterministic repeated execution;
+- raw-candidate immutability;
+- legacy-projection preservation; and
+- a clean downstream consumer workflow.
 
-The matrix must compare:
+Differences from Python Presidio and the existing Rust compatibility path are classified through the archaeology model rather than automatically treated as defects.
 
-- current legacy projection;
-- `ReportAll`;
-- `BestCandidate`; and
-- `ConservativeRedaction`.
+## Explicit non-goals retained
 
-Differences are classified using the Presidio archaeology model rather than automatically treated as defects.
+This round did not:
 
-## Explicit non-goals
-
-This round does not:
-
-- implement document transformation;
-- change the existing legacy analyzer or anonymizer output;
+- transform document text;
+- change existing legacy analyzer or anonymizer output;
 - add hashing or pseudonymization;
 - add serialized configuration;
 - add semantic recognition;
 - expand the default recognizer set;
-- claim compatibility with Python Presidio; or
+- claim drop-in compatibility with Python Presidio; or
 - publish a crate.
 
-## Pull-request structure
+## Exit evidence
 
-The preferred implementation sequence is three reviewable PRs:
+The round is complete when the exact PR #53 head passes:
 
-1. **#40 Evidence and contract freeze:** complete the overlap decision ledger, threat assumptions, ADR, and test matrix specification.
-2. **#41 Pure resolution engine:** implement value types, three policies, deterministic behavior, and table-driven tests without analyzer integration.
-3. **#42 Analysis-report integration:** expose the additive authoritative entry point, preserve document binding, add examples and migration guidance, and run downstream compile evidence.
+- formatting and Clippy;
+- unit, integration, and doctests;
+- rustdoc with warnings denied;
+- Rust 1.74;
+- DCO;
+- dependency advisories;
+- full history, provenance, and secret scanning;
+- unauthenticated public-clone rehearsal;
+- all documented examples;
+- package inspection; and
+- `cargo publish --dry-run` without publication.
 
-The second PR is the first substantive Rust implementation. It should remain small enough that reviewers can reason about every conflict case without scrolling through unrelated analyzer refactors.
+PR #53 carries the final evidence for this round and closes issue #42 when merged.
 
-## Exit criteria
+## Next development round
 
-The round is complete when:
+The next legitimate development round is **fallible document-bound anonymization**:
 
-- all three policies have explicit versioned semantics;
-- original candidates remain available unchanged;
-- resolved findings and decision evidence are separate and bounded;
-- behavior is deterministic across input order;
-- all required overlap and tie families have tests;
-- legacy behavior is captured in differential fixtures but not silently replaced;
-- the public API status and migration documents describe the additive contract;
-- the public-clone, history, CI, MSRV, DCO, dependency, package, and documentation gates pass; and
-- the next anonymization round can consume a defined `ResolutionReport` rather than private overlap logic.
-
-## Next round
-
-After this round, the next legitimate development round is fallible document-bound anonymization:
-
-1. validate a complete transformation plan from resolved findings;
-2. reject wrong-document, invalid-span, unresolved-conflict, unsupported-operator, and output-limit conditions;
-3. execute atomically;
-4. return transformed text and source-to-output operation records; and
-5. leave hashing unavailable on the authoritative path until issue #37 is resolved.
+1. define an explicit anonymization request and operator policy;
+2. validate a complete transformation plan from `ResolvedAnalysisReport` or its contained `ResolutionReport`;
+3. reject wrong-document, invalid-span, unresolved-conflict, unsupported-operator, and output-limit conditions;
+4. calculate source-to-output offsets before mutation;
+5. execute atomically only after the full plan validates;
+6. return transformed text, operation records, policy identity, versions, status, and bounded non-plaintext evidence;
+7. preserve legacy anonymization unchanged; and
+8. leave hashing unavailable on the authoritative path until issue #37 establishes reviewed pseudonymization semantics.

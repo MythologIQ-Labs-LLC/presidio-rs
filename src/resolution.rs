@@ -105,10 +105,7 @@ impl ResolutionOptions {
     }
 
     /// Set entity precedence from highest to lowest priority.
-    pub fn with_entity_priority(
-        mut self,
-        priority: impl IntoIterator<Item = EntityId>,
-    ) -> Self {
+    pub fn with_entity_priority(mut self, priority: impl IntoIterator<Item = EntityId>) -> Self {
         self.entity_priority = priority.into_iter().collect();
         self
     }
@@ -253,15 +250,9 @@ pub enum ResolutionDecision {
     /// A canonical candidate was retained by `BestCandidate`.
     Retained { candidate: usize },
     /// An exact duplicate collapsed onto a retained canonical candidate.
-    CollapsedDuplicate {
-        candidate: usize,
-        retained: usize,
-    },
+    CollapsedDuplicate { candidate: usize, retained: usize },
     /// An overlapping candidate lost to a retained candidate.
-    RejectedOverlap {
-        candidate: usize,
-        retained: usize,
-    },
+    RejectedOverlap { candidate: usize, retained: usize },
     /// A connected overlap component produced one conservative union.
     ConservativeUnion {
         output: usize,
@@ -381,9 +372,8 @@ impl fmt::Display for ResolutionError {
                 formatter,
                 "resolution requires {required} outputs, exceeding maximum {maximum}"
             ),
-            Self::InconsistentDocumentBinding => formatter.write_str(
-                "resolution candidates do not share one consistent document binding",
-            ),
+            Self::InconsistentDocumentBinding => formatter
+                .write_str("resolution candidates do not share one consistent document binding"),
         }
     }
 }
@@ -473,11 +463,9 @@ fn resolve_best_candidate(
             continue;
         }
 
-        if let Some(retained) = selected
-            .iter()
-            .copied()
-            .find(|retained| spans_overlap(candidates[candidate].span(), candidates[*retained].span()))
-        {
+        if let Some(retained) = selected.iter().copied().find(|retained| {
+            spans_overlap(candidates[candidate].span(), candidates[*retained].span())
+        }) {
             decisions.push(ResolutionDecision::RejectedOverlap {
                 candidate,
                 retained,
@@ -625,11 +613,33 @@ fn compare_precedence(
                 .partial_cmp(&left_candidate.confidence().get())
                 .unwrap_or(Ordering::Equal)
         })
-        .then_with(|| right_candidate.span().len().cmp(&left_candidate.span().len()))
-        .then_with(|| left_candidate.span().start().cmp(&right_candidate.span().start()))
-        .then_with(|| left_candidate.span().end().cmp(&right_candidate.span().end()))
-        .then_with(|| left_candidate.entity().as_str().cmp(right_candidate.entity().as_str()))
-        .then_with(|| compare_optional_recognizer(left_candidate.recognizer(), right_candidate.recognizer()))
+        .then_with(|| {
+            right_candidate
+                .span()
+                .len()
+                .cmp(&left_candidate.span().len())
+        })
+        .then_with(|| {
+            left_candidate
+                .span()
+                .start()
+                .cmp(&right_candidate.span().start())
+        })
+        .then_with(|| {
+            left_candidate
+                .span()
+                .end()
+                .cmp(&right_candidate.span().end())
+        })
+        .then_with(|| {
+            left_candidate
+                .entity()
+                .as_str()
+                .cmp(right_candidate.entity().as_str())
+        })
+        .then_with(|| {
+            compare_optional_recognizer(left_candidate.recognizer(), right_candidate.recognizer())
+        })
         .then_with(|| left.cmp(&right))
 }
 
@@ -686,7 +696,11 @@ fn compare_optional_binding(
             .as_str()
             .cmp(right.id().as_str())
             .then_with(|| left.byte_len().cmp(&right.byte_len()))
-            .then_with(|| left.fingerprint().as_bytes().cmp(right.fingerprint().as_bytes())),
+            .then_with(|| {
+                left.fingerprint()
+                    .as_bytes()
+                    .cmp(right.fingerprint().as_bytes())
+            }),
         (Some(_), None) => Ordering::Less,
         (None, Some(_)) => Ordering::Greater,
         (None, None) => Ordering::Equal,
@@ -711,14 +725,9 @@ fn compare_evidence(left: &Evidence, right: &Evidence) -> Ordering {
             | (Evidence::LegacyValidatorAccepted, Evidence::LegacyValidatorAccepted) => {
                 Ordering::Equal
             }
-            (
-                Evidence::Pattern {
-                    pattern_id: left,
-                },
-                Evidence::Pattern {
-                    pattern_id: right,
-                },
-            ) => left.as_str().cmp(right.as_str()),
+            (Evidence::Pattern { pattern_id: left }, Evidence::Pattern { pattern_id: right }) => {
+                left.as_str().cmp(right.as_str())
+            }
             (
                 Evidence::Validator {
                     validator_id: left_id,
@@ -911,10 +920,7 @@ mod tests {
         let options = ResolutionOptions::new(ResolutionPolicy::ReportAll)
             .with_minimum_confidence(confidence(0.75));
         let report = resolve_candidates(
-            &[
-                finding("A", 0, 4, 0.8, "r1"),
-                finding("B", 6, 9, 0.7, "r2"),
-            ],
+            &[finding("A", 0, 4, 0.8, "r1"), finding("B", 6, 9, 0.7, "r2")],
             &options,
         )
         .expect("resolution succeeds");
@@ -945,10 +951,7 @@ mod tests {
     #[test]
     fn best_candidate_uses_lexical_entity_tie_break_without_priority() {
         let report = resolve(
-            &[
-                finding("B", 0, 4, 0.8, "r1"),
-                finding("A", 0, 4, 0.8, "r1"),
-            ],
+            &[finding("B", 0, 4, 0.8, "r1"), finding("A", 0, 4, 0.8, "r1")],
             ResolutionPolicy::BestCandidate,
         )
         .expect("resolution succeeds");
@@ -962,10 +965,7 @@ mod tests {
         let options = ResolutionOptions::new(ResolutionPolicy::BestCandidate)
             .with_entity_priority([entity("B"), entity("A")]);
         let report = resolve_candidates(
-            &[
-                finding("A", 0, 4, 0.8, "r1"),
-                finding("B", 0, 4, 0.8, "r1"),
-            ],
+            &[finding("A", 0, 4, 0.8, "r1"), finding("B", 0, 4, 0.8, "r1")],
             &options,
         )
         .expect("resolution succeeds");
@@ -979,10 +979,7 @@ mod tests {
         let options = ResolutionOptions::new(ResolutionPolicy::BestCandidate)
             .with_recognizer_priority([recognizer("r2"), recognizer("r1")]);
         let report = resolve_candidates(
-            &[
-                finding("A", 0, 4, 0.8, "r1"),
-                finding("A", 0, 4, 0.8, "r2"),
-            ],
+            &[finding("A", 0, 4, 0.8, "r1"), finding("A", 0, 4, 0.8, "r2")],
             &options,
         )
         .expect("resolution succeeds");
@@ -1079,10 +1076,7 @@ mod tests {
 
     #[test]
     fn adjacent_candidates_remain_separate_for_selection_and_union() {
-        let candidates = [
-            finding("A", 0, 4, 0.8, "r1"),
-            finding("B", 4, 8, 0.9, "r2"),
-        ];
+        let candidates = [finding("A", 0, 4, 0.8, "r1"), finding("B", 4, 8, 0.9, "r2")];
         let best = resolve(&candidates, ResolutionPolicy::BestCandidate).expect("best succeeds");
         let conservative = resolve(&candidates, ResolutionPolicy::ConservativeRedaction)
             .expect("conservative succeeds");
@@ -1240,10 +1234,7 @@ mod tests {
         let options = ResolutionOptions::new(ResolutionPolicy::ReportAll).with_max_candidates(1);
         assert_eq!(
             resolve_candidates(
-                &[
-                    finding("A", 0, 2, 0.8, "r1"),
-                    finding("B", 3, 5, 0.8, "r2"),
-                ],
+                &[finding("A", 0, 2, 0.8, "r1"), finding("B", 3, 5, 0.8, "r2"),],
                 &options,
             ),
             Err(ResolutionError::CandidateLimitExceeded {
@@ -1258,10 +1249,7 @@ mod tests {
         let options = ResolutionOptions::new(ResolutionPolicy::ReportAll).with_max_resolved(1);
         assert_eq!(
             resolve_candidates(
-                &[
-                    finding("A", 0, 2, 0.8, "r1"),
-                    finding("B", 3, 5, 0.8, "r2"),
-                ],
+                &[finding("A", 0, 2, 0.8, "r1"), finding("B", 3, 5, 0.8, "r2"),],
                 &options,
             ),
             Err(ResolutionError::ResolvedLimitExceeded {
@@ -1275,10 +1263,7 @@ mod tests {
     fn decision_limit_truncates_evidence_not_output() {
         let options = ResolutionOptions::new(ResolutionPolicy::BestCandidate).with_max_decisions(0);
         let report = resolve_candidates(
-            &[
-                finding("A", 0, 2, 0.8, "r1"),
-                finding("B", 3, 5, 0.8, "r2"),
-            ],
+            &[finding("A", 0, 2, 0.8, "r1"), finding("B", 3, 5, 0.8, "r2")],
             &options,
         )
         .expect("resolution succeeds");
@@ -1322,10 +1307,7 @@ mod tests {
     #[test]
     fn unicode_aligned_byte_spans_resolve_without_coordinate_changes() {
         let report = resolve(
-            &[
-                finding("A", 1, 3, 0.8, "r1"),
-                finding("B", 3, 4, 0.8, "r2"),
-            ],
+            &[finding("A", 1, 3, 0.8, "r1"), finding("B", 3, 4, 0.8, "r2")],
             ResolutionPolicy::ReportAll,
         )
         .expect("resolution succeeds");

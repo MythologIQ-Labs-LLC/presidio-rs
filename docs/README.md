@@ -11,6 +11,7 @@
 - [ADR 0006: Bind findings and reports to exact text documents](adr/0006-bind-findings-to-text-documents.md)
 - [ADR 0007: Add analysis requests and a backend-neutral recognizer trait](adr/0007-add-analysis-request-and-recognizer-trait.md)
 - [ADR 0008: Stage the secure functional alpha through an evidence-gated pipeline](adr/0008-stage-secure-functional-alpha-through-evidence-gated-pipeline.md)
+- [ADR 0009: Version explicit candidate-resolution policies](adr/0009-version-explicit-candidate-resolution.md)
 
 ## Implemented architecture status
 
@@ -42,6 +43,7 @@ The secure functional alpha critical path is:
 
 - [Public API status](api/PUBLIC_API_STATUS.md)
 - [Migration from legacy analysis to document-aware requests](api/MIGRATION_GUIDE.md)
+- [Resolution conformance matrix](testing/RESOLUTION_CONFORMANCE_MATRIX.md)
 - [Strict pattern recognizer example](../examples/strict_pattern_recognizer.rs)
 - [Custom backend example](../examples/custom_backend.rs)
 
@@ -86,6 +88,7 @@ The February 26, 2027 horizon remains a broader maturity checkpoint.
 ## Research and external landscape
 
 - [Presidio archaeology and secure alpha model](research/PRESIDIO_ARCHAEOLOGY_AND_ALPHA_MODEL.md)
+- [Presidio resolution decision ledger](research/PRESIDIO_RESOLUTION_DECISION_LEDGER.md)
 - [Active Rust privacy landscape watch](research/ACTIVE_LANDSCAPE_WATCH.md)
 - [Parallel efforts and architectural lessons](research/PARALLEL_EFFORTS_AND_LESSONS.md)
 

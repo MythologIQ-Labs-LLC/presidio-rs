@@ -8,6 +8,7 @@ The crate is pre-1.0. This inventory communicates maintainer intent for the publ
 - **Legacy-compatible:** retained for existing consumers while the target path matures. New designs should not depend on undocumented behavior.
 - **Transitional:** useful during migration but not intended as the final long-term contract.
 - **Experimental:** exposed for evaluation. Shape and semantics may change with evidence.
+- **Accepted contract, not implemented:** semantics are frozen by ADR, but the Rust API has not yet landed.
 - **Unsupported contract:** behavior consumers must not treat as stable or authoritative.
 
 ## Alpha target
@@ -62,6 +63,25 @@ Expected guarantees:
 
 Recognizers must preserve original source coordinates, declare every emitted entity, use authoritative metadata, and submit candidates through the emitter.
 
+## Accepted resolution contract, not implemented
+
+ADR 0009 freezes the version-1 semantics for:
+
+- `report_all/v1`;
+- `best_candidate/v1`; and
+- `conservative_redaction/v1`.
+
+The planned additive concepts include `ResolutionPolicy`, `ResolutionReport`, `ResolvedFinding`, bounded decision evidence, policy identity, and policy version. Names may still change during #41 review, but behavior may not drift from ADR 0009 without another explicit decision record.
+
+Until #41 and #42 merge:
+
+- no public Rust resolution API is available;
+- `AnalysisReport::candidates()` remains the raw authoritative evidence;
+- `legacy_compatible_results()` remains compatibility output only; and
+- consumers must not infer that legacy overlap behavior implements one of the accepted policies.
+
+The conformance contract is documented in [`docs/testing/RESOLUTION_CONFORMANCE_MATRIX.md`](../testing/RESOLUTION_CONFORMANCE_MATRIX.md).
+
 ## Legacy-compatible
 
 - `AnalyzerEngine::analyze`
@@ -94,7 +114,9 @@ These APIs helped stage candidate preservation and document binding before `Anal
 - optional `serde` serialization for metadata, findings, reports, requests, statuses and failures;
 - recognizer evaluation receipts;
 - capability and locale selection semantics beyond the documented current behavior; and
-- any future transformation-record, resolution-policy, evaluation-corpus or semantic-adapter interfaces until separately promoted.
+- any future transformation-record, evaluation-corpus or semantic-adapter interfaces until separately promoted.
+
+Resolution APIs will enter this category when first implemented, even though their version-1 behavior is already accepted by ADR 0009.
 
 Serialization is one-way for several validated types and is not a stable wire protocol.
 

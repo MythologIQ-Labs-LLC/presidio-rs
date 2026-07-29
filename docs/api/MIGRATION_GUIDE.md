@@ -51,6 +51,21 @@ for finding in report.candidates() {
 
 The request-oriented path preserves validated candidates and records status, issues, recognizer metadata, exact document binding, and legacy-projection completeness.
 
+## Resolution migration state
+
+ADR 0009 has accepted the version-1 semantics for three future additive policies:
+
+- `report_all/v1` preserves all qualifying candidates;
+- `best_candidate/v1` performs deterministic precedence-based selection; and
+- `conservative_redaction/v1` unions connected overlap components without inventing a mixed source entity.
+
+The implementation is tracked by #41 and #42. Until those issues merge, the crate does not expose a public resolution API. Consumers should continue to treat `AnalysisReport::candidates()` as raw authoritative evidence and `legacy_compatible_results()` as compatibility output.
+
+Accepted semantics are documented in:
+
+- [ADR 0009](../adr/0009-version-explicit-candidate-resolution.md); and
+- [Resolution conformance matrix](../testing/RESOLUTION_CONFORMANCE_MATRIX.md).
+
 ## Step-by-step migration
 
 ### 1. Assign document identity
@@ -94,13 +109,29 @@ report.validate_for_document(&document)?;
 
 Use `finding.slice_document(&document)` instead of slicing directly from unchecked offsets.
 
-### 5. Inspect status and issues
+### 5. Resolve candidates explicitly when the API lands
+
+The accepted migration sequence is:
+
+1. inspect or retain the raw candidate collection;
+2. choose one named policy and version;
+3. resolve into a separate report;
+4. validate that report against the same document; and
+5. pass only the resolved report into the future document-bound anonymizer.
+
+Do not overwrite the raw candidate collection. Do not infer resolution from vector order. Do not reproduce legacy overlap behavior in application code and later label it `BestCandidate`.
+
+`ConservativeRedaction` is the intended safe input for irreversible coverage-oriented redaction. `BestCandidate` is a precision-oriented selection policy and can intentionally select a contained higher-confidence span over a larger lower-confidence span.
+
+### 6. Inspect status and issues
 
 A successful `analyze_request` can still return a report with retained issues or limit status. Applications must decide whether those conditions fail closed, require review, reduce confidence, or are acceptable for their use case.
 
 Do not interpret a lack of retained issue details as proof that analysis was exhaustive when an issue limit was reached.
 
-### 6. Register recognizers through authoritative paths
+Future resolution status will similarly distinguish complete output from candidate, resolved-output, or decision-evidence limits.
+
+### 7. Register recognizers through authoritative paths
 
 Replace legacy registration:
 
@@ -121,15 +152,16 @@ See:
 - [`examples/strict_pattern_recognizer.rs`](../../examples/strict_pattern_recognizer.rs)
 - [`examples/custom_backend.rs`](../../examples/custom_backend.rs)
 
-### 7. Delay transformation migration until the fallible API lands
+### 8. Delay transformation migration until the fallible API lands
 
-The current anonymizer accepts legacy `RecognizerResult` values. Fallible anonymization over document-bound findings and an explicit resolution policy remain immediate roadmap work.
+The current anonymizer accepts legacy `RecognizerResult` values. Fallible anonymization over a document-bound `ResolutionReport` remains the round after #42.
 
 Until that API exists:
 
 - keep existing anonymization on the legacy path where compatibility is required;
 - use request-oriented reports for inspection, provenance, evaluation and policy decisions;
-- do not manually transform overlapping candidates without an explicit application-owned policy; and
+- do not manually transform overlapping candidates without an explicit application-owned policy;
+- do not pass unresolved request-oriented candidates into the legacy anonymizer; and
 - do not present the legacy compatibility projection as the permanent transformation contract.
 
 ## Mixed-mode migration
@@ -138,9 +170,10 @@ A consumer may run both paths temporarily:
 
 1. use `analyze_request` to collect authoritative candidates and evidence;
 2. compare `legacy_compatible_results()` with the existing `analyze` output;
-3. record any open-entity or threshold differences;
-4. retain the existing anonymizer for current production behavior; and
-5. migrate transformation only after the document-bound fallible anonymizer is available.
+3. record any open-entity, threshold, ordering, containment, or partial-overlap differences;
+4. retain the existing anonymizer for current production behavior;
+5. adopt explicit resolution after #42; and
+6. migrate transformation only after the document-bound fallible anonymizer is available.
 
 This allows evidence gathering without changing output behavior in the same deployment.
 
@@ -155,9 +188,11 @@ Before switching a consumer:
 - [ ] backend failure and truncation policy is explicit;
 - [ ] recognizer metadata is retained where provenance matters;
 - [ ] Unicode byte offsets are tested with realistic synthetic fixtures;
-- [ ] existing overlap and anonymization behavior is regression-tested; and
+- [ ] existing overlap and anonymization behavior is regression-tested;
+- [ ] an explicit resolution policy is selected when the API is available;
+- [ ] conservative redaction is used where coverage matters more than single-candidate precision; and
 - [ ] logs do not expose plaintext, source fingerprints, or sensitive identifiers unnecessarily.
 
 ## Deprecation posture
 
-No legacy API is deprecated by this guide. Deprecation requires a separately reviewed decision after the replacement analysis and transformation paths have consumer evidence, migration coverage, and a documented support window.
+No legacy API is deprecated by this guide. Deprecation requires a separately reviewed decision after the replacement analysis, resolution, and transformation paths have consumer evidence, migration coverage, and a documented support window.

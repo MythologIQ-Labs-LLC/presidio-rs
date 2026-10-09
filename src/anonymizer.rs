@@ -75,7 +75,7 @@ fn ordered(results: &[RecognizerResult]) -> Vec<&RecognizerResult> {
 }
 
 fn apply_span(out: &mut String, r: &RecognizerResult, op: &Operator) {
-    if r.start > r.end
+    if r.start >= r.end
         || r.end > out.len()
         || !out.is_char_boundary(r.start)
         || !out.is_char_boundary(r.end)
@@ -145,7 +145,8 @@ mod span_safety_tests {
         let text = "abécd";
         let invalid_utf8 = RecognizerResult::new(EntityType::Email, 3, 4, 1.0);
         let past_end = RecognizerResult::new(EntityType::Email, 0, text.len() + 1, 1.0);
-        let spans = [invalid_utf8, past_end];
+        let empty = RecognizerResult::new(EntityType::Email, 2, 2, 1.0);
+        let spans = [invalid_utf8, past_end, empty];
         assert_eq!(anonymize(text, &spans, &Operator::Redact), text);
         assert_eq!(AnonymizerEngine::new(Operator::Redact).anonymize(text, &spans), text);
     }

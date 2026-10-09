@@ -165,10 +165,15 @@ mod tests {
                 &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
             )
             .unwrap();
-        let other = TextDocument::new(DocumentId::new("different").unwrap(), doc.original());
+        let other = TextDocument::new(
+            DocumentId::new("different").unwrap(),
+            doc.original(),
+        );
         assert!(matches!(
             redact_resolved_document(&other, &resolved),
-            Err(AtomicRedactionError::Document(DocumentBindingError::IdMismatch { .. }))
+            Err(AtomicRedactionError::Document(
+                DocumentBindingError::IdMismatch { .. }
+            ))
         ));
     }
 
@@ -184,7 +189,10 @@ mod tests {
                 &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
             )
             .unwrap();
-        assert_eq!(redact_resolved_document(&doc, &resolved).unwrap(), doc.original());
+        assert_eq!(
+            redact_resolved_document(&doc, &resolved).unwrap(),
+            doc.original()
+        );
     }
 
     #[test]
@@ -194,7 +202,9 @@ mod tests {
             "jane@example.com mary@example.com",
         );
         let request = AnalysisRequest::new().with_max_candidates(1).unwrap();
-        let report = AnalyzerEngine::new().analyze_request(&doc, &request).unwrap();
+        let report = AnalyzerEngine::new()
+            .analyze_request(&doc, &request)
+            .unwrap();
         assert!(report.status().candidate_limit_reached());
         assert!(report
             .resolve_for_document(

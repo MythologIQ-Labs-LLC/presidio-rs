@@ -152,4 +152,55 @@ mod tests {
             Err(AtomicRedactionError::UnsupportedPolicy)
         );
     }
+
+    #[test]
+    fn rejects_different_identity_even_when_content_matches() {
+        let doc = TextDocument::new(DocumentId::new("original").unwrap(), "jane@example.com");
+        let report = AnalyzerEngine::new()
+            .analyze_request(&doc, &AnalysisRequest::new())
+            .unwrap();
+        let resolved = report
+            .resolve_for_document(
+                &doc,
+                &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
+            )
+            .unwrap();
+        let other = TextDocument::new(DocumentId::new("different").unwrap(), doc.original());
+        assert!(matches!(
+            redact_resolved_document(&other, &resolved),
+            Err(AtomicRedactionError::Document(DocumentBindingError::IdMismatch { .. }))
+        ));
+    }
+
+    #[test]
+    fn accepts_empty_detection_result_without_modifying_source() {
+        let doc = TextDocument::new(DocumentId::new("plain").unwrap(), "plain text");
+        let report = AnalyzerEngine::new()
+            .analyze_request(&doc, &AnalysisRequest::new())
+            .unwrap();
+        let resolved = report
+            .resolve_for_document(
+                &doc,
+                &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
+            )
+            .unwrap();
+        assert_eq!(redact_resolved_document(&doc, &resolved).unwrap(), doc.original());
+    }
+
+    #[test]
+    fn incomplete_detection_cannot_become_a_redaction_input() {
+        let doc = TextDocument::new(
+            DocumentId::new("bounded").unwrap(),
+            "jane@example.com mary@example.com",
+        );
+        let request = AnalysisRequest::new().with_max_candidates(1).unwrap();
+        let report = AnalyzerEngine::new().analyze_request(&doc, &request).unwrap();
+        assert!(report.status().candidate_limit_reached());
+        assert!(report
+            .resolve_for_document(
+                &doc,
+                &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
+            )
+            .is_err());
+    }
 }

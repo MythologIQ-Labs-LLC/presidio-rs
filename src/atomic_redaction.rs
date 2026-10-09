@@ -33,7 +33,9 @@ impl fmt::Display for AtomicRedactionError {
             Self::UnsupportedPolicy => f.write_str("conservative redaction policy required"),
             Self::UnexpectedOutput => f.write_str("unexpected resolved output shape"),
             Self::InvalidSpan(error) => write!(f, "invalid resolved span: {error}"),
-            Self::OverlappingOutputs => f.write_str("resolved output ranges overlap or are unordered"),
+            Self::OverlappingOutputs => {
+                f.write_str("resolved output ranges overlap or are unordered")
+            }
         }
     }
 }
@@ -123,7 +125,10 @@ mod tests {
                 &ResolutionOptions::new(ResolutionPolicy::ConservativeRedaction),
             )
             .unwrap();
-        let other = TextDocument::new(DocumentId::new("source").unwrap(), "mary@example.com");
+        let other = TextDocument::new(
+            DocumentId::new("source").unwrap(),
+            "mary@example.com",
+        );
         assert!(matches!(
             redact_resolved_document(&other, &resolved),
             Err(AtomicRedactionError::Document(_))
@@ -137,7 +142,10 @@ mod tests {
             .analyze_request(&doc, &AnalysisRequest::new())
             .unwrap();
         let resolved = report
-            .resolve_for_document(&doc, &ResolutionOptions::new(ResolutionPolicy::ReportAll))
+            .resolve_for_document(
+                &doc,
+                &ResolutionOptions::new(ResolutionPolicy::ReportAll),
+            )
             .unwrap();
         assert_eq!(
             redact_resolved_document(&doc, &resolved),

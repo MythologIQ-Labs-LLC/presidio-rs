@@ -79,6 +79,7 @@
 #![forbid(unsafe_code)]
 
 mod analyzer;
+mod atomic_redaction;
 mod anonymizer;
 pub mod context;
 mod document;
@@ -96,6 +97,7 @@ mod types;
 pub mod validators;
 
 pub use analyzer::{AnalyzerEngine, DEFAULT_SCORE_THRESHOLD};
+pub use atomic_redaction::{redact_resolved_document, AtomicRedactionError};
 pub use anonymizer::{anonymize, AnonymizerEngine, Operator};
 pub use document::{
     DocumentBinding, DocumentBindingError, DocumentFingerprint, FindingDocumentError, TextDocument,

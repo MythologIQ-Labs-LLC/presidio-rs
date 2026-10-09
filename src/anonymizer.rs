@@ -75,7 +75,11 @@ fn ordered(results: &[RecognizerResult]) -> Vec<&RecognizerResult> {
 }
 
 fn apply_span(out: &mut String, r: &RecognizerResult, op: &Operator) {
-    if r.end > out.len() || !out.is_char_boundary(r.start) || !out.is_char_boundary(r.end) {
+    if r.start > r.end
+        || r.end > out.len()
+        || !out.is_char_boundary(r.start)
+        || !out.is_char_boundary(r.end)
+    {
         return;
     }
     let original = out[r.start..r.end].to_string();
@@ -117,4 +121,32 @@ fn mask(original: &str, mask_char: char, keep_last: usize) -> String {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod span_safety_tests {
+    use super::{anonymize, AnonymizerEngine, Operator};
+    use crate::entity::EntityType;
+    use crate::result::RecognizerResult;
+
+    #[test]
+    fn reversed_valid_boundary_offsets_never_panic_or_transform() {
+        let text = "abécd";
+        let reversed = RecognizerResult::new(EntityType::Email, 4, 2, 1.0);
+        assert_eq!(anonymize(text, &[reversed.clone()], &Operator::Redact), text);
+        assert_eq!(
+            AnonymizerEngine::new(Operator::Redact).anonymize(text, &[reversed]),
+            text
+        );
+    }
+
+    #[test]
+    fn invalid_utf8_boundaries_and_out_of_bounds_offsets_are_skipped() {
+        let text = "abécd";
+        let invalid_utf8 = RecognizerResult::new(EntityType::Email, 3, 4, 1.0);
+        let past_end = RecognizerResult::new(EntityType::Email, 0, text.len() + 1, 1.0);
+        let spans = [invalid_utf8, past_end];
+        assert_eq!(anonymize(text, &spans, &Operator::Redact), text);
+        assert_eq!(AnonymizerEngine::new(Operator::Redact).anonymize(text, &spans), text);
+    }
 }

@@ -19,13 +19,13 @@ pub enum Operator {
     Redact,
     /// Overwrite with `mask_char`, keeping the last `keep_last` characters.
     Mask { mask_char: char, keep_last: usize },
-    /// Replace with a salted SHA-256 digest (deterministic pseudonym).
+    /// Legacy deterministic SHA-256 pseudonym, not irreversible anonymization.\n    /// Low-entropy values may be recovered by guessing; do not use for privacy guarantees.
     Hash { salt: String },
 }
 
 /// Apply a single `op` to every span in `results`, returning the transformed
 /// string. Spans are applied right-to-left so byte offsets stay valid; results
-/// whose offsets are not char boundaries of `text` are skipped defensively.
+/// whose offsets are invalid, empty or not char boundaries of `text` are skipped defensively.\n/// This legacy best-effort API is not fail-closed: callers needing security\n/// guarantees must validate complete source-bound findings before transformation.
 pub fn anonymize(text: &str, results: &[RecognizerResult], op: &Operator) -> String {
     let mut out = text.to_string();
     for r in ordered(results) {

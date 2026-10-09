@@ -133,7 +133,10 @@ mod span_safety_tests {
     fn reversed_valid_boundary_offsets_never_panic_or_transform() {
         let text = "abécd";
         let reversed = RecognizerResult::new(EntityType::Email, 4, 2, 1.0);
-        assert_eq!(anonymize(text, &[reversed.clone()], &Operator::Redact), text);
+        assert_eq!(
+            anonymize(text, &[reversed.clone()], &Operator::Redact),
+            text
+        );
         assert_eq!(
             AnonymizerEngine::new(Operator::Redact).anonymize(text, &[reversed]),
             text
@@ -148,6 +151,9 @@ mod span_safety_tests {
         let empty = RecognizerResult::new(EntityType::Email, 2, 2, 1.0);
         let spans = [invalid_utf8, past_end, empty];
         assert_eq!(anonymize(text, &spans, &Operator::Redact), text);
-        assert_eq!(AnonymizerEngine::new(Operator::Redact).anonymize(text, &spans), text);
+        assert_eq!(
+            AnonymizerEngine::new(Operator::Redact).anonymize(text, &spans),
+            text
+        );
     }
 }
